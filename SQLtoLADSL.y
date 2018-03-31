@@ -34,15 +34,16 @@ listaSelect : COMPLEXO													        { ; }
             | '*'                                      					        { ; }
             ;
 
+listaFrom   : sublistaFrom														{ ; }
+			| sublistaFrom ',' listaFrom										{ ; }
 
-listaFrom 	: SIMPLES virgula listaFrom
-			| Join SIMPLES virgula listaFrom              		 				{ ; }
-		  	| Join SIMPLES ON SIMPLES '=' SIMPLES virgula listaFrom				{ ; }
-		  	| Join SIMPLES AS NOME virgula listaFrom							{ ; }
-		  	| Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES virgula listaFrom		{ ; }
+sublistaFrom: SIMPLES
+			| Join SIMPLES             		 									{ ; }
+		  	| Join SIMPLES ON SIMPLES '=' SIMPLES 								{ ; }
+		  	| Join SIMPLES AS NOME 												{ ; }
+		  	| Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES 						{ ; }
           	| BlocoSelect                          								{ ; }
           	| BlocoSelect AS NOME                                       		{ ; }
-          	|
           	;
 
 Join		: JOIN 																{ ; }
@@ -70,10 +71,6 @@ listaOB 	: SIMPLES													        { ; }
 listaHaving : COMPLEXO													        { ; }
 			| COMPLEXO OL  listaHaving                    				        { ; }
 			;
-
-virgula 	: ','                                            			        { ; }
-        	|                                                			        { ; }
-        	;
 
 OL 			: AND                                                 		        { ; }
    			| OR                                                  		        { ; }
