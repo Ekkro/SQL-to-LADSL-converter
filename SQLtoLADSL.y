@@ -10,87 +10,87 @@
 %%  
 
 
-BlocoSelect : SELECT     listaSelect                     { ; }
-              FROM       listaFrom                       { ; }
-              WHERE_     listaWhere                      { ; }
-              GROUPBY_   listaGB                         { ; }
-              ORDERBY_   listaOB                         { ; }
+BlocoSelect : SELECT     listaSelect                     				{ ; }
+              FROM       listaFrom                       				{ ; }
+              WHERE_     listaWhere                      				{ ; }
+              GROUPBY_   listaGB                         				{ ; }
+              ORDERBY_   listaOB                         				{ ; }
               
 
-WHERE_ : WHERE                                           { ; }
-       |                                                 { ; }
-       ;
+WHERE_ 		: WHERE                                           			{ ; }
+       		|                                                 			{ ; }
+       		;
 
-GROUPBY_ : GROUPBY                                       { ; }
-         |                                               { ; }
-         ;
+GROUPBY_ 	: GROUPBY                                       			{ ; }
+         	|                                               			{ ; }
+         	;
 
-ORDERBY_: ORDERBY                                        { ; }
-       |                                                 { ; }
-       ;
-HAVING_ : HAVING                                         { ; }
-        |                                                { ; }
-        ;
+ORDERBY_	: ORDERBY                                        			{ ; }
+       		|                                                 			{ ; }
+       		;
 
-listaSelect : ATRIBUTOF ASNNOME virgula  listaSelect     { ; }
-            | '*'                                        { ; }
+HAVING_ 	: HAVING                                         			{ ; }
+        	|                                                			{ ; }
+        	;
+
+listaSelect : COMPLEXO													{ ; }
+			| COMPLEXO virgula  listaSelect     		 				{ ; }
+            | '*'                                      					{ ; }
             ;
 
 
-listaFrom : NOME ASNNOME  virgula listaFrom            { ; }
-          | BlocoSelect ASNNOME                          { ; }
-          |                                              { ; }
-          ;
-ASNNOME : AS NOME                                        { ; }
-        |                                                { ; }
-        ;
+listaFrom 	: SIMPLES virgula listaFrom              		 			{ ; }
+		  	| SIMPLES ON SIMPLES '=' SIMPLES virgula listaFrom			{ ; }
+		  	| SIMPLES AS NOME virgula listaFrom							{ ; }
+		  	| SIMPLES AS NOME ON SIMPLES '=' SIMPLES virgula listaFrom	{ ; }
+          	| BlocoSelect                          						{ ; }
+          	| BlocoSelect AS NOME                                       { ; }
+          	|
+          	;
+/*
+ASNNOME 	: AS NOME                                        			{ ; }
+        	|                                                			{ ; }
+        	;
+*/
+listaWhere 	: COMPLEXO													{ ; }
+			| COMPLEXO OL  listaWhere                    				{ ; }
+           	| BETWEEN SIMPLES AND SIMPLES               				{ ; }                                            
+           	;
 
-listaWhere : ATRIBUTOF OL  listaWhere                    { ; }
-           | BETWEEN ATRIBUTO AND ATRIBUTO               { ; }
-           |                                             { ; }
-           ;
-listaGB : ATRIBUTO virgula listaGB HAVING_               { ; }
-        |                                                { ; }
-        ;
-listaOB : ATRIBUTO virgula listaOB                       { ; }
-        |                                                { ; }
-        ;
-virgula : ','                                            { ; }
-        |                                                { ; }
-        ;
-OL : AND                                                 { ; }
-   | OR                                                  { ; }
-   | OL_ EXISTS '(' BlocoSelect ')' ';'                  { ; }
-   | NOT                                                 { ; }
-   ;
-OL_ : OL                                                 { ; }
-    |                                                    { ; }
-    ;
+listaGB 	: SIMPLES virgula listaGB               					{ ; }
+        	| SIMPLES HAVING_                                           { ; }
+        	;
 
-ATRIBUTO : NOME                                          { ; }
-         | NOME AS NOME                                  { ; }
-         ;
-ATRIBUTOF : NOME                                         { ; }
-          | NOME '(' ATRIBUTOF ')'                     { ; }
-        /* este Nome ( atributof ) seria funçao, mas como temos o lex assim
-        neste momento é como se fosse um nome.
-        se quisermos distingir, temos que obrigar a que atributos 
-        tenham <nomeTabela>_nome e assim um nome so seria funcao
-        e o outro um atributo. Temos de ver se cobre todos os casos.
-        */
-          | NOME OP ATRIBUTOF                            { ; }
-          ;
+listaOB 	: SIMPLES													{ ; }
+			| SIMPLES virgula listaOB                       			{ ; }                                               
+        	;
 
-SIMPLES : NOME
-        | CONSTANTE
-        ;
+virgula 	: ','                                            			{ ; }
+        	|                                                			{ ; }
+        	;
+
+OL 			: AND                                                 		{ ; }
+   			| OR                                                  		{ ; }
+   			| OL EXISTS '(' BlocoSelect ')' ';'                  		{ ; }
+   			| NOT														{ ; }
+   			;
+
+/*TESTE
+SIMPLES  	: NOME                                          			{ ; }
+         	| NOME AS NOME                                  			{ ; }
+         	;
+*/
+
+SIMPLES 	: NOME														{ ; }
+        	| CONSTANTE													{ ; }
+        	;
 
 
-COMPLEXO : SIMPLES
-         | COMPLEXO OP COMPLEXO
-         | NOME '(' COMPLEXO ')'
-         | COMPLEXO AS NOME
-         ;
+COMPLEXO 	: SIMPLES													{ ; }
+         	| COMPLEXO OP COMPLEXO										{ ; }
+         	| NOME '(' COMPLEXO ')'										{ ; }
+         	| COMPLEXO AS NOME											{ ; }
+         	;
 
 
 OP      
