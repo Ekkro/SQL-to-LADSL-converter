@@ -29,12 +29,8 @@ ORDERBY_	: ORDERBY    listaOB                               			        { ; }
        		|                                                 			        { ; }
        		;
 
-HAVING_ 	: HAVING                                         			        { ; }
-        	|                                                			        { ; }
-        	;
-
 listaSelect : COMPLEXO													        { ; }
-			| COMPLEXO virgula  listaSelect     		 				        { ; }
+			| COMPLEXO ',' listaSelect 		    		 				        { ; }
             | '*'                                      					        { ; }
             ;
 
@@ -65,13 +61,19 @@ listaWhere 	: COMPLEXO													        { ; }
            	| BETWEEN SIMPLES AND SIMPLES               				        { ; }                                            
            	;
 
-listaGB 	: SIMPLES virgula listaGB               					        { ; }
-        	| SIMPLES HAVING_                                                   { ; }
+listaGB 	: COMPLEXO															{ ; }
+			| COMPLEXO ',' listaGB               					            { ; }
+        	| COMPLEXO HAVING listaHaving                                       { ; }
         	;
 
 listaOB 	: SIMPLES													        { ; }
-			| SIMPLES virgula listaOB                       			        { ; }                                               
+			| SIMPLES NOME														{ ; }
+			| SIMPLES ',' listaOB                       			        	{ ; }                                               
         	;
+
+listaHaving : COMPLEXO													        { ; }
+			| COMPLEXO OL  listaHaving                    				        { ; }
+			;
 
 virgula 	: ','                                            			        { ; }
         	|                                                			        { ; }
