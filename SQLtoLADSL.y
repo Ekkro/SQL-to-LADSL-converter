@@ -12,20 +12,20 @@
 
 BlocoSelect : SELECT     listaSelect                     				{ ; }
               FROM       listaFrom                       				{ ; }
-              WHERE_     listaWhere                      				{ ; }
-              GROUPBY_   listaGB                         				{ ; }
-              ORDERBY_   listaOB                         				{ ; }
+              WHERE_     			                      				{ ; }
+              GROUPBY_   		                         				{ ; }
+              ORDERBY_   		                         				{ ; }
               
 
-WHERE_ 		: WHERE                                           			{ ; }
+WHERE_ 		: WHERE  	 listaWhere                            			{ ; }
        		|                                                 			{ ; }
        		;
 
-GROUPBY_ 	: GROUPBY                                       			{ ; }
+GROUPBY_ 	: GROUPBY    listaGB                              			{ ; }
          	|                                               			{ ; }
          	;
 
-ORDERBY_	: ORDERBY                                        			{ ; }
+ORDERBY_	: ORDERBY    listaOB                               			{ ; }
        		|                                                 			{ ; }
        		;
 
