@@ -51,11 +51,7 @@ Join		: JOIN 																{ ; }
 			| RIGHT JOIN 														{ ; }
 			| FULL JOIN 														{ ; }
 			;
-/*
-ASNNOME 	: AS NOME                                        			        { ; }
-        	|                                                			        { ; }
-        	;
-*/
+
 listaWhere 	: COMPLEXO													        { ; }
 			| COMPLEXO OL  listaWhere                    				        { ; }
            	| BETWEEN SIMPLES AND SIMPLES               				        { ; }                                            
@@ -84,12 +80,6 @@ OL 			: AND                                                 		        { ; }
    			| OL EXISTS '(' BlocoSelect ')' ';'                  		        { ; }
    			| NOT														        { ; }
    			;
-
-/*TESTE
-SIMPLES  	: NOME                                          			        { ; }
-         	| NOME AS NOME                                  			        { ; }
-         	;
-*/
 
 SIMPLES 	: NOME														        { ; }
         	| CONSTANTE													        { ; }
