@@ -10,86 +10,94 @@
 %%  
 
 
-BlocoSelect : SELECT     listaSelect                     				{ ; }
-              FROM       listaFrom                       				{ ; }
-              WHERE_     			                      				{ ; }
-              GROUPBY_   		                         				{ ; }
-              ORDERBY_   		                         				{ ; }
+BlocoSelect : SELECT     listaSelect                     				        { ; }
+              FROM       listaFrom                       				        { ; }
+              WHERE_     			                      				        { ; }
+              GROUPBY_   		                         				        { ; }
+              ORDERBY_   		                         				        { ; }
               
 
-WHERE_ 		: WHERE  	 listaWhere                            			{ ; }
-       		|                                                 			{ ; }
+WHERE_ 		: WHERE  	 listaWhere                            			        { ; }
+       		|                                                 			        { ; }
        		;
 
-GROUPBY_ 	: GROUPBY    listaGB                              			{ ; }
-         	|                                               			{ ; }
+GROUPBY_ 	: GROUPBY    listaGB                              			        { ; }
+         	|                                               			        { ; }
          	;
 
-ORDERBY_	: ORDERBY    listaOB                               			{ ; }
-       		|                                                 			{ ; }
+ORDERBY_	: ORDERBY    listaOB                               			        { ; }
+       		|                                                 			        { ; }
        		;
 
-HAVING_ 	: HAVING                                         			{ ; }
-        	|                                                			{ ; }
+HAVING_ 	: HAVING                                         			        { ; }
+        	|                                                			        { ; }
         	;
 
-listaSelect : COMPLEXO													{ ; }
-			| COMPLEXO virgula  listaSelect     		 				{ ; }
-            | '*'                                      					{ ; }
+listaSelect : COMPLEXO													        { ; }
+			| COMPLEXO virgula  listaSelect     		 				        { ; }
+            | '*'                                      					        { ; }
             ;
 
 
-listaFrom 	: SIMPLES virgula listaFrom              		 			{ ; }
-		  	| SIMPLES ON SIMPLES '=' SIMPLES virgula listaFrom			{ ; }
-		  	| SIMPLES AS NOME virgula listaFrom							{ ; }
-		  	| SIMPLES AS NOME ON SIMPLES '=' SIMPLES virgula listaFrom	{ ; }
-          	| BlocoSelect                          						{ ; }
-          	| BlocoSelect AS NOME                                       { ; }
+listaFrom 	: SIMPLES virgula listaFrom
+			| Join SIMPLES virgula listaFrom              		 				{ ; }
+		  	| Join SIMPLES ON SIMPLES '=' SIMPLES virgula listaFrom				{ ; }
+		  	| Join SIMPLES AS NOME virgula listaFrom							{ ; }
+		  	| Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES virgula listaFrom		{ ; }
+          	| BlocoSelect                          								{ ; }
+          	| BlocoSelect AS NOME                                       		{ ; }
           	|
           	;
+
+Join		: JOIN 																{ ; }
+			| INNER JOIN 														{ ; }
+			| LEFT JOIN 														{ ; }
+			| RIGHT JOIN 														{ ; }
+			| FULL JOIN 														{ ; }
+			;
 /*
-ASNNOME 	: AS NOME                                        			{ ; }
-        	|                                                			{ ; }
+ASNNOME 	: AS NOME                                        			        { ; }
+        	|                                                			        { ; }
         	;
 */
-listaWhere 	: COMPLEXO													{ ; }
-			| COMPLEXO OL  listaWhere                    				{ ; }
-           	| BETWEEN SIMPLES AND SIMPLES               				{ ; }                                            
+listaWhere 	: COMPLEXO													        { ; }
+			| COMPLEXO OL  listaWhere                    				        { ; }
+           	| BETWEEN SIMPLES AND SIMPLES               				        { ; }                                            
            	;
 
-listaGB 	: SIMPLES virgula listaGB               					{ ; }
-        	| SIMPLES HAVING_                                           { ; }
+listaGB 	: SIMPLES virgula listaGB               					        { ; }
+        	| SIMPLES HAVING_                                                   { ; }
         	;
 
-listaOB 	: SIMPLES													{ ; }
-			| SIMPLES virgula listaOB                       			{ ; }                                               
+listaOB 	: SIMPLES													        { ; }
+			| SIMPLES virgula listaOB                       			        { ; }                                               
         	;
 
-virgula 	: ','                                            			{ ; }
-        	|                                                			{ ; }
+virgula 	: ','                                            			        { ; }
+        	|                                                			        { ; }
         	;
 
-OL 			: AND                                                 		{ ; }
-   			| OR                                                  		{ ; }
-   			| OL EXISTS '(' BlocoSelect ')' ';'                  		{ ; }
-   			| NOT														{ ; }
+OL 			: AND                                                 		        { ; }
+   			| OR                                                  		        { ; }
+   			| OL EXISTS '(' BlocoSelect ')' ';'                  		        { ; }
+   			| NOT														        { ; }
    			;
 
 /*TESTE
-SIMPLES  	: NOME                                          			{ ; }
-         	| NOME AS NOME                                  			{ ; }
+SIMPLES  	: NOME                                          			        { ; }
+         	| NOME AS NOME                                  			        { ; }
          	;
 */
 
-SIMPLES 	: NOME														{ ; }
-        	| CONSTANTE													{ ; }
+SIMPLES 	: NOME														        { ; }
+        	| CONSTANTE													        { ; }
         	;
 
 
-COMPLEXO 	: SIMPLES													{ ; }
-         	| COMPLEXO OP COMPLEXO										{ ; }
-         	| NOME '(' COMPLEXO ')'										{ ; }
-         	| COMPLEXO AS NOME											{ ; }
+COMPLEXO 	: SIMPLES													        { ; }
+         	| COMPLEXO OP COMPLEXO										        { ; }
+         	| NOME '(' COMPLEXO ')'										        { ; }
+         	| COMPLEXO AS NOME											        { ; }
          	;
 
 
