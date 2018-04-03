@@ -29,10 +29,13 @@ ORDERBY_	: ORDERBY    listaOB                               			        { ; }
        		|                                                 			        { ; }
        		;
 
-listaSelect : COMPLEXO													        { ; }
-			| COMPLEXO ',' listaSelect 		    		 				        { ; }
+listaSelect : listaSelectN														{ ; }
             | '*'                                      					        { ; }
             ;
+
+listaSelectN : COMPLEXO													        { ; }
+			 | COMPLEXO ',' listaSelectN 		    		 				    { ; }
+             ;
 
 listaFrom   : sublistaFrom														{ ; }
 			| sublistaFrom ',' listaFrom										{ ; }
