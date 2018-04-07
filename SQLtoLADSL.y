@@ -10,87 +10,88 @@
 %%  
 
 
-BlocoSelect : SELECT     listaSelect                     				        { ; }
-              FROM       listaFrom                       				        { ; }
-              WHERE_     			                      				        { ; }
-              GROUPBY_   		                         				        { ; }
-              ORDERBY_   		                         				        { ; }
+BlocoSelect : SELECT     listaSelect                                             { ; }
+              FROM       listaFrom                                               { ; }
+              WHERE_                                                             { ; }
+              GROUPBY_                                                           { ; }
+              ORDERBY_                                                           { ; }
               
 
-WHERE_ 		: WHERE  	 listaWhere                            			        { ; }
-       		|                                                 			        { ; }
-       		;
-
-GROUPBY_ 	: GROUPBY    listaGB                              			        { ; }
-         	|                                               			        { ; }
-         	;
-
-ORDERBY_	: ORDERBY    listaOB                               			        { ; }
-       		|                                                 			        { ; }
-       		;
-
-listaSelect : listaSelectN														{ ; }
-            | '*'                                      					        { ; }
-            ;
-
-listaSelectN : COMPLEXO													        { ; }
-			 | COMPLEXO ',' listaSelectN 		    		 				    { ; }
+WHERE_       : WHERE       listaWhere                                            { ; }
+             |                                                                   { ; }
              ;
 
-listaFrom   : sublistaFrom														{ ; }
-			| sublistaFrom ',' listaFrom										{ ; }
+GROUPBY_     : GROUPBY    listaGB                                                { ; }
+             |                                                                   { ; }
+             ;
 
-sublistaFrom: SIMPLES
-			| Join SIMPLES             		 									{ ; }
-		  	| Join SIMPLES ON SIMPLES '=' SIMPLES 								{ ; }
-		  	| Join SIMPLES AS NOME 												{ ; }
-		  	| Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES 						{ ; }
-          	| BlocoSelect                          								{ ; }
-          	| BlocoSelect AS NOME                                       		{ ; }
-          	;
+ORDERBY_     : ORDERBY    listaOB                                                { ; }
+             |                                                                   { ; }
+             ;
 
-Join		: JOIN 																{ ; }
-			| INNER JOIN 														{ ; }
-			| LEFT JOIN 														{ ; }
-			| RIGHT JOIN 														{ ; }
-			| FULL JOIN 														{ ; }
-			;
+listaSelect  : listaSelectN                                                      { ; }
+             | '*'                                                               { ; }
+             ;
 
-listaWhere 	: COMPLEXO													        { ; }
-			| COMPLEXO OL  listaWhere                    				        { ; }
-           	| BETWEEN SIMPLES AND SIMPLES               				        { ; }                                            
-           	;
+listaSelectN : COMPLEXO                                                          { ; }
+             | COMPLEXO ',' listaSelectN                                         { ; }
+             ;
 
-listaGB 	: COMPLEXO															{ ; }
-			| COMPLEXO ',' listaGB               					            { ; }
-        	| COMPLEXO HAVING listaHaving                                       { ; }
-        	;
+listaFrom    : sublistaFrom                                                      { ; }
+             | sublistaFrom ',' listaFrom                                        { ; }
+             ;
 
-listaOB 	: SIMPLES													        { ; }
-			| SIMPLES NOME														{ ; }
-			| SIMPLES ',' listaOB                       			        	{ ; }                                               
-        	;
+sublistaFrom : SIMPLES
+             | Join SIMPLES                                                      { ; }
+             | Join SIMPLES ON SIMPLES '=' SIMPLES                               { ; }
+             | Join SIMPLES AS NOME                                              { ; }
+             | Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES                       { ; }
+             | BlocoSelect                                                       { ; }
+             | BlocoSelect AS NOME                                               { ; }
+             ;
 
-listaHaving : COMPLEXO													        { ; }
-			| COMPLEXO OL  listaHaving                    				        { ; }
-			;
+Join         : JOIN                                                              { ; }
+             | INNER JOIN                                                        { ; }
+             | LEFT JOIN                                                         { ; }
+             | RIGHT JOIN                                                        { ; }
+             | FULL JOIN                                                         { ; }
+             ;
 
-OL 			: AND                                                 		        { ; }
-   			| OR                                                  		        { ; }
-   			| OL EXISTS '(' BlocoSelect ')' ';'                  		        { ; }
-   			| NOT														        { ; }
-   			;
+listaWhere   : COMPLEXO                                                          { ; }
+             | COMPLEXO OL  listaWhere                                           { ; }
+             | BETWEEN SIMPLES AND SIMPLES                                       { ; }                                            
+             ;
 
-SIMPLES 	: NOME														        { ; }
-        	| CONSTANTE													        { ; }
-        	;
+listaGB      : COMPLEXO                                                          { ; }
+             | COMPLEXO ',' listaGB                                              { ; }
+             | COMPLEXO HAVING listaHaving                                       { ; }
+             ;
+
+listaOB      : SIMPLES                                                           { ; }
+             | SIMPLES NOME                                                      { ; }
+             | SIMPLES ',' listaOB                                               { ; }                                               
+             ;
+
+listaHaving  : COMPLEXO                                                          { ; }
+             | COMPLEXO OL  listaHaving                                          { ; }
+             ;
+
+OL           : AND                                                               { ; }
+             | OR                                                                { ; }
+             | OL EXISTS '(' BlocoSelect ')' ';'                                 { ; }
+             | NOT                                                               { ; }
+             ;
+
+SIMPLES      : NOME                                                              { ; }
+             | CONSTANTE                                                         { ; }
+             ;
 
 
-COMPLEXO 	: SIMPLES													        { ; }
-         	| COMPLEXO OP COMPLEXO										        { ; }
-         	| NOME '(' COMPLEXO ')'										        { ; }
-         	| COMPLEXO AS NOME											        { ; }
-         	;
+COMPLEXO     : SIMPLES                                                           { ; }
+             | COMPLEXO OP COMPLEXO                                              { ; }
+             | NOME '(' COMPLEXO ')'                                             { ; }
+             | COMPLEXO AS NOME                                                  { ; }
+             ;
 
 
 
@@ -101,8 +102,5 @@ COMPLEXO 	: SIMPLES													        { ; }
 int main(int argc, char **argv){
 
   yyparse();
-
-
-
-	return 0;
+    return 0;
 }
