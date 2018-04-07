@@ -5,49 +5,48 @@
  %}                                                                    
                                                                        
 
-%token SELECT FROM WHERE GROUPBY ORDERBY HAVING NOME AS  
+%token SELECT FROM WHERE GROUPBY ORDERBY HAVING Name AS  
 %token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANTE
 %%  
 
 
-BlocoSelect : SELECT     listaSelect                                             { ; }
-              FROM       listaFrom                                               { ; }
+SelectBlock : SELECT     selectList                                              { ; }
+              FROM       fromList                                                { ; }
               WHERE_                                                             { ; }
               GROUPBY_                                                           { ; }
-              ORDERBY_                                                           { ; }
-              
+              ORDERBY_                                                           { ; }              
 
-WHERE_       : WHERE       listaWhere                                            { ; }
+WHERE_       : WHERE       whereList                                             { ; }
              |                                                                   { ; }
              ;
 
-GROUPBY_     : GROUPBY    listaGB                                                { ; }
+GROUPBY_     : GROUPBY    groupbyList                                            { ; }
              |                                                                   { ; }
              ;
 
-ORDERBY_     : ORDERBY    listaOB                                                { ; }
+ORDERBY_     : ORDERBY    orderbyList                                            { ; }
              |                                                                   { ; }
              ;
 
-listaSelect  : listaSelectN                                                      { ; }
+selectList   : selectListN                                                       { ; }
              | '*'                                                               { ; }
              ;
 
-listaSelectN : COMPLEXO                                                          { ; }
-             | COMPLEXO ',' listaSelectN                                         { ; }
+selectListN  : COMPLEX                                                           { ; }
+             | COMPLEX ',' selectListN                                           { ; }
              ;
 
-listaFrom    : sublistaFrom                                                      { ; }
-             | sublistaFrom ',' listaFrom                                        { ; }
+fromList     : subfromList                                                       { ; }
+             | subfromList ',' fromList                                          { ; }
              ;
 
-sublistaFrom : SIMPLES
-             | Join SIMPLES                                                      { ; }
-             | Join SIMPLES ON SIMPLES '=' SIMPLES                               { ; }
-             | Join SIMPLES AS NOME                                              { ; }
-             | Join SIMPLES AS NOME ON SIMPLES '=' SIMPLES                       { ; }
-             | BlocoSelect                                                       { ; }
-             | BlocoSelect AS NOME                                               { ; }
+subfromList  : SIMPLE                                                            { ; }
+             | Join SIMPLE                                                       { ; }
+             | Join SIMPLE ON SIMPLE '=' SIMPLE                                  { ; }
+             | Join SIMPLE AS Name                                               { ; }
+             | Join SIMPLE AS Name ON SIMPLE '=' SIMPLE                          { ; }
+             | SelectBlock                                                       { ; }
+             | SelectBlock AS Name                                               { ; }
              ;
 
 Join         : JOIN                                                              { ; }
@@ -57,43 +56,45 @@ Join         : JOIN                                                             
              | FULL JOIN                                                         { ; }
              ;
 
-listaWhere   : COMPLEXO                                                          { ; }
-             | COMPLEXO OL  listaWhere                                           { ; }
-             | BETWEEN SIMPLES AND SIMPLES                                       { ; }                                            
+whereList    : COMPLEX                                                           { ; }
+             | COMPLEX OL  whereList                                             { ; }
+             | BETWEEN SIMPLE AND SIMPLE                                         { ; }                                            
              ;
 
-listaGB      : COMPLEXO                                                          { ; }
-             | COMPLEXO ',' listaGB                                              { ; }
-             | COMPLEXO HAVING listaHaving                                       { ; }
+groupbyList  : COMPLEX                                                           { ; }
+             | COMPLEX ',' groupbyList                                           { ; }
+             | COMPLEX HAVING havingList                                         { ; }
              ;
 
-listaOB      : SIMPLES                                                           { ; }
-             | SIMPLES NOME                                                      { ; }
-             | SIMPLES ',' listaOB                                               { ; }                                               
+orderbyList  : SIMPLE                                                            { ; }
+             | SIMPLE Name                                                       { ; }
+             | SIMPLE ',' orderbyList                                            { ; }                                               
              ;
 
-listaHaving  : COMPLEXO                                                          { ; }
-             | COMPLEXO OL  listaHaving                                          { ; }
+havingList   : COMPLEX                                                           { ; }
+             | COMPLEX OL  havingList                                            { ; }
              ;
 
 OL           : AND                                                               { ; }
              | OR                                                                { ; }
-             | OL EXISTS '(' BlocoSelect ')' ';'                                 { ; }
+             | OL EXISTS '(' SelectBlock ')' ';'                                 { ; }
              | NOT                                                               { ; }
              ;
 
-SIMPLES      : NOME                                                              { ; }
+SIMPLE       : Name                                                              { ; }
              | CONSTANTE                                                         { ; }
              ;
 
-
-COMPLEXO     : SIMPLES                                                           { ; }
-             | COMPLEXO OP COMPLEXO                                              { ; }
-             | NOME '(' COMPLEXO ')'                                             { ; }
-             | COMPLEXO AS NOME                                                  { ; }
+COMPLEX      : SIMPLE                                                            { ; }
+             | COMPLEX BOP COMPLEX                                               { ; }
+             | Name '(' COMPLEX ')'                                              { ; }
+             | COMPLEX AS Name                                                   { ; }
              ;
 
-
+BOP          : Name                                                              { ; } 
+             | COMPARISSON                                                       { ; }
+             | OP                                                                { ; }
+             ;
 
 
 
