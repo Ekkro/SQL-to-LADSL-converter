@@ -6,7 +6,7 @@
                                                                        
 
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING Name AS  
-%token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANTE
+%token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT
 %%  
 
 
@@ -82,7 +82,7 @@ OL           : AND                                                              
              ;
 
 SIMPLE       : Name                                                              { ; }
-             | CONSTANTE                                                         { ; }
+             | CONSTANT                                                          { ; }
              ;
 
 COMPLEX      : SIMPLE                                                            { ; }
