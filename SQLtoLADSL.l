@@ -30,6 +30,9 @@ SELECT|select						{ return SELECT; }
 WHERE|where 						{ return WHERE; }
 ASC|asc                         {return ASC;}
 DESC|desc                       {return DESC;}
+ANY|any                         {return ANY;}
+ALL|all                         {return ALL;}
+
 
     /* numbers */
 

@@ -3,17 +3,12 @@
  #include <strings.h>
 
  /* Declaracoes C diversas */                                          
- %}                                                                    
+                                                                   
                                                                        
 
 int flag1 = 0;
 int counter = 0;
 FILE* out;
-
-
-%token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
-%token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL
-%%  
 
 void join (int flag, char* atributo1, char* atributo2){
     switch(flag){
@@ -32,8 +27,11 @@ void join (int flag, char* atributo1, char* atributo2){
 }
 
 
+%}
 
-
+%token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
+%token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL IN ASC DESC COMPARISSON DATE ANDOP ANY ALL
+%%  
 
 SelectBlock : SELECT     selectList                                              { fprintf(out, "{\n");; }
               FROM       fromList                                                { ; }
@@ -120,6 +118,8 @@ SIMPLE       : NAME                                                             
              | DATE                                                              { ; }
              | CONSTANT                                                          { ; }
              | BOOL                                                              { ; }
+             | ANY                                                               { ; }
+             | ALL                                                               { ; }
              ;
 
 
