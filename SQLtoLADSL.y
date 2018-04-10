@@ -40,13 +40,13 @@ fromList     : subfromList                                                      
              | subfromList ',' fromList                                          { ; }
              ;
 
-subfromList  : SIMPLE                                                            { ; }
-             | Join SIMPLE                                                       { ; }
-             | Join SIMPLE ON SIMPLE '=' SIMPLE                                  { ; }
-             | Join SIMPLE AS Name                                               { ; }
-             | Join SIMPLE AS Name ON SIMPLE '=' SIMPLE                          { ; }
-             | SelectBlock                                                       { ; }
-             | SelectBlock AS Name                                               { ; }
+subfromList  : SIMPLE                                                            { ; } // tabela
+             | Join SIMPLE                                                       { ; } // Join tabela
+             | Join SIMPLE ON SIMPLE '=' SIMPLE                                  { ; } // Join tabela1 on tabela1.key = tabela2.key
+             | Join SIMPLE AS Name                                               { ; } // Join tabela1 as tabela
+             | Join SIMPLE AS Name ON SIMPLE '=' SIMPLE                          { ; } // Join tablea1 as tabela on tabela.key = tabela2.key
+             | '{' SelectBlock '}'                                               { ; } // {Select...}
+             | '{' SelectBlock '}' AS Name                                       { ; } // {Select...} as tabela
              ;
 
 Join         : JOIN                                                              { ; }
@@ -56,19 +56,26 @@ Join         : JOIN                                                             
              | FULL JOIN                                                         { ; }
              ;
 
-whereList    : COMPLEX                                                           { ; }
-             | COMPLEX OL  whereList                                             { ; }
-             | BETWEEN SIMPLE AND SIMPLE                                         { ; }                                            
+
+whereList    : whereListSub                                                      { ; }
+             | whereListSub OL whereList                                         { ; } 
              ;
 
-groupbyList  : COMPLEX                                                           { ; }
-             | COMPLEX ',' groupbyList                                           { ; }
-             | COMPLEX HAVING havingList                                         { ; }
+whereListSub : COMPLEX                                                           { ; } 
+             | SIMPLE BETWEEN SIMPLE AND SIMPLE                                  { ; }
+             | EXISTS '(' SelectBlock ')' ';'                                    { ; }                                           
+             ;
+
+groupbyList  : SIMPLE                                                            { ; } 
+             | SIMPLE  ',' groupbyList                                           { ; }
+             | SIMPLE HAVING havingList                                          { ; }
+             | SIMPLE HAVING havingList ',' groupbyList                          { ; }
              ;
 
 orderbyList  : SIMPLE                                                            { ; }
              | SIMPLE Name                                                       { ; }
-             | SIMPLE ',' orderbyList                                            { ; }                                               
+             | SIMPLE ',' orderbyList                                            { ; }
+             | SIMPLE Name ',' orderbyList                                       { ; }                                              
              ;
 
 havingList   : COMPLEX                                                           { ; }
@@ -77,23 +84,27 @@ havingList   : COMPLEX                                                          
 
 OL           : AND                                                               { ; }
              | OR                                                                { ; }
-             | OL EXISTS '(' SelectBlock ')' ';'                                 { ; }
-             | NOT                                                               { ; }
              ;
 
-SIMPLE       : Name                                                              { ; }
-             | CONSTANT                                                          { ; }
+SIMPLE       : Attribute                                                         { ; } // tabela.atributo
+		     | Name                                                              { ; } // string
+             | CONSTANT                                                          { ; } // 1
              ;
 
 COMPLEX      : SIMPLE                                                            { ; }
+			 | NOT COMPLEX                                                       { ; }
              | COMPLEX BOP COMPLEX                                               { ; }
-             | Name '(' COMPLEX ')'                                              { ; }
+             | OP '(' COMPLEX ')'                                                { ; }
              | COMPLEX AS Name                                                   { ; }
              ;
 
-BOP          : Name                                                              { ; } 
-             | COMPARISSON                                                       { ; }
-             | OP                                                                { ; }
+OP           : Name                                                              { ; } // in
+		     | Name OP                                                           { ; } // not in
+		     ;
+
+BOP          : Name                                                              { ; } // a like b -> like(a,b)
+             | COMPARISSON                                                       { ; } // a > b -> (a > b)
+             | IOP                                                               { ; } // a + b -> (a + b)
              ;
 
 
