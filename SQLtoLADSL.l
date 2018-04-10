@@ -28,6 +28,8 @@ NOT|not    						{ return NOT; }
 OR|or     						{ return OR; }
 SELECT|select						{ return SELECT; }
 WHERE|where 						{ return WHERE; }
+ASC|asc                         {return ASC;}
+DESC|desc                       {return DESC;}
 
     /* numbers */
 
@@ -72,10 +74,10 @@ TRIM/"("                                                { return FTRIM; }
 DATE_ADD/"("                                            { return FDATE_ADD; }
 DATE_SUB/"("                                            { return FDATE_SUB; }
 
-    /* NOMES */
+    /* NAMES */
 
-date \'.*\'                                             { yylval.strval = strdup(yytext);return NOME; }
-[A - Za - z][A - Za - z0 - 9_]*                         { yylval.strval = strdup(yytext);return NOME; }
+date \'.*\'                                             { yylval.strval = strdup(yytext);return NAME; }
+[A - Za - z][A - Za - z0 - 9_]*                         { yylval.strval = strdup(yytext);return NAME; }
 
 
 
