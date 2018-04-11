@@ -3,8 +3,33 @@
  #include <strings.h>
 
  /* Declaracoes C diversas */                                          
+
+typedef struct node{
+    char* string;
+    node* next;
+}Node;
+
+typedef struct nodes{
+    Node node;
+    nodes* next;
+}Nodes;
+
+typedef struct  select{
+    int cardinalidade;
+    int parent;
+    Node atributos;
+    Node keys;
+    Nodes tabelas;
+    int* select;
+}Select;
+
+typedef struct selects{
+    SELECT atual
+    selects* next
+}Selects;
+
+
                                                                    
-                                                                       
 
 int flag1 = 0;
 int counter = 0;
@@ -132,6 +157,7 @@ COMPLEX      : SIMPLE                                                           
              | NAME '(' COMPLEX ')'                                              { fprintf(out, "%s(",$1); counter++; } //return(op(complex))
              | COMPLEX AS NAME                                                   { fprintf(out, "change(%s)",$3); } //return complex , add NAME
              | NAME IN Inlist                                                    { fprintf(out, "IN(%s,",$1); }
+             | '('COMPLEX OL COMPLEX ')'                                         { fprintf(stderr, "%s\n", );}
              ;
 
 BOP          : NAME                                                              { fprintf(out, "%s(",$1); counter++; } // return NAME
