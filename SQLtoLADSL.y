@@ -86,7 +86,7 @@ whereList    : whereListSub                                                     
              ;
 
 whereListSub : COMPLEX                                                           { ; } //add_filter($1):: filter( 
-             | SIMPLE BETWEEN SIMPLE AND SIMPLE                                  { fprintf(out, "filter( %s > %s)\nfilter(%s < %s)\n",$1,$3,$1,$); }
+             | SIMPLE BETWEEN SIMPLE AND SIMPLE                                  { fprintf(out, "filter( %s > %s)\nfilter(%s < %s)\n",$1,$3,$1,$5); }
              | EXISTS '(' SelectBlock ')' ';'                                    { ; } //?                                          
              ;
 
