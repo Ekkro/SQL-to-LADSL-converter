@@ -10,23 +10,25 @@ typedef struct node{
 }Node;
 
 typedef struct nodes{
+	char* nome_tabela;
     Node node;
     nodes* next;
 }Nodes;
 
 typedef struct  select{
-    int cardinalidade;
-    int parent;
-    Node atributos;
-    Node keys;
+    Select selects[10];
+    Node renumeacoes;
+    Node conteudo_select;
+    Node conteudo_orderby;
     Nodes tabelas;
-    int* select;
 }Select;
 
-typedef struct selects{
-    SELECT atual
-    selects* next
-}Selects;
+void add_rename(char* rename, Select select){
+	Node aux = new Node;
+	aux->string = rename;
+	aux->next = select->renumeacoes;
+	select->renumeacoes=aux;
+}
 
 
                                                                    
@@ -51,124 +53,126 @@ void join (int flag, char* atributo1, char* atributo2){
       }
 }
 
-
 %}
 
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
 %token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL IN ASC DESC COMPARISSON DATE ANDOP ANY ALL
 %%  
 
-SelectBlock : SELECT     selectList                                              { fprintf(out, "{\n");; }
-              FROM       fromList                                                { ; }
-              WHERE_                                                             { ; }
-              GROUPBY_                                                           { ; }
-              ORDERBY_                                                           { ; }
-              ';'                                                                { fprintf(out, "}\n");}     
+SelectBlock    : SELECT     selectList                                             { ; }
+                 FROM       fromList                                               { ; }
+                 WHERE_                                                            { ; }
+                 GROUPBY_                                                          { ; }
+                 ORDERBY_                                                          { ; }
+                 ';'                                                               { ; }     
 
-WHERE_       : WHERE       whereList                                             { ; }
-             |                                                                   { ; }
-             ;
+WHERE_         : WHERE       whereList                                             { ; }
+               |                                                                   { ; }
+               ;
 
-GROUPBY_     : GROUPBY    groupbyList                                            { ; }
-             |                                                                   { ; }
-             ;
+GROUPBY_       : GROUPBY    groupbyList                                            { ; }
+               |                                                                   { ; }
+               ;
 
-ORDERBY_     : ORDERBY    orderbyList                                            { ; }
-             |                                                                   { ; }
-             ;
+ORDERBY_       : ORDERBY    orderbyList                                            { ; }
+               |                                                                   { ; }
+               ;
 
-selectList   : selectListN                                                       { fprintf(out, "SELECT("); }
-             | '*'                                                               { fprintf(out, "SELECT *\n"); }
-             ;
+selectList     : selectListN                                                       { ; }
+               | '*'                                                               { ; }
+               ;
 
-selectListN  : COMPLEX                                                           { fprintf(out, ")\n"); } 
-             | COMPLEX ',' selectListN                                           { ; }
-             ;
+selectListN    : selectListNSub                                                    { ; } 
+               | selectListNSub ',' selectListN                                    { ; }
+               ;
 
-fromList     : subfromList                                                       { ; } 
-             | subfromList ',' fromList                                          { ; }
-             ;
+selectListNSub : COMPLEX                                                           { add_simplefilter($1);; } 
+               | COMPLEX AS NAME                                                   { add_simplefilter($1);add_rename($1,$3); }
+               ;
 
-subfromList  : SIMPLE                                                            { ; } 
-             | Join NAME                                                         { ; } 
-             | Join NAME ON NAME '=' NAME                                        { join(flag1,$4,$6);} 
-             | Join NAME AS NAME                                                 { fprintf(out, "change( %s , %s)\n",$2,$4); }
-             | Join NAME AS NAME ON NAME '=' NAME                                { fprintf(out, "change( %s , %s)\n",$2,$4); join(flag1,$6,$8); }
-             | '{' SelectBlock '}'                                               { fprintf(out, "{\n"); } 
-             | '{' SelectBlock '}' AS NAME                                       { ; } //add nome
-             ;
+fromList       : subfromList                                                       { ; } 
+               | subfromList ',' fromList                                          { ; }
+               ;
 
-Join         : JOIN                                                              { flag1 = 1; } //
-             | INNER JOIN                                                        { flag1 = 1; } //
-             | LEFT JOIN                                                         { flag1 = 2; } //filter($4 != NULL)
-             | RIGHT JOIN                                                        { flag1 = 3; } //filter($6 != NULL)
-             | FULL JOIN                                                         { flag1 = 0; } //0 filtros
-             ;
+subfromList    : NAME                                                              { ; } 
+               | Join NAME                                                         { ; } 
+               | Join NAME ON NAME '=' NAME                                        { add_filter($4,$6,'='); } 
+               | Join NAME AS NAME                                                 { add_rename($2,$4); }
+               | Join NAME AS NAME ON NAME '=' NAME                                { add_filter($6,$8,'=');add_rename($2,$4); }
+               | '{' SelectBlock '}'                                               { ; } 
+               | '{' SelectBlock '}' AS NAME                                       { add_rename($2,$5); } 
+               ;
 
-
-whereList    : whereListSub                                                      { ; }
-             | whereListSub OL whereList                                         { ; }
-             ;
-
-whereListSub : COMPLEX                                                           { ; } //add_filter($1):: filter( 
-             | SIMPLE BETWEEN SIMPLE AND SIMPLE                                  { fprintf(out, "filter( %s > %s)\nfilter(%s < %s)\n",$1,$3,$1,$5); }
-             | EXISTS '(' SelectBlock ')' ';'                                    { ; } //?                                          
-             ;
-
-groupbyList  : groupbyListSub                                                    { ; } 
-             | groupbyListSub  ',' groupbyList                                   { ; }
-             ;
-
-groupbyListSub: SIMPLE                                                           { fprintf(out, "group( %s)\n",$1); } 
-              | HAVING NAME '(' SIMPLE ')' BOP SIMPLE                            { fprintf(out, "filter( %s '(' %s ')' %s %s)\n",$2,$4,$6,$7); } 
-              ;
-
-orderbyList  : NAME                                                              { ; }
-             | SIMPLE order                                                      { ; }
-             | SIMPLE ',' orderbyList                                            { ; }
-             | SIMPLE order ',' orderbyList                                      { ; }                                              
-             ;
-
-order        : ASC                                                               { ; }
-             | DESC                                                              { ; }
-             ;
+Join           : JOIN                                                              { ; } 
+               | INNER JOIN                                                        { ; }
+               | LEFT JOIN                                                         { ; }
+               | RIGHT JOIN                                                        { ; }
+               | FULL JOIN                                                         { ; } 
+               ;
 
 
-OL           : AND                                                               { fprintf(out, "&"); }
-             | ANDOP                                                             { fprintf(out, "&"); }
-             | OR                                                                { fprintf(out, "|"); }
-             ;
+whereList      : whereListSub                                                      { ; }
+               | whereListSub OL whereList                                         { ; }
+               ;
 
-SIMPLE       : NAME                                                              { ; }
-             | DATE                                                              { ; }
-             | CONSTANT                                                          { ; }
-             | BOOL                                                              { ; }
-             | ANY                                                               { ; }
-             | ALL                                                               { ; }
-             ;
+whereListSub   : COMPLEX                                                           { add_simplefilter($1); }
+               | '(' whereList ')'                                                 { ; }
+               | NAME IN Inlist                                                    { add_in($1,$3); }//a in(......)
+               | NAME BETWEEN SIMPLE AND SIMPLE                                    { add_filter($1,$3,'>'); add_filter($1,$5,'<'); }
+               | EXISTS '(' SelectBlock ')' ';'                                    { ; }                                        
+               ;
+
+groupbyList    : groupbyListSub                                                    { ; } 
+               | groupbyListSub  ',' groupbyList                                   { ; }
+               ;
+
+groupbyListSub : NAME                                                              { add_groupby($1); } 
+               | HAVING NAME '(' SIMPLE ')' BOP SIMPLE                             { ; }//?????? 
+               ;
+
+orderbyList    : orderbyListSub                                                    { ; }
+               | orderbyListSub ',' orderbyList                                    { ; }                                            
+               ;
+
+orderbyListSub : NAME                                                              { add_orderby($1); }
+               | NAME order                                                        { add_orderby($1); }                                          
+               ;
+
+order          : ASC                                                               { ; }
+               | DESC                                                              { ; }
+               ;
 
 
-COMPLEX      : SIMPLE                                                            { fprintf(out, "%s",$1); while(counter>0){
-                                                                                                            fprintf(out, ")");
-                                                                                                            counter--;}
-                                                                                                            fprintf(out, "\n");} //return simple
-             | NOT COMPLEX                                                       { fprintf(out, "NOT"); } //return(Not(complex))
-             | COMPLEX BOP COMPLEX                                               { fprintf(out, "%s",$2); } //return(BOP(complex))
-             | NAME '(' COMPLEX ')'                                              { fprintf(out, "%s(",$1); counter++; } //return(op(complex))
-             | COMPLEX AS NAME                                                   { fprintf(out, "change(%s)",$3); } //return complex , add NAME
-             | NAME IN Inlist                                                    { fprintf(out, "IN(%s,",$1); }
-             | '('COMPLEX OL COMPLEX ')'                                         { fprintf(stderr, "%s\n", );}
-             ;
+OL             : AND                                                               { ; }
+               | ANDOP                                                             { ; }
+               | OR                                                                { ; }
+               ;
 
-BOP          : NAME                                                              { fprintf(out, "%s(",$1); counter++; } // return NAME
-             | COMPARISSON                                                       { fprintf(out, "%s",$1); } // return comparisson
-             | SHIFT                                                             { fprintf(out, "%s",$1); } // return comparisson
-             | OP                                                                { fprintf(out, "%s",$1); } // return iop
-             ;
+SIMPLE         : NAME                                                              { ; }
+               | DATE                                                              { ; }
+               | CONSTANT                                                          { ; }
+               | BOOL                                                              { ; }
+               | ANY                                                               { ; }
+               | ALL                                                               { ; }
+               ;
 
-Inlist       : SIMPLE                                                            { fprintf(out, "%s)\n",$1); }
-             | SIMPLE  ','  Inlist                                               { fprintf(out, "%s, ",$1); }
-             ;
+
+COMPLEX        : SIMPLE                                                            { ; }//a.atributo
+               | NOT COMPLEX                                                       { ; }//not ....
+               | COMPLEX BOP COMPLEX                                               { ; }// a > b
+               | NAME '(' COMPLEX ')'                                              { ; }// sum(....)
+               ;
+
+
+BOP            : COMPARISSON                                                       { ; }// <,>,==
+               | SHIFT                                                             { ; }// <<, >>
+               | OP                                                                { ; }// +, -
+//             | NAME                                                              { ; }//???
+               ;
+
+Inlist         : SIMPLE                                                            { ; }
+               | SIMPLE  ','  Inlist                                               { ; }
+               ;
 
 %%
 int main(int argc, char **argv){
