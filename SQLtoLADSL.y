@@ -30,7 +30,7 @@ void add_rename(char* rename, Select select){
   select->alias=aux;
 }
 
-void add_simplefilter(char* filter,char* table, Select select){
+void add_Simplefilter(char* filter,char* table, Select select){
   Node aux = new Node;
   aux->string = filter;
   aux->next = select->tables[hash(table,select->sizetables)];
@@ -100,9 +100,9 @@ fromList       : subfromList                                                    
 
 subfromList    : NAME                                                              { ; } 
                | Join NAME                                                         { ; } 
-               | Join NAME ON SIMPLE '=' SIMPLE                                    {$$ = add_key($2,$4,$6); } 
+               | Join NAME ON Simple '=' Simple                                    {$$ = add_key($2,$4,$6); } 
                | Join NAME AS NAME                                                 {$$ = add_rename($2,$4); }
-               | Join NAME AS NAME ON SIMPLE '=' SIMPLE                            {$$ = add_key($2,$6,$8);add_rename($2,$4); }
+               | Join NAME AS NAME ON Simple '=' Simple                            {$$ = add_key($2,$6,$8);add_rename($2,$4); }
                | '{' SelectBlock '}'                                               {$$ = from_select($2); } 
                | '{' SelectBlock '}' AS NAME                                       {$$ = from_select($2); add_renameT($2,$5); } 
                ;
@@ -118,10 +118,10 @@ whereList      : whereListSub                                                   
                | whereListSub OL whereList                                         {opLogic($1,$2,$3); }
                ;
 
-whereListSub   : Expr                                                              {add_simplefilter($1,table); }
+whereListSub   : Expr                                                              {add_Simplefilter($1,table); }
                | '(' whereList ')'                                                 { ; }
                | NAME IN Inlist                                                    {$$ = add_in($1,$3); }
-               | NAME BETWEEN SIMPLE AND SIMPLE                                    {$$ = add_filter($1,$3,'>',table); add_filter($1,$5,'<',table); }
+               | NAME BETWEEN Simple AND Simple                                    {$$ = add_filter($1,$3,'>',table); add_filter($1,$5,'<',table); }
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
                | Expr LIKE Expr                                                    { ; }                                        
                ;
@@ -130,15 +130,15 @@ groupbyList    : groupbyListSub                                                 
                | groupbyListSub  ',' groupbyList                                   { ; }
                ;
 
-groupbyListSub : SIMPLE                                                            {add_groupby($1); } 
-               | HAVING NAME '(' SIMPLE ')' BOP SIMPLE                             { ; }//?????? 
+groupbyListSub : Simple                                                            {add_groupby($1); } 
+               | HAVING NAME '(' Simple ')' BOP Simple                             { ; }//?????? 
                ;
 
 orderbyList    : orderbyListSub                                                    { ; }
                | orderbyListSub ',' orderbyList                                    { ; }                                            
                ;
 
-orderbyListSub : SIMPLE                                                            {add_orderby($1,""); }
+orderbyListSub : Simple                                                            {add_orderby($1,""); }
                | NAME order                                                        {add_orderby($1,$2); }                                          
                ;
 
@@ -151,7 +151,7 @@ OL             : AND                                                            
                | OR                                                                {$$ = $1 ; }
                ;
 
-SIMPLE         : NAME                                                              {$$ = $1 ; }//string
+Literal        : NAME                                                              {$$ = $1 ; }//string
                | NAME'.'NAME                                                       {$$ = $3 ; table = $1; }
                | DATE                                                              {$$ = $1 ; }
                | CONSTANT                                                          {$$ = $1 ; }
@@ -160,7 +160,11 @@ SIMPLE         : NAME                                                           
                | ALL                                                               {$$ = $1 ; }
                ;
 
-Expr        : SIMPLE                                                               {$$ = $1 ; }//a.atributo
+Simple         : Literal
+               | NAME'.'NAME
+               ;
+
+Expr           : Simple                                                            {$$ = $1 ; }//a.atributo
                | NOT Expr                                                          {$$ = not($2) ; }//not ....
               //| NAME'.'NAME '=' NAME'.'NAME                                       {add_key()}
                | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }// a > b
@@ -174,8 +178,8 @@ BOP            : COMPARISSON                                                    
                | '='                                                               {$$ = $1 ; }
                ;
 
-Inlist         : SIMPLE                                                            {$$ = $1 ; }
-               | SIMPLE  ','  Inlist                                               {$$ = $1 ; }
+Inlist         : Simple                                                            {$$ = $1 ; }
+               | Simple  ','  Inlist                                               {$$ = $1 ; }
                ;
 
 %%
