@@ -5,43 +5,36 @@
  /* Declaracoes C diversas */                                          
 
 typedef struct node{
-    char* string;
-    node* next;
+  char* string;
+  node* next;
 }Node;
 
-typedef struct nodes{
-	char* nome_tabela;
-    Node node;
-    nodes* next;
-}Nodes;
-
 typedef struct  select{
-    Select selects[10];
-    Node renumeacoes;
-    Node conteudo_select;
-    Node conteudo_orderby;
-    Nodes tabelas;
+  int sizeSelects;
+  Select selects[10];
+  Node renumeacoes;
+  Node conteudo_select;
+  Node conteudo_orderby;
+  int sizetabelas;
+  Node tabelas[1];
 }Select;
-
-void add_rename(char* rename, Select select){
-	Node aux = new Node;
-	aux->string = rename;
-	aux->next = select->renumeacoes;
-	select->renumeacoes=aux;
-}
 
 FILE* out;
 int flag = 0;
 char* tabela;
 
+void add_rename(char* rename, Select select){
+  Node aux = new Node;
+  aux->string = rename;
+  aux->next = select->renumeacoes;
+  select->renumeacoes=aux;
+}
+
 void add_simplefilter(char* filter,char* tabela, Select select){
-  Nodes aux = select->tabelas;
-  while(aux!=NULL && strcmp(aux->nome_tabela,tabela) == 0)aux=aux->next;
-  if(aux == NULL){
-    //add tabela
-  }else{
-    //add filter
-  }
+  Node aux = new Node;
+  aux->string = filter;
+  aux->next = select->tabelas[hash(tabela,select->sizetabelas)];
+  select->tabelas[hash(tabela,select->sizetabelas)] = aux;
 }
 
 void add_filter(char* atributo1, char* atributo2, char* op, char* tabela, Select select){
@@ -107,9 +100,9 @@ fromList       : subfromList                                                    
 // from join ?? -> from nomeT join .... 
 subfromList    : NAME                                                              {$$ = $1 ; } 
                | Join NAME                                                         {$$ = simple_join($2) ; } 
-               | Join NAME ON NAME '=' NAME                                        {$$ = add_filter($4,$6,'=',tabela); } 
+               | Join NAME ON SIMPLE '=' SIMPLE                                    {$$ = add_key($4,$6,'=',tabela); } 
                | Join NAME AS NAME                                                 {$$ = add_rename($2,$4); }
-               | Join NAME AS NAME ON NAME '=' NAME                                {$$ = add_filter($6,$8,'=',tabela);add_rename($2,$4); }
+               | Join NAME AS NAME ON SIMPLE '=' SIMPLE                            {$$ = add_key($6,$8,'=',tabela);add_rename($2,$4); }
                | '{' SelectBlock '}'                                               {$$ = from_select($2) ; } 
                | '{' SelectBlock '}' AS NAME                                       {$$ =  add_renameT($2,$5); } 
                ;
@@ -130,14 +123,15 @@ whereListSub   : COMPLEX                                                        
                | '(' whereList ')'                                                 {$$ = $2 ; }
                | NAME IN Inlist                                                    {$$ = add_in($1,$3); }//a in(......)
                | NAME BETWEEN SIMPLE AND SIMPLE                                    {$$ = add_filter($1,$3,'>',tabela); add_filter($1,$5,'<',tabela); }
-               | EXISTS '(' SelectBlock ')' ';'                                    {$$ =  ; }                                        
+               | EXISTS '(' SelectBlock ')' ';'                                    {$$ =  ; }
+               | COMPLEX LIKE COMPLEX                                              { ; }                                        
                ;
 
 groupbyList    : groupbyListSub                                                    {$$ =  ; } 
                | groupbyListSub  ',' groupbyList                                   { ; }
                ;
 
-groupbyListSub : NAME                                                              {$$ =  add_groupby($1); } 
+groupbyListSub : SIMPLE                                                            {$$ =  add_groupby($1); } 
                | HAVING NAME '(' SIMPLE ')' BOP SIMPLE                             { ; }//?????? 
                ;
 
@@ -145,7 +139,7 @@ orderbyList    : orderbyListSub                                                 
                | orderbyListSub ',' orderbyList                                    { ; }                                            
                ;
 
-orderbyListSub : NAME                                                              {$$ =  add_orderby($1,""); }
+orderbyListSub : SIMPLE                                                            {$$ =  add_orderby($1,""); }
                | NAME order                                                        {$$ =  add_orderby($1,$2); }                                          
                ;
 
@@ -159,8 +153,8 @@ OL             : AND                                                            
                | OR                                                                {$$ = $1 ; }
                ;
 
-SIMPLE         : NAME                                                              {$$ = $1 ; }
-               | NAME'.'NAME                                                       {$$ = $3 ;tabela = $1; }
+SIMPLE         : NAME                                                              {$$ = $1 ; }//string
+               | NAME'.'NAME                                                       {$$ = $3 ; tabela = $1; }
                | DATE                                                              {$$ = $1 ; }
                | CONSTANT                                                          {$$ = $1 ; }
                | BOOL                                                              {$$ = $1 ; }
@@ -183,7 +177,7 @@ BOP            : COMPARISSON                                                    
                ;
 
 Inlist         : SIMPLE                                                            {$$ = $1 ; }
-               | SIMPLE  ','  Inlist                                               { ; }
+               | SIMPLE  ','  Inlist                                               {$$ = $1 ; }
                ;
 
 %%
