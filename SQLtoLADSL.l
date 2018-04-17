@@ -50,12 +50,12 @@ FALSE   						{ yylval.intval = 0; return BOOL; }
 
 
 
-    /* operators 
-[ -+&~ | ^ / % *(), .; !]                               { return yytext[0]; }
-*/
+    /* operators*/ 
+[ -+&~ | ^ / % *(), .; ! =]                             { return yytext[0]; }
+
 "&&"                                                    { return ANDOP; }
 "||"                                                    { return OR; }
-"="                                                     { yylval.subtok = 4; return COMPARISON; }
+//"="                                                     { yylval.subtok = 4; return COMPARISON; }
 "<=>"                                                   { yylval.subtok = 12; return COMPARISON; }
 ">="                                                    { yylval.subtok = 6;return COMPARISON; }
 ">"                                                     { yylval.subtok = 2; return COMPARISON; }
