@@ -1,26 +1,7 @@
  #include <stdio.h>                                                                                                                      
  #include <strings.h>
+ #include "SQLtoLADSL.h"
 
- /* Declaracoes C diversas */                                          
-
-typedef struct node{
-  char* string;
-  node* next;
-}Node;
-
-typedef struct  select{
-  int sizeSelects;
-  Select selects[10];
-  Node alias;
-  Node return_values;
-  Node orderby;
-  int sizetables;
-  Node tables[1];
-}Select;
-
-FILE* out;
-int flag = 0;
-char* tables;
 
 void add_rename(char* rename, Select select){
   Node aux = new Node;
