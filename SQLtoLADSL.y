@@ -1,66 +1,11 @@
 %{                                                                    
  #include <stdio.h>                                                                                                                      
  #include <strings.h>
-
- /* Declaracoes C diversas */                                          
-
-typedef struct node{
-  char* string;
-  node* next;
-}Node;
-
-typedef struct  select{
-  int sizeSelects;
-  Select selects[10];
-  Node alias;
-  Node return_values;
-  Node orderby;
-  int sizetables;
-  Node tables[1];
-}Select;
-
-FILE* out;
-int flag = 0;
-char* tables;
-
-void add_rename(char* rename, Select select){
-  Node aux = new Node;
-  aux->string = rename;
-  aux->next = select->alias;
-  select->alias=aux;
-}
-
-void add_Simplefilter(char* filter,char* table, Select select){
-  Node aux = new Node;
-  aux->string = filter;
-  aux->next = select->tables[hash(table,select->sizetables)];
-  select->tables[hash(table,select->sizetables)] = aux;
-}
-
-void add_filter(char* atributo1, char* atributo2, char* op, char* table, Select select){
-  printf
-}
-
-/*
-void join (int flag, char* atributo1, char* atributo2){
-    switch(flag){
-        case 1:
-               fprintf(out, "filter( %s = %s)\n",atributo1,atributo2);
-               break;
-        case 2:
-              fprintf(out, "filter( %s != NULL)\n",atributo1);
-              break;
-        case 3:
-              fprintf(out, "filter( %s != NULL)\n",atributo2);
-              break;
-        default:
-              fprintf(out, "");
-      }
-}
-*/
+ #include <SQLtoLADSL.h>
 %}
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
 %token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL IN ASC DESC COMPARISSON DATE ANDOP ANY ALL
+%token LIKE  
 %%  
 
 SelectBlock    : SELECT     selectList                                             
@@ -74,11 +19,11 @@ WHERE_         : WHERE       whereList                                          
                |                                                                   { ; }
                ;
 
-GROUPBY_       : GROUPBY    groupbyList                                            { ; }
+GROUPBY_       : GROUPBY    goby                                                   { ; }
                |                                                                   { ; }
                ;
 
-ORDERBY_       : ORDERBY    orderbyList                                            { ; }
+ORDERBY_       : ORDERBY    goby                                                   { ; }
                |                                                                   { ; }
                ;
 
@@ -100,9 +45,9 @@ fromList       : subfromList                                                    
 
 subfromList    : NAME                                                              { ; } 
                | Join NAME                                                         { ; } 
-               | Join NAME ON Simple '=' Simple                                    {$$ = add_key($2,$4,$6); } 
+               | Join NAME ON Literal '=' Literal                                    {$$ = add_key($2,$4,$6); } 
                | Join NAME AS NAME                                                 {$$ = add_rename($2,$4); }
-               | Join NAME AS NAME ON Simple '=' Simple                            {$$ = add_key($2,$6,$8);add_rename($2,$4); }
+               | Join NAME AS NAME ON Literal '=' Literal                            {$$ = add_key($2,$6,$8);add_rename($2,$4); }
                | '{' SelectBlock '}'                                               {$$ = from_select($2); } 
                | '{' SelectBlock '}' AS NAME                                       {$$ = from_select($2); add_renameT($2,$5); } 
                ;
@@ -114,32 +59,41 @@ Join           : JOIN                                                           
                | FULL JOIN                                                         { ; } 
                ;
 
-whereList      : whereListSub                                                      {$$ = $2 ; }
+whereList      : whereListSub                                                      {$$ = $1 ; }
                | whereListSub OL whereList                                         {opLogic($1,$2,$3); }
                ;
 
-whereListSub   : Expr                                                              {add_Simplefilter($1,table); }
+whereListSub   : Expr                                                              {add_Literalfilter($1,table); }
                | '(' whereList ')'                                                 { ; }
                | NAME IN Inlist                                                    {$$ = add_in($1,$3); }
-               | NAME BETWEEN Simple AND Simple                                    {$$ = add_filter($1,$3,'>',table); add_filter($1,$5,'<',table); }
+               | NAME BETWEEN Literal AND Literal                                    {$$ = add_filter($1,$3,'>',table); add_filter($1,$5,'<',table); }
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
                | Expr LIKE Expr                                                    { ; }                                        
                ;
-
-groupbyList    : groupbyListSub                                                    {$$ =  ; } 
-               | groupbyListSub  ',' groupbyList                                   { ; }
+//simple         : Literal                                                            {;}
+//               | Literal ',' Literal                                                 {;}
+//               ;
+//groupbyList    : groupbyListSub                                                    {$$ =$1  ; } 
+//               | groupbyListSub  ',' groupbyList                                   { ; }
+//               | simple ',' groupbyList                                            { ; }
+//               ;
+//
+//groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                             { ; }//?????? 
+//               ;
+//
+//orderbyList    : orderbyListSub                                                    { ; }
+//               | orderbyListSub ',' orderbyList                                    { ; }                                            
+//               | simple ',' orderbyList                                    { ; }                                            
+//               ;
+//
+//orderbyListSub : NAME order                                                        {add_orderby($1,$2); }                                          
+//               ;
+goby           : gobyAux                                                           {;}
+               | gobyAux ',' goby                                                  {;}
                ;
-
-groupbyListSub : Simple                                                            {add_groupby($1); } 
-               | HAVING NAME '(' Simple ')' BOP Simple                             { ; }//?????? 
-               ;
-
-orderbyList    : orderbyListSub                                                    { ; }
-               | orderbyListSub ',' orderbyList                                    { ; }                                            
-               ;
-
-orderbyListSub : Simple                                                            {add_orderby($1,""); }
-               | NAME order                                                        {add_orderby($1,$2); }                                          
+gobyAux        : Literal                                                           {;}
+               | HAVING NAME '(' Literal ')' BOP Literal                             { ; }//?????? 
+               | NAME order                                                        {;} 
                ;
 
 order          : ASC                                                               { $$ = $1; }
@@ -160,11 +114,8 @@ Literal        : NAME                                                           
                | ALL                                                               {$$ = $1 ; }
                ;
 
-Simple         : Literal
-               | NAME'.'NAME
-               ;
 
-Expr           : Simple                                                            {$$ = $1 ; }//a.atributo
+Expr           : Literal                                                            {$$ = $1 ; }//a.atributo
                | NOT Expr                                                          {$$ = not($2) ; }//not ....
               //| NAME'.'NAME '=' NAME'.'NAME                                       {add_key()}
                | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }// a > b
@@ -178,8 +129,8 @@ BOP            : COMPARISSON                                                    
                | '='                                                               {$$ = $1 ; }
                ;
 
-Inlist         : Simple                                                            {$$ = $1 ; }
-               | Simple  ','  Inlist                                               {$$ = $1 ; }
+Inlist         : Literal                                                            {$$ = $1 ; }
+               | Literal  ','  Inlist                                               {$$ = $1 ; }
                ;
 
 %%
