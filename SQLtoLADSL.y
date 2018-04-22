@@ -6,6 +6,12 @@
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
 %token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL IN ASC DESC COMPARISSON DATE ANDOP ANY ALL
 %token LIKE  
+
+%right '=' 
+%left OP
+%left NOT
+%left COMPARISSON
+%left SHIFT
 %%  
 
 SelectBlock    : SELECT     selectList                                             
