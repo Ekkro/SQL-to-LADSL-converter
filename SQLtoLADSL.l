@@ -55,21 +55,21 @@ FALSE   						{ yylval.intval = 0; return BOOL; }
 
 "&&"                                                    { return ANDOP; }
 "||"                                                    { return OR; }
-//"="                                                     { yylval.subtok = 4; return COMPARISON; }
-"<=>"                                                   { yylval.subtok = 12; return COMPARISON; }
-">="                                                    { yylval.subtok = 6;return COMPARISON; }
-">"                                                     { yylval.subtok = 2; return COMPARISON; }
-"<="                                                    { yylval.subtok = 5; return COMPARISON; }
-"<"                                                     { yylval.subtok = 1; return COMPARISON; }
-"!="|"<>"                                               { yylval.subtok = 3; return COMPARISON; }
-"<<"                                                    { yylval.subtok = 1; return SHIFT; }
-">>"                                                    { yylval.subtok = 2; return SHIFT; }
+//"="                                                     { yylval.subtok = 4; return BOP; }
+"<=>"                                                   { yylval.subtok = 12; return BOP; }
+">="                                                    { yylval.subtok = 6;return BOP; }
+">"                                                     { yylval.subtok = 2; return BOP; }
+"<="                                                    { yylval.subtok = 5; return BOP; }
+"<"                                                     { yylval.subtok = 1; return BOP; }
+"!="|"<>"                                               { yylval.subtok = 3; return BOP; }
+"<<"                                                    { yylval.subtok = 1; return BOP; }
+">>"                                                    { yylval.subtok = 2; return BOP; }
 ":="                                                    { return ASSIGN; }
 
-"*"                                                     { yylval.cha = 'm' ; return OP: }
-"/"                                                     { yylval.cha = 'd' ; return OP: }
-"+"                                                     { yylval.cha = 'P' ; return OP: }
-"-"                                                     { yylval.cha = 'M' ; return OP: }
+"*"                                                     { yylval.cha = 'm' ; return BOP: }
+"/"                                                     { yylval.cha = 'd' ; return BOP: }
+"+"                                                     { yylval.cha = 'P' ; return BOP: }
+"-"                                                     { yylval.cha = 'M' ; return BOP: }
     /* functions */
 
 SUBSTR(ING)?/"("                                        { return FSUBSTRING; }
