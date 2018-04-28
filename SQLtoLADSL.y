@@ -25,11 +25,11 @@ WHERE_         : WHERE       whereList                                          
                |                                                                   { ; }
                ;
 
-GROUPBY_       : GROUPBY    goby                                                   { ; }
+GROUPBY_       : GROUPBY    groupbyList                                                   { ; }
                |                                                                   { ; }
                ;
 
-ORDERBY_       : ORDERBY    goby                                                   { ; }
+ORDERBY_       : ORDERBY    orderbyList                                                  { ; }
                |                                                                   { ; }
                ;
 
@@ -38,7 +38,7 @@ selectList     : selectListN                                                    
                ;
 
 selectListN    : selectListNSub                                                    { ; } 
-               | selectListNSub ',' selectListN                                    { ; }// ver melhor
+               | selectListNSub ',' selectListN                                    { ; } 
                ;
 
 selectListNSub : Expr                                                              {add_select($1); } 
@@ -46,7 +46,7 @@ selectListNSub : Expr                                                           
                ;
 
 fromList       : subfromList                                                       { aux->sizetables++; } 
-               | subfromList ',' fromList                                          { aux->sizetables++; }// ver melhor
+               | subfromList ',' fromList                                          { aux->sizetables++; }
                ;
 
 subfromList    : NAME                                                              { ; } 
@@ -76,30 +76,22 @@ whereListSub   : Expr                                                           
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
                | Expr LIKE Expr                                                    { ; }                                        
                ;
-//simple         : Literal                                                            {;}
-//               | Literal ',' Literal                                                 {;}
-//               ;
-//groupbyList    : groupbyListSub                                                    {$$ =$1  ; } 
-//               | groupbyListSub  ',' groupbyList                                   { ; }
-//               | simple ',' groupbyList                                            { ; }
-//               ;
-//
-//groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                             { ; }//?????? 
-//               ;
-//
-//orderbyList    : orderbyListSub                                                    { ; }
-//               | orderbyListSub ',' orderbyList                                    { ; }                                            
-//               | simple ',' orderbyList                                    { ; }                                            
-//               ;
-//
-//orderbyListSub : NAME order                                                        {add_orderby($1,$2); }                                          
-//               ;
-goby           : gobyAux                                                           {;}
-               | gobyAux ',' goby                                                  {;}
+
+groupbyList    : groupbyListSub                                                    {$$ =$1  ; } 
+               | groupbyListSub  ',' groupbyList                                   { ; }
                ;
-gobyAux        : Literal                                                           {;}
-               | HAVING NAME '(' Literal ')' BOP Literal                             { ; }//?????? 
-               | NAME order                                                        {;} 
+
+groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                           { ; }
+				 | Literal
+               ;
+
+orderbyList    : orderbyListSub                                                    { ; }
+               | orderbyListSub ',' orderbyList                                    { ; }                                            
+                                       
+               ;
+
+orderbyListSub : NAME 	 	                                                      {add_orderby($1); }
+			   | NAME order                                                       {add_orderby($1,$2); }                                         
                ;
 
 order          : ASC                                                               { $$ = $1; }
@@ -111,7 +103,7 @@ OL             : AND                                                            
                | OR                                                                {$$ = $1 ; }
                ;
 
-Literal        : NAME                                                              {$$ = $1 ; }//string
+Literal        : NAME                                                              {$$ = $1 ; }
                | NAME'.'NAME                                                       {$$ = $3 ; table = $1; }
                | DATE                                                              {$$ = $1 ; }
                | CONSTANT                                                          {$$ = $1 ; }
@@ -121,17 +113,17 @@ Literal        : NAME                                                           
                ;
 
 
-Expr           : Literal                                                            {$$ = $1 ; }//a.atributo
-               | NOT Expr                                                          {$$ = not($2) ; }//not ....
-              //| NAME'.'NAME '=' NAME'.'NAME                                       {add_key()}
-               | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }// a > b
-               | NAME '(' Expr ')'                                                 {$$ = func($1,$3) ; }// sum(....)
+Expr           : Literal                                                            {$$ = $1 ; }
+               | NOT Expr                                                          {$$ = not($2) ; }
+               // | NAME'.'NAME '=' NAME'.'NAME                                       {add_key()}
+               | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }
+               | NAME '(' Expr ')'                                                 {$$ = func($1,$3) ; }
                | '('SelectBlock')'                                                 { ; }
                ;
 
-BOP            : COMPARISSON                                                       {$$ = $1 ; }// <,>si
-               | SHIFT                                                             {$$ = $1 ; }// <<, >>
-               | OP                                                                {$$ = $1 ; }// +, -
+BOP            : COMPARISSON                                                       {$$ = $1 ; }
+               | SHIFT                                                             {$$ = $1 ; } 
+               | OP                                                                {$$ = $1 ; }
                | '='                                                               {$$ = $1 ; }
                ;
 
@@ -147,7 +139,7 @@ int main(int argc, char **argv){
         printf("Error opening file!\n");
         exit(1);
     }
-    //char codigo[1023*1024];
+    char codigo[1023*1024];
     fprintf(out, "start\n"); 
     yyparse();
     fprintf(out, "stop\n");
