@@ -5,13 +5,14 @@
 %}
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
 %token AND OR EXISTS OP NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT SHIFT BOOL IN ASC DESC COMPARISSON DATE ANDOP ANY ALL
-%token LIKE  
+%token LIKE BOP  
 
 %right '=' 
 %left OP
 %left NOT
 %left COMPARISSON
 %left SHIFT
+%left BOP
 %%  
 
 SelectBlock    : SELECT     selectList                                             
@@ -116,16 +117,16 @@ Literal        : NAME                                                           
 Expr           : Literal                                                            {$$ = $1 ; }
                | NOT Expr                                                          {$$ = not($2) ; }
                // | NAME'.'NAME '=' NAME'.'NAME                                       {add_key()}
-               | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }
+              | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }
                | NAME '(' Expr ')'                                                 {$$ = func($1,$3) ; }
                | '('SelectBlock')'                                                 { ; }
                ;
 
-BOP            : COMPARISSON                                                       {$$ = $1 ; }
-               | SHIFT                                                             {$$ = $1 ; } 
-               | OP                                                                {$$ = $1 ; }
-               | '='                                                               {$$ = $1 ; }
-               ;
+//BOP            : COMPARISSON                                                       {$$ = $1 ; }
+//               | SHIFT                                                             {$$ = $1 ; } 
+//               | OP                                                                {$$ = $1 ; }
+//               | '='                                                               {$$ = $1 ; }
+//               ;
 
 Inlist         : Literal                                                            {$$ = $1 ; }
                | Literal  ','  Inlist                                               {$$ = $1 ; }
