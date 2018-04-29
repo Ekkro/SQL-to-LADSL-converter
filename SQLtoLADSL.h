@@ -4,12 +4,12 @@
 
 typedef struct node{
   char* string;
-  node* next;
+  struct node * next;
 }Node;
 
 typedef struct  select{
   int sizeSelects;
-  Select selects[10];
+  struct select* selects[10];
   Node alias;
   Node return_values;
   Node orderby;

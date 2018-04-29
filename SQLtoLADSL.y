@@ -9,7 +9,7 @@
 
 %right '=' 
 %left OP
-%left NOT
+%right NOT
 %left COMPARISSON
 %left SHIFT
 %left BOP
