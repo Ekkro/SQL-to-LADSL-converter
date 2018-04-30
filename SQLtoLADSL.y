@@ -92,7 +92,7 @@ orderbyList    : orderbyListSub                                                 
                ;
 
 orderbyListSub : NAME 	 	                                                      {add_orderby($1); }
-			         | NAME order                                                       {add_orderby($1,$2); }                                         
+             | NAME order                                                       {add_orderby($1,$2); }                                         
                ;
 
 order          : ASC                                                               { $$ = $1; }
@@ -122,11 +122,6 @@ Expr           : Literal                                                        
                | '('SelectBlock')'                                                 { ; }
                ;
 
-//BOP            : COMPARISSON                                                       {$$ = $1 ; }
-//               | SHIFT                                                             {$$ = $1 ; } 
-//               | OP                                                                {$$ = $1 ; }
-//               | '='                                                               {$$ = $1 ; }
-//               ;
 
 Inlist         : Literal                                                            {$$ = $1 ; }
                | Literal  ','  Inlist                                               {$$ = $1 ; }

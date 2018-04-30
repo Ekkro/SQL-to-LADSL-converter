@@ -3,11 +3,25 @@
  #include "SQLtoLADSL.h"
 
 
-void add_rename(char* rename, Select select){
-  Node aux = new Node;
-  aux->string = rename;
-  aux->next = select->alias;
-  select->alias=aux;
+void add_rename(char* name, char* rename, Select select){
+    if (select->alias == NULL) {
+        select->alias = g_hash_table_new (g_str_hash, g_str_equal);
+    }
+    g_hash_table_insert (select->alias, g_strdup (name), g_strdup (rename));
+}
+
+void add_select(char* name, Select select){
+    Node aux = new Node;
+    aux->string = name;
+    aux->next = select->return_values;
+    select->return_values = aux;
+}
+
+void add_renameT(char* name, char* rename, GHashTable* Tables){
+    if (Tables == NULL) {
+        Tables= g_hash_table_new (g_str_hash, g_str_equal);
+    }
+    g_hash_table_insert (Tables, g_strdup (name), g_strdup (rename));
 }
 
 void add_Literalfilter(char* filter,char* table, Select select){
@@ -59,15 +73,6 @@ int converToIndex(GString *name, GSList *indexL){
     return ret;
 }
 
-int calcLen(GSList *dim){
-    int len = 1;
-    if(dim == NULL) return 0;
-    for(GSList *it = dim; it; it=it->next){
-        len *= (int)it->data;
-    }
-
-    return len;
-}
 
 void hdPrint(HashData hd){
     printf("estrutura a inserir na hash\n");

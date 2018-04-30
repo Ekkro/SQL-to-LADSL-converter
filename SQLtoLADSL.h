@@ -21,7 +21,7 @@ typedef struct node{
 typedef struct  select{
   int sizeSelects;
   struct select* selects[10];
-  Node alias;
+  HashData* alias;
   Node return_values;
   Node orderby;
   int sizetables;
