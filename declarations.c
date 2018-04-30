@@ -24,6 +24,23 @@ void add_renameT(char* name, char* rename, GHashTable* Tables){
     g_hash_table_insert (Tables, g_strdup (name), g_strdup (rename));
 }
 
+void attribute_Table(char* attribute, char* Table, GHashTable* Hash){
+    if (Hash == NULL) {
+        Hash = g_hash_table_new (g_str_hash, g_str_equal);
+    }
+    else{ 
+        if (g_hash_table_lookup (Table,g_strdup(attribute)!= NULL) 
+            printf("Atributo %s Apareçe em mais que uma tabela\n",attribute ));
+    }
+    g_hash_table_insert (Hash, g_strdup (attribute), g_strdup (Table));
+    
+} 
+
+char* Table( char* attribute ){
+    char* res = (char*) g_hash_table_lookup (attribute_Table,attribute); 
+    return res;
+}
+
 void add_Literalfilter(char* filter,char* table, Select select){
   Node aux = new Node;
   aux->string = filter;
