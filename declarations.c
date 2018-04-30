@@ -37,7 +37,7 @@ void attribute_Table(char* attribute, char* Table, GHashTable* Hash){
 } 
 
 char* Table( char* attribute ){
-    char* res = (char*) g_hash_table_lookup (attribute_Table,attribute); 
+    char* res = (char*) g_hash_table_lookup (attribute_Table, g_strdup (attribute)); 
     return res;
 }
 
