@@ -11,7 +11,7 @@ void add_rename(char* name, char* rename, Select select){
 }
 
 void add_select(char* name, Select select){
-    Node aux = new Node;
+    Node aux = malloc(sizeof(struct Node));
     aux->string = name;
     aux->next = select->return_values;
     select->return_values = aux;
@@ -30,7 +30,7 @@ void attribute_Table(char* attribute, char* Table, GHashTable* Hash){
     }
     else{ 
         if (g_hash_table_lookup (Table,g_strdup(attribute)!= NULL) 
-            printf("Atributo %s Apareçe em mais que uma tabela\n",attribute ));
+            printf("Attribute %s appears in more than one table\n",attribute ));
     }
     g_hash_table_insert (Hash, g_strdup (attribute), g_strdup (Table));
     
@@ -48,9 +48,28 @@ void add_Literalfilter(char* filter,char* table, Select select){
   select->tables[hash(table,select->sizetables)] = aux;
 }
 
-void add_filter(char* atributo1, char* atributo2, char* op, char* table, Select select){
-  printf
+void add_filter(char* attribute1, char* attribute2, char* op, char* table, Select select){
+    Filter aux = malloc(sizeof(struct Filter));
+    Gstring* filter = g_strdup (attribute1);
+    filter = g_string_append (filter, g_strdup(op)); 
+    filter = g_string_append (filter, g_strdup(attribute2)); 
+    aux->filter = filter ;
+
+    /* Find the table */
+    for (int i = 0; i < select->sizetables; i++) {
+        if(select->tables[i] == table) {
+            aux->next = select->tables[i]->Filter;            
+            select->tables[i]->Filter = aux;
+        }
+    }
 }
+
+void rewrite_filters(Table table, int size){
+    for (int i = 0; i < size; i++) {
+        table[i]->Filters = rewrite__filters_aux(table->Filters)
+    }
+}
+
 
 int calcLen(GSList *dim){
     int len = 1;

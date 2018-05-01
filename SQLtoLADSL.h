@@ -2,6 +2,10 @@
 #include <strings.h>
 #include <glib.h>
 
+/* For each select structure */
+number_selects = 10;
+number_tables = 1;
+
 /* -----GLIB----- */
 #define insertDecs(...) g_hash_table_insert(hDecs,__VA_ARGS__)
 #define lookupDecs(...) g_hash_table_lookup(hDecs,__VA_ARGS__)
@@ -18,19 +22,33 @@ typedef struct node{
   struct node * next;
 }Node;
 
+typedef struct filter{
+    GString* filter;
+    struct filter* next;
+}Filter;
+
+
+typedef struct table{
+    char* Name;
+    Node GroupBy;
+    Filter Filters;
+}Table
+
 typedef struct  select{
   int sizeSelects;
-  struct select* selects[10];
-  HashData* alias;
+  struct select* selects[number_selects];
+  GHashTable* alias;
   Node return_values;
   Node orderby;
   int sizetables;
-  Node tables[1];
+  Table tables[number_tables];
 }Select;
 
 FILE* out;
 int flag = 0;
 char* tables;
+
+typedef struct _GHashTable GHashTable;
 
 typedef struct hashData{
     char type;
