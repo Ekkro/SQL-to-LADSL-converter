@@ -18,7 +18,7 @@ number_tables = 1;
 /* -------------- */
 
 typedef struct node{
-  char* string;
+  GString* string;
   struct node * next;
 }Node;
 
@@ -29,7 +29,7 @@ typedef struct filter{
 
 
 typedef struct table{
-    char* Name;
+    GString* Name;
     Node GroupBy;
     Filter Filters;
 }Table
@@ -46,7 +46,7 @@ typedef struct  select{
 
 FILE* out;
 int flag = 0;
-char* tables;
+GString* tables;
 
 typedef struct _GHashTable GHashTable;
 
@@ -58,13 +58,13 @@ typedef struct hashData{
 } *HashData;
 
 /* -----declarations.c----- */
-void add_rename(char* rename, Select select);
+void add_rename(GString* rename, Select select);
 
-void add_Literalfilter(char* filter,char* table, Select select);
+void add_Literalfilter(GString* filter,GString* table, Select select);
 
-void add_filter(char* atributo1, char* atributo2, char* op, char* table, Select select);
+void add_filter(GString* atributo1, GString* atributo2, GString* op, GString* table, Select select);
 
-//void join (int flag, char* atributo1, char* atributo2);
+//void join (int flag, GString* atributo1, GString* atributo2);
 
 HashData newHashData(char type, int pt, GSList *dim);
 

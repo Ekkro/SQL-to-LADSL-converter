@@ -3,28 +3,28 @@
  #include "SQLtoLADSL.h"
 
 
-void add_rename(char* name, char* rename, Select select){
+void add_rename(GString* name, GString* rename, Select select){
     if (select->alias == NULL) {
         select->alias = g_hash_table_new (g_str_hash, g_str_equal);
     }
-    g_hash_table_insert (select->alias, g_strdup (name), g_strdup (rename));
+    g_hash_table_insert (select->alias, g_strdup ( name ), g_strdup (rename));
 }
 
-void add_select(char* name, Select select){
+void add_select(GString* name, Select select){
     Node aux = malloc(sizeof(struct Node));
     aux->string = name;
     aux->next = select->return_values;
     select->return_values = aux;
 }
 
-void add_renameT(char* name, char* rename, GHashTable* Tables){
+void add_renameT(GString* name, GString* rename, GHashTable* Tables){
     if (Tables == NULL) {
         Tables= g_hash_table_new (g_str_hash, g_str_equal);
     }
     g_hash_table_insert (Tables, g_strdup (name), g_strdup (rename));
 }
 
-void attribute_Table(char* attribute, char* Table, GHashTable* Hash){
+void attribute_Table(GString* attribute, GString* Table, GHashTable* Hash){
     if (Hash == NULL) {
         Hash = g_hash_table_new (g_str_hash, g_str_equal);
     }
@@ -36,19 +36,19 @@ void attribute_Table(char* attribute, char* Table, GHashTable* Hash){
     
 } 
 
-char* Table( char* attribute ){
-    char* res = (char*) g_hash_table_lookup (attribute_Table, g_strdup (attribute)); 
+GString* Table( GString* attribute ){
+    GString* res = (GString*) g_hash_table_lookup (attribute_Table, g_strdup (attribute)); 
     return res;
 }
 
-void add_Literalfilter(char* filter,char* table, Select select){
+void add_Literalfilter(GString* filter,GString* table, Select select){
   Node aux = new Node;
   aux->string = filter;
   aux->next = select->tables[hash(table,select->sizetables)];
   select->tables[hash(table,select->sizetables)] = aux;
 }
 
-void add_filter(char* attribute1, char* attribute2, char* op, char* table, Select select){
+void add_filter(GString* attribute1, GString* attribute2, GString* op, GString* table, Select select){
     Filter aux = malloc(sizeof(struct Filter));
     Gstring* filter = g_strdup (attribute1);
     filter = g_string_append (filter, g_strdup(op)); 
@@ -69,6 +69,39 @@ void rewrite_filters(Table table, int size){
         table[i]->Filters = rewrite__filters_aux(table->Filters)
     }
 }
+
+
+//void print_hasTable(GHashTable table){
+//}
+//
+//void print_Node(Node node){
+//    printf("%s\n",node->string);
+//    print_Node(node->next);
+//}
+//
+//void print_filter(Filter filter){
+//    
+//}
+//
+//void print_Table(Table table){
+//    printf("%s\n",table->name);
+//    printf("GroupBy\n");
+//    print_Node(table->GroupBy);
+//    printf("Filters\n");
+//    print_filter(table->Filters);
+//}
+//
+//void print_struct(Select select){
+//   print_hasTable(select->alias); 
+//   print_Node(select->return_values); 
+//   print_Node(select->orderby); 
+//   for (int i = 0; i<sizetables; i++) {
+//       print_Table(select->tables[i]);
+//   }
+//    for (int i =0; i<select->sizeSelects; i++) {
+//        print_struct(select->selects[i]);
+//    }
+//}
 
 
 int calcLen(GSList *dim){
@@ -119,7 +152,7 @@ void hdPrint(HashData hd){
 }
 
 /*
-void join (int flag, char* atributo1, char* atributo2){
+void join (int flag, GString* atributo1, GString* atributo2){
     switch(flag){
         case 1:
                fprintf(out, "filter( %s = %s)\n",atributo1,atributo2);

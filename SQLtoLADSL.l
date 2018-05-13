@@ -55,7 +55,7 @@ FALSE   						{ yylval.intval = 0; return BOOL; }
 
 "&&"                                                    { return ANDOP; }
 "||"                                                    { return OR; }
-//"="                                                     { yylval.subtok = 4; return BOP; }
+"="                                                     { yylval.subtok = 4; return BOP; }
 "<=>"                                                   { yylval.subtok = 12; return BOP; }
 ">="                                                    { yylval.subtok = 6;return BOP; }
 ">"                                                     { yylval.subtok = 2; return BOP; }
