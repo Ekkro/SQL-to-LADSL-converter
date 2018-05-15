@@ -8,14 +8,50 @@ class Ltree {
     vector<String> ltree;
     Public:
 //        Ltree() {ltree = new vector<string>();}
-        String Parent(int indice){ return ltree[(indice-1)/2]; } 
-        int ind_Parent(int indice){ return ((indice-1)/2); } 
+        String Parent(int indice){
+            String res = "NULL";
+            int aux = (indice-1)/2;
+            if ( aux <0 || aux >= ltree.size()) {
+                return res;
+            }else{ return ltree[aux]; }
+            }
+
+        int ind_Parent(int indice){ 
+            int aux = (indice-1)/2;
+            if ( aux <0 || aux >= ltree.size()) {
+                return -1;
+            }else{ return aux; }
+            }
         
-        String left_child(int indice){ return ltree[(2*indice+1)]; } 
-        int ind_left_child(int indice){ return (2*indice+1); } 
+        String left_child(int indice){
+            String res = "NULL";
+            int aux = 2*indice+1; 
+            if ( aux <0 || aux >= ltree.size()) {
+                return res;
+            }else{ return ltree[aux]; }
+            }
+
+        int ind_left_child(int indice){
+            int aux = 2*indice+1; 
+            if ( aux <0 || aux >= ltree.size()) {
+                return -1;
+            }else{ return aux; }
+            }
         
-        String right_child(int indice){ return ltree[(2*indice+2)]; } 
-        int ind_right_child(int indice){ return (2*indice+2); } 
+        String right_child(int indice){
+            String res = "NULL";
+            int aux = 2*indice+2; 
+            if ( aux <0 || aux >= ltree.size()) {
+                return res;
+            }else{ return ltree[aux]; }
+            }
+
+        int ind_right_child(int indice){
+            int aux = 2*indice+2; 
+            if ( aux <0 || aux >= ltree.size()) {
+                return -1;
+            }else{ return aux; }
+            }
         
         void add(String value ,int indice ){ ltree[indice] = value; }
 
