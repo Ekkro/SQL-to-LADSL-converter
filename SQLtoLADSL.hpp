@@ -118,6 +118,7 @@ class Graph {
     
     Map<String, vector< vector<String> > > graph;
     Map<String, String> attribute_table;
+    Map<String,int> attribute_type;
     Public:
         int num_attributes(String str){
             int count = 0;
@@ -128,10 +129,34 @@ class Graph {
             }
             return count;
         }
-        void add_filter(String Table,String filter, String str){
+
+        void add_filter_type(String filter, String type){
+            if (!type.compare("Measures") {
+                    attribute_type[filter]= 1;
+            }else{
+                if (!type.compare("Dimension") {
+                    attribute_type[filter]= 2;
+                }
+            }
+        
+        void add_filter(String Table,String filter, String str, String type = "NULL"){
             graph[Table].insert(filter,str);
             attribute1[filter] = Table;
+            add_filter_type(filter,type);
         }
+
+        int is_measured(String filter){
+            if (attribute_type[filter] == 1) {
+                return 1;
+            }else return 0;
+        }
+
+        int is_dimension(String filter){
+            if (attribute_type[filter] == 2) {
+                return 1;
+            }else return 0;
+        }
+
         void add_table(String Table, String name){
             graph[Table].insert(filter,str);
         }
