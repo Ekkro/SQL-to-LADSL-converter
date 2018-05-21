@@ -71,23 +71,24 @@ class Ltree {
             ltree[indice2] = aux;
         }
         
-        vector<Strings> parents(int i){
-           vector<String> res;
-           for (int ind = i;ind_Parent[i]>0;i = ind_Parent(i)) {
-               res.insert(Parent(i));
+        vector<int> parents(int i){
+           vector<int> res;
+           for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
+               res.insert(i);
            }
            return res;
         }
 
         String common_ancestor( int indice1, int indice2 ){
-            vector<String> parrent_1 = parrents(indice1);
-            vector<String> parrent_2 = parrents(indice2);
-            for ( int i = 0;i < min(parrent_1.size(),parrent_2.size()); i++) {
-                if (!parrent_1[i].compare(parrent_2[i])) {
-                    return(parrent_1[i]);
+            vector<int> parent_1 = parents(indice1);
+            vector<int> parent_2 = parents(indice2);
+            for ( int i = 0;i < min(parent_1.size(),parent_2.size()); i++) {
+                if (parent_1[i] == parent_2[i]) {
+                    return(ltree[parent_1[i]]);
                 }
             }
         }
+
         void merge(vector<String> vec){
             for ( int i = 0; ltree.size(); i++) {
                 if ((!ltree[i].compare("NULL")) && (vec.compare("NULL")==0)) {
@@ -97,13 +98,13 @@ class Ltree {
         }
 
         vector<String> split_aux(vector<String> res, int indice1, int indice2){
-            if (ltree[indice2].compare("NULL")) {
+            if (!ltree[indice2].compare("NULL")) {
                 return res;
             }
             res[indice1] = ltree[indice2];
-            vector<String> aux1 = ltree.split_aux(res,ind_left_child(indice1),ind_right_child(indice2));
-           // vector<String> aux2 = ltree.split_aux(res,ind_left_child(indice1),ind_right_child(indice2));
-            return aux1.merge(aux1);
+            vector<String> aux1 = ltree.split_aux(res,ind_left_child(indice1),ind_left_child(indice2));
+            vector<String> aux2 = ltree.split_aux(res,ind_right_child(indice1),ind_right_child(indice2));
+            return aux1.merge(aux2);
             
         }
 
@@ -111,6 +112,56 @@ class Ltree {
             vector<String> res;
             return  ltree.split_aux(res,indice1,indice2);
         }
+
+        void add_tree(vector<String> v,int ind, int n=0){
+                if (v[n] != "NULL") {
+                    ltree.add(v[n],ind);
+                    add_tree(v,ind_left_child(ind),ind_left_child(n));
+                    add_tree(v,ind_right_child(ind),ind_right_child(n));
+                }
+        }
+
+        void search_nextOR_aux(int parent, int favourite_child){
+            if (favourite_child) {
+               ltree.swap(parent, ind_right_child(parent)); 
+               ltree.add("NULL",ind_left_child(parent));
+               ltree.add("NULL",ind_right_child(parent));
+            }else{
+               ltree.swap(parent, ind_left_child(parent)); 
+               ltree.add("NULL",ind_left_child(parent));
+               ltree.add("NULL",ind_right_child(parent));
+                }
+        
+        }
+
+        void search_nextOR(int ind){
+            if (left_child(ind_left_child(ind)) == "OR") {
+                search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
+                search_nextOR_aux(ind_right_child(ind_left_child(ind)),1);
+            }else{ 
+                search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
+                search_nextOR_aux(ind_right_child(ind_right_child(ind)),1);
+            }
+            
+        }
+
+
+        void funcao(Graph g, int x=0){
+            if(ltree.ltree[x] == "OR" && g.isThe_same_Table(left_child.left_child(x),ltree.right_child(x)){
+                int parent = ltree.ind_Parent(x);
+                    vector<String> s = ltree.split(0,parent);
+                    ltree.add_tree(s,ltree.ind_left_child(x));
+                    ltree.add_tree(s,ltree.ind_right_child(x));
+                    ltree.add("OR",parent);
+                    ltree.searh_nextOR(parent);
+          }else{
+            if(t.ltree!="NULL"){
+              funcao(g,(ltree.ind_left_child(x));
+              funcao(g,(ltree.ind_right_child(x));
+            }
+          }
+    }
+
 
 }
 
