@@ -16,43 +16,43 @@ class Ltree {
             }else{ return ltree[aux]; }
             }
 
-        int ind_Parent(int indice){ 
+        int ind_Parent(int indice){
             int aux = (indice-1)/2;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
             }else{ return aux; }
             }
-        
+
         String left_child(int indice){
             String res = "NULL";
-            int aux = 2*indice+1; 
+            int aux = 2*indice+1;
             if ( aux <0 || aux >= ltree.size()) {
                 return res;
             }else{ return ltree[aux]; }
             }
 
         int ind_left_child(int indice){
-            int aux = 2*indice+1; 
+            int aux = 2*indice+1;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
             }else{ return aux; }
             }
-        
+
         String right_child(int indice){
             String res = "NULL";
-            int aux = 2*indice+2; 
+            int aux = 2*indice+2;
             if ( aux <0 || aux >= ltree.size()) {
                 return res;
             }else{ return ltree[aux]; }
             }
 
         int ind_right_child(int indice){
-            int aux = 2*indice+2; 
+            int aux = 2*indice+2;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
             }else{ return aux; }
             }
-        
+
         void add(String value ,int indice ){ ltree[indice] = value; }
 
         int indice(String value){
@@ -63,14 +63,14 @@ class Ltree {
            }
            return -1;
         }
-        
+
         void swap(int indice1,int indice2 ){
             String aux;
-            aux = ltree[indice1]; 
+            aux = ltree[indice1];
             ltree[indice1] = ltree[indice2];
             ltree[indice2] = aux;
         }
-        
+
         vector<int> parents(int i){
            vector<int> res;
            for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
@@ -82,8 +82,9 @@ class Ltree {
         String common_ancestor( int indice1, int indice2 ){
             vector<int> parent_1 = parents(indice1);
             vector<int> parent_2 = parents(indice2);
-            for ( int i = 0;i < min(parent_1.size(),parent_2.size()); i++) {
-                if (parent_1[i] == parent_2[i]) {
+            for ( int i = 0;i < parent_1.size(); i++) {
+              for ( int j = 0; j < parent_2.size();j++)){}
+                if (parent_1[i] == parent_2[j]) {
                     return(ltree[parent_1[i]]);
                 }
             }
@@ -105,7 +106,7 @@ class Ltree {
             vector<String> aux1 = ltree.split_aux(res,ind_left_child(indice1),ind_left_child(indice2));
             vector<String> aux2 = ltree.split_aux(res,ind_right_child(indice1),ind_right_child(indice2));
             return aux1.merge(aux2);
-            
+
         }
 
         vector<String> split(int indice1, int indice2){
@@ -123,37 +124,37 @@ class Ltree {
 
         void search_nextOR_aux(int parent, int favourite_child){
             if (favourite_child) {
-               ltree.swap(parent, ind_right_child(parent)); 
+               ltree.swap(parent, ind_right_child(parent));
                ltree.add("NULL",ind_left_child(parent));
                ltree.add("NULL",ind_right_child(parent));
             }else{
-               ltree.swap(parent, ind_left_child(parent)); 
+               ltree.swap(parent, ind_left_child(parent));
                ltree.add("NULL",ind_left_child(parent));
                ltree.add("NULL",ind_right_child(parent));
                 }
-        
+
         }
 
-        void search_nextOR(int ind){
-            if (left_child(ind_left_child(ind)) == "OR") {
+        void search_nextOR(Graph g ,int ind){
+            if (left_child(ind_left_child(ind)) == "OR" && g.isThe_same_Table(ltree.left_child(left_child(ind_left_child(ind))),ltree.right_child(left_child(ind_left_child(ind)))) {
                 search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
                 search_nextOR_aux(ind_right_child(ind_left_child(ind)),1);
-            }else{ 
+            }else{
                 search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
                 search_nextOR_aux(ind_right_child(ind_right_child(ind)),1);
             }
-            
+
         }
 
 
         void funcao(Graph g, int x=0){
-            if(ltree.ltree[x] == "OR" && g.isThe_same_Table(left_child.left_child(x),ltree.right_child(x)){
+            if(ltree.ltree[x] == "OR" && g.isThe_same_Table(ltree.left_child(x),ltree.right_child(x)){
                 int parent = ltree.ind_Parent(x);
                     vector<String> s = ltree.split(0,parent);
                     ltree.add_tree(s,ltree.ind_left_child(x));
                     ltree.add_tree(s,ltree.ind_right_child(x));
                     ltree.add("OR",parent);
-                    ltree.searh_nextOR(parent);
+                    ltree.searh_nextOR(g,parent);
           }else{
             if(t.ltree!="NULL"){
               funcao(g,(ltree.ind_left_child(x));
@@ -166,7 +167,7 @@ class Ltree {
 }
 
 class Graph {
-    
+
     Map<String, vector< vector<String> > > graph;
     Map<String, String> attribute_table;
     Map<String,int> attribute_type;
@@ -189,7 +190,7 @@ class Graph {
                     attribute_type[filter]= 2;
                 }
             }
-        
+
         void add_filter(String Table,String filter, String str, String type = "NULL"){
             graph[Table].insert(filter,str);
             attribute1[filter] = Table;
@@ -217,5 +218,5 @@ class Graph {
                 return 1;
             }
             else return 0;
-        
+
  }
