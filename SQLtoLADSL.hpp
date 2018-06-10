@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <utility>
 using namespace std;
 class Ltree {
 
@@ -168,18 +169,14 @@ class Ltree {
 
 class Graph {
 
-    Map<String, vector< vector<String> > > graph;
-    Map<String, String> attribute_table;
-    Map<String,int> attribute_type;
-    Public:
+    Map<String, pair<String,String> > join;
+    vector<pair <String,String> > groupby;
+    Map<String,Map<Stringn,int> > tables; //int-> 0=Measure, 1 = Dimension
+    Map<String, vector<String> > filter;
+    vector<String> select;
+        Public:
         int num_attributes(String str){
-            int count = 0;
-            for (int i = 0;graph[str].size(); i++) {
-                if (graph[str][i][1].compare("NULL")) { // diffrent strings
-                    count++;
-                }
-            }
-            return count;
+            return tables[str].size();
         }
 
         void add_filter_type(String filter, String type){
