@@ -175,23 +175,80 @@ class Graph {
     Map<String, vector<String> > filter;
     vector<String> select;
         Public:
+        
         int num_attributes(String str){
             return tables[str].size();
         }
 
-        void add_filter_type(String filter, String type){
-            if (!type.compare("Measures") {
-                    attribute_type[filter]= 1;
-            }else{
-                if (!type.compare("Dimension") {
-                    attribute_type[filter]= 2;
+        void add_filter(String Table,String filter, int type = -1){
+            tables[Table].insert(pair<String,int>(filter,type));
+        }
+
+        void remove_filter(String Table,String filter){
+            tables[Table].erase(filter);
+        }
+            
+        void add_table(String Table, String filter, int type){
+            map<String,int> aux;
+            aux[filter] = type;
+            tables.insert(pair<String,Map<String,int>(Table, aux));
+        }
+
+        void remove_table(String Table){
+            tables.erase(Table);
+        }
+
+        void add_join(String Table,String filter, String type ){
+            join[Table].insert(pair<String,String>(filter,type));
+        }
+
+        void remove_join(String Table,String filter){
+            join[Table].erase(filter);
+        }
+
+        void add_groupby(String Table,String filter){
+            groupby.push_back(pair<String,String>(Table,filter));
+        }
+
+        void remove_groupby(String Table,String filter){
+            for (int i = 0; i < groupby.size(); i++) {
+                if ((groupby[i].getKey().compare(Table)==0) && (groupby[i].getValue().compare(filter)==0)) {
+                    groupby.erase(groupby.begin() + i);
+                    break();
                 }
             }
+        }
 
-        void add_filter(String Table,String filter, String str, String type = "NULL"){
-            graph[Table].insert(filter,str);
-            attribute1[filter] = Table;
-            add_filter_type(filter,type);
+        Map<String, vector<String> > filter;
+
+        void add_map_filter(String Table, String filter){
+            filter[Table].push_back(filter);
+        }
+
+        void remove_map_Table_filter(String Table){
+            filter.erase(Table);
+        }
+
+        void remove_map_filter(String Table,String filter){
+            for (int i = 0; i < filter[Table].size(); i++) {
+                if (filter[Table][i].compare(Table)==0){ 
+                    filter[Table].erase(filter[Table].begin() + i);
+                    break();
+                }
+            }
+        }
+
+        void add_select(String Table){
+            select.push_back(Table);
+        }
+
+        void remove_select(String Table){
+            for (int i = 0; i < select.size(); i++) {
+                if (select[i].compare(Table)==0) {
+                    select.erase(select.begin() + i);
+                    break();
+                }
+            }
         }
 
         int is_measured(String filter){
