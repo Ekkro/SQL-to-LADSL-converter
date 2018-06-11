@@ -187,6 +187,20 @@ class Graph {
         void remove_filter(String Table,String filter){
             tables[Table].erase(filter);
         }
+        
+        int search_filter_in table(String table, String filter){
+            for(map<String,int>::iterator it = tables[Table].begin(); it != tables[Table].end(); ++it) {
+                if (it->frist.compare(filter)==0) {return 1;}
+            }
+            return 0;
+        }
+
+        int search_table(String table){
+            for(map<String,Map<String,int>>::iterator it = tables.begin(); it != tables.end(); ++it) {
+                if (it->frist.compare(Table)==0) {return 1;}
+            }
+            return 0;
+        }
             
         void add_table(String Table, String filter, int type){
             map<String,int> aux;
