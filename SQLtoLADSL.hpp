@@ -168,14 +168,14 @@ class Ltree {
 }
 
 class Graph {
-
+    String raiz;
     Map<String, pair<String,String> > join;
     vector<pair <String,String> > groupby;
-    Map<String,Map<Stringn,int> > tables; //int-> 0=Measure, 1 = Dimension
+    Map<String,Map<String,int> > tables; //int-> 0=Measure, 1 = Dimension
     Map<String, vector<String> > filter;
     vector<String> select;
         Public:
-        
+
         int num_attributes(String str){
             return tables[str].size();
         }
@@ -187,10 +187,10 @@ class Graph {
         void remove_filter(String Table,String filter){
             tables[Table].erase(filter);
         }
-        
-        int search_filter_in table(String table, String filter){
+
+        int search_filter_in_table(String table, String filter){
             for(map<String,int>::iterator it = tables[Table].begin(); it != tables[Table].end(); ++it) {
-                if (it->frist.compare(filter)==0) {return 1;}
+                if (it->first.compare(filter)==0) {return 1;}
             }
             return 0;
         }
@@ -201,7 +201,7 @@ class Graph {
             }
             return 0;
         }
-            
+
         void add_table(String Table, String filter, int type){
             map<String,int> aux;
             aux[filter] = type;
@@ -233,8 +233,6 @@ class Graph {
             }
         }
 
-        Map<String, vector<String> > filter;
-
         void add_map_filter(String Table, String filter){
             filter[Table].push_back(filter);
         }
@@ -245,7 +243,7 @@ class Graph {
 
         void remove_map_filter(String Table,String filter){
             for (int i = 0; i < filter[Table].size(); i++) {
-                if (filter[Table][i].compare(Table)==0){ 
+                if (filter[Table][i].compare(Table)==0){
                     filter[Table].erase(filter[Table].begin() + i);
                     break();
                 }
@@ -288,3 +286,177 @@ class Graph {
             else return 0;
 
  }
+
+String a = "A";
+Graph g;
+LTree l;
+
+void graphWork(){
+  while (!g.join.empty()) {
+    graphWorkAux();
+  }
+}
+
+
+
+void graphWorkAux(){
+  //pega nas pontas
+  String start = giveMeStart(g.join, g.raiz);
+  //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
+  joinAtr(start);
+  //juntar tudo
+  joinFilters(start);
+  //remover tabela e adicionar como atributo às seguintes
+  removerTabela(g.join,start,a);
+}
+
+void joinAtr(String start){
+  //pega nos filtros no mesmo atributo
+  Map<String,int> work = g.tables[start];
+  vetor<String> values;
+  vector<String,int> new_elements;
+  for(Map<String,int>::iterator it = work.begin(); it != work.end(); ++it) {
+    String s = it->first;
+    vector<String> v = g.filter[s];
+    if(it->secound == 0){ //se for medida
+      joinAtrM(s,v);
+    }else{                //se for dimensao
+      joinAtrD(s,v);
+    }
+    new_elements.append(a,it->secound);
+  }
+  g.tables[start] = new_elements;
+}
+
+void joinAtrM(String s, vector<String> v){
+  vector<String> resolvidos;
+  vector<String> relacoes;
+  resolvidos.append(v[0]);
+  for(x = 1; x < v.lenght() < v; x++){
+    relacoes.append(relacao_entre(resolvidos,v[x]));
+    resolvidos.append(v[x]);
+  }
+  cout << a << "=filter(";
+  for(x = v.lenght(); x > 0; x--){ // letra = filter(OR(AND(a,b)),c);
+    cout << relacoes[x-1] << "(("<< s << ',' << resolvidos[x] << "),";
+  }
+  cout << "(" << s << "," << v[0] << ")";
+  for(x = 0; x < relacoes.lenght(); x++){
+    cout << ")";
+  cout << ")\n";
+  next();
+}
+
+void joinAtrD(String s, vector<String> v){
+  vector<String> resolvidos;
+  vector<String> relacoes;
+  resolvidos.append(v[0]);
+  for(x = 1; x < v.lenght() < v; x++){
+    relacoes.append(relacao_entre(resolvidos,v[x],s));
+    resolvidos.append(v[x]);
+  cout << a << "=filter("<< s << v[0] << ")\n";
+  for(x = 1; x < resolvidos.lenght(); x++){ // letra = AND/OR(filter(),letra_anterior);
+    String aux = a;
+    next();
+    cout << a << "=";
+    if(relacoes[x-1].compare("AND")){
+      cout << "hadamard";
+    }else{
+      cout << "hadamardOR";
+    }
+    cout << "(filter(" << s << "," <<resolvidos[x] << ")," << aux << ")\n";
+  }
+}
+
+void joinFilters(String start){
+  //pega nos filtros da mesma tabela
+  Map<String,int> work = g.tables[start];
+  vector<String> medidas;
+  vector<String> dimensoes;
+  for(Map<String,int>::iterator it = work.begin(); it != work.end(); ++it) {
+    String s = it->first;
+    if(it->secound == 0){ //se for medida
+      medidas.append(s);
+    }else{                //se for dimensao
+      dimensoes.append(s)
+    }
+  }
+  if( medidas.size() == 1){
+    String aux = medias[0];
+  }else{
+    joinFiltersM(medidas);
+    String aux = a;
+  }
+  if( dimensoes.size() == 1){
+    String aux2 = medias[0];
+  }else{
+    joinFiltersD(dimensoes);
+    String aux2 = a;
+  }
+  if(dimensoes.size()>0 && medidas.size()>0){
+    next();
+    cout << a << "=" << "krao(" << aux << "," << aux2 << ")\n";
+  }
+}
+
+void joinFiltersM(vector<String> v){
+  next();
+  cout << a << "= hadamard(" << v[0] << "," << v[1] << ")\n";
+  for(int x = 1; x < v.lenght() ; x++){
+    String aux = a;
+    next();
+    cout << a << "=" << "hadamard(" << aux << "," << v[x] << ")\n";
+  }
+}
+
+void joinFiltersM(vector<String> v){
+  next();
+  cout << a << "= krao(" << v[0] << "," << v[1] << ")\n";
+  for(int x = 1; x < v.lenght() ; x++){
+    String aux = a;
+    next();
+    cout << a << "=" << "krao(" << aux << "," << v[x] << ")\n";
+  }
+}
+
+
+void removerTabela(Map<String,pair<String,String> > m, String start, String alpha){
+  vector<String> removedKeys;
+  for(map<String,String>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    if(it->secound->secound.compare(start)){
+      next();
+      cout << a << "=" << "dot(" << it->first << "," << alpha << ")\n";
+      Map<String,int> aux = g.tables[start];
+      aux[a] = 1;           //possivel zona a melhorar
+      g.tables[start] = aux;
+      removedKeys.append(it->first);
+    }
+  }
+  for(int x = 0; x< removedKeys.lenght(); x++){
+    g.join.erase(removedKeys[x]);
+  }
+}
+
+
+
+String giveMeStart( Map<String,pair<String,String> > m, String raiz){
+  vector<String> values;
+  for(map<String,String>::iterator it = m.begin(); it != m.end(); ++it) {
+    values.push_back(it->secound);
+  }
+  for(x = 0; x < values.lenght(); x++){
+    if(values[x]->first==raiz){
+      return giveMeStart(m,values[x]->secound);
+    }
+  }
+  return raiz;
+}
+
+
+void next(){
+  if(a[a.lenght()-1] == "Z"){
+    a.append("A");
+  }else{
+    a[a.lenght()-1]++;
+  }
+}
