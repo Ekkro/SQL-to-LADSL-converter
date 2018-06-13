@@ -7,6 +7,7 @@ using namespace std;
 class Ltree {
 
     vector<String> ltree;
+    //vector<pair<String,String>> ltree; possivelmente será necessário alterar o codigo para esta ltree
     Public:
 //        Ltree() {ltree = new vector<string>();}
         String Parent(int indice){
@@ -168,7 +169,7 @@ class Ltree {
 }
 
 class Graph {
-    String raiz;
+    String root;
     Map<String, pair<String,String> > join;
     vector<pair <String,String> > groupby;
     Map<String,Map<String,int> > tables; //int-> 0=Measure, 1 = Dimension
@@ -293,27 +294,28 @@ LTree l;
 
 void graphWork(){
   while (!g.join.empty()) {
-    graphWorkAux();
+    graphWorkAux(1);
   }
+  graphWorkAux(0);
 }
 
 
 
-void graphWorkAux(){
+void graphWorkAux(int x){
   //pega nas pontas
-  String start = giveMeStart(g.join, g.raiz);
+  String start = giveMeStart(g.root);
   //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
   joinAtr(start);
   //juntar tudo
   joinFilters(start);
   //remover tabela e adicionar como atributo às seguintes
-  removerTabela(g.join,start,a);
+  if(x == 1)removeTable(start);
 }
 
 void joinAtr(String start){
   //pega nos filtros no mesmo atributo
   Map<String,int> work = g.tables[start];
-  vetor<String> values;
+  vetor<String> v;
   vector<String,int> new_elements;
   for(Map<String,int>::iterator it = work.begin(); it != work.end(); ++it) {
     String s = it->first;
@@ -336,15 +338,19 @@ void joinAtrM(String s, vector<String> v){
     relacoes.append(relacao_entre(resolvidos,v[x]));
     resolvidos.append(v[x]);
   }
-  cout << a << "=filter(";
-  for(x = v.lenght(); x > 0; x--){ // letra = filter(OR(AND(a,b)),c);
-    cout << relacoes[x-1] << "(("<< s << ',' << resolvidos[x] << "),";
-  }
-  cout << "(" << s << "," << v[0] << ")";
-  for(x = 0; x < relacoes.lenght(); x++){
-    cout << ")";
-  cout << ")\n";
   next();
+  if(resolvidos.size()>1){
+    cout << a << "=filter(" << s << ",";
+    for(x = v.lenght(); x > 0; x--){ // letra = filter(OR(AND(a,b)),c);
+      cout << relacoes[x-1] << "("<< resolvidos[x] << ",";
+    }
+    cout << v[0] << ")";
+    for(x = 0; x < relacoes.lenght(); x++){
+      cout << ")";
+    cout << ")\n";
+  }else{
+    cout << a << "=filter(" << s << v[0] << ")\n"
+  }
 }
 
 void joinAtrD(String s, vector<String> v){
@@ -354,6 +360,7 @@ void joinAtrD(String s, vector<String> v){
   for(x = 1; x < v.lenght() < v; x++){
     relacoes.append(relacao_entre(resolvidos,v[x],s));
     resolvidos.append(v[x]);
+  next();
   cout << a << "=filter("<< s << v[0] << ")\n";
   for(x = 1; x < resolvidos.lenght(); x++){ // letra = AND/OR(filter(),letra_anterior);
     String aux = a;
@@ -391,9 +398,9 @@ void joinFilters(String start){
     String aux2 = medias[0];
   }else{
     joinFiltersD(dimensoes);
+    if(dimensoes.size()>0 && medidas.size()>0){
     String aux2 = a;
   }
-  if(dimensoes.size()>0 && medidas.size()>0){
     next();
     cout << a << "=" << "krao(" << aux << "," << aux2 << ")\n";
   }
@@ -409,7 +416,7 @@ void joinFiltersM(vector<String> v){
   }
 }
 
-void joinFiltersM(vector<String> v){
+void joinFiltersD(vector<String> v){
   next();
   cout << a << "= krao(" << v[0] << "," << v[1] << ")\n";
   for(int x = 1; x < v.lenght() ; x++){
@@ -420,9 +427,10 @@ void joinFiltersM(vector<String> v){
 }
 
 
-void removerTabela(Map<String,pair<String,String> > m, String start, String alpha){
+void removeTable(String start){
   vector<String> removedKeys;
-  for(map<String,String>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+  String alpha = a;
+  for(Map<String,pair<String,String>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
     if(it->secound->secound.compare(start)){
       next();
       cout << a << "=" << "dot(" << it->first << "," << alpha << ")\n";
@@ -439,17 +447,17 @@ void removerTabela(Map<String,pair<String,String> > m, String start, String alph
 
 
 
-String giveMeStart( Map<String,pair<String,String> > m, String raiz){
+String giveMeStart(String root){
   vector<String> values;
-  for(map<String,String>::iterator it = m.begin(); it != m.end(); ++it) {
+  for(Map<String,pair<String,String>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
     values.push_back(it->secound);
   }
   for(x = 0; x < values.lenght(); x++){
-    if(values[x]->first==raiz){
-      return giveMeStart(m,values[x]->secound);
+    if(values[x]->first==root){
+      return giveMeStart(values[x]->secound);
     }
   }
-  return raiz;
+  return root;
 }
 
 
