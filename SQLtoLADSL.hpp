@@ -31,6 +31,15 @@ class Graph {
             }
             return 0;
         }
+        vector<string> search_filter(string filter){
+            vector<string> aux;
+            for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
+                if (search_filter_in_table(it->first,filter)) {
+                    aux.push_back(it->first);
+                }
+            }
+            return aux;
+        }
 
         int search_table(string table){
             for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
@@ -128,6 +137,21 @@ class Graph {
 //            }
 //            else return 0;
 //         }
+  int isThe_same_Table_array(vector<string> v){
+     int res = 1;
+     for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+         if (!isThe_same_Table(v[0],it)) {
+             res = 0;
+             break;
+         }
+     }
+     return res;
+  }
+  int isThe_same_Table(string attribute1, string attribute2){
+     if ( relacao_entre_arrays(search_filter(attribute1),search_filter(attribute2))=="NULL") {
+         return 0;
+     }else {return 1;}
+  }
 };
 
 class Ltree {
@@ -185,6 +209,20 @@ class Ltree {
                 return -1;
             }else{ return aux; }
             }
+        vector<string> childs(int ind){
+               vector<string> res;
+               string aux = right_child(ind);
+               if (aux.compare("NULL") != 0) {
+                   res.push_back(aux);
+                   res.insert(res.end(),childs(ind_right_child(ind)).begin(),childs(ind_right_child(ind)).end());
+               }
+               aux = left_child(ind);
+               if (aux.compare("NULL") != 0) {
+                   res.push_back(aux);
+                   res.insert(res.end(),childs(ind_left_child(ind)).begin(),childs(ind_left_child(ind)).end());
+               }
+               return res;
+           }
 
         void add(string value ,int indice ){ ltree[indice] = value; }
 
@@ -273,19 +311,21 @@ class Ltree {
         }
 
         void search_nextOR(Graph g ,int ind){
-            if (left_child(ind_left_child(ind)) == "OR" && g.isThe_same_Table(ltree.left_child(left_child(ind_left_child(ind))),ltree.right_child(left_child(ind_left_child(ind)))) {
+          if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
                 search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
                 search_nextOR_aux(ind_right_child(ind_left_child(ind)),1);
-            }else{
+          }else{
+              if (right_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
                 search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
                 search_nextOR_aux(ind_right_child(ind_right_child(ind)),1);
-            }
+              }
+          }
 
         }
 
 
         void funcao(Graph g, int x=0){
-            if(ltree.ltree[x] == "OR" && g.isThe_same_Table(ltree.left_child(x),ltree.right_child(x)){
+          if(ltree.ltree[x] == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
                 int parent = ltree.ind_Parent(x);
                     vector<string> s = ltree.split(0,parent);
                     ltree.add_tree(s,ltree.ind_left_child(x));
@@ -299,6 +339,60 @@ class Ltree {
             }
           }
     }
+    void pushLT(int ind){
+     swap(ind,ind_Parent(ind));
+     int last = pushLT(ind);
+     ltree.erase(vec.begin() + last);
+ }
+ int push_aux(int ind){
+     if (left_child(ind)!= NULL){
+         int child = ind_left_child(ind);
+         swap(child,ind);
+         push_aux(child);
+     }
+     if (right_child(ind)!= NULL){
+         int child = ind_right_child(ind);
+         swap(child,ind);
+         push_aux(child);
+     }
+     return ind;
+ }
+ void func(int ind){
+   if((ltree[ind]=="AND" || ltree[ind]=="OR"){
+     if (left_child(ind)== NULL){
+       pushLT(ind_right_child(ind));
+     }
+     if(right_child(ind) == NULL){
+       pushLT(ind_left_child(ind));
+     }
+   }
+   if(ltree[ind]!="NULL"){
+     func(left_child(ind));
+     func(right_child(ind));
+     }
+}
+ vector<int> subvector (vector<int> v1, vector<int> v2){
+     vector<int> res(max(lenght(v1),lenght(v2));
+     vector<int>::iterator aux;
+     aux =std::set_intersection (v1.begin(), v1.end(), v2.begin(), v2.end(), res.begin());
+     res.resize(aux-res.begin());
+     return res;
+ }
+ string relacao_entre(vector<string> v, string s){
+     vector<int> aux = parents(s);
+     for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+         aux = subvector(aux,parents(it));
+     }
+     if (aux.size()) {
+         return ltree[aux[0]];
+     }else {return "NULL";}
+ }
+ string relacao_entre_arrays(vector<string> v, vector<string> s){
+     for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+         s.push_back(v);
+     }
+     return relacao_entre(s,v[0]);
+ }
 };
 
 
@@ -500,3 +594,17 @@ void next(){
     a[a.lenght()-1]++;
   }
 }
+
+
+
+
+
+void trabalha(int ind)
+  trabalhaaux(ind_left_child(ind),string tabela1)
+  trabalhaaux(ind_right_child(ind),string tabela2)
+
+void trabalhaaux(int ind, int count)
+if(is_the_same_table_array(childs(ind)) == 0 ){
+  if(left_child(ind) == "AND" || right_child(ind) == "AND"){
+    trabalhaaux(int ind);
+  }
