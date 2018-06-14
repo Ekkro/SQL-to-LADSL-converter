@@ -65,7 +65,7 @@ class Graph {
             groupby.push_back(pair<string,string>(Table,filter));
         }
 
-        //groupby é um vetor, groupby[i] é um par 
+        //groupby é um vetor, groupby[i] é um par
         void remove_groupby(string Table,string filter){
             for (int i = 0; i < groupby.size(); i++) {
                 if ((groupby[i].first.compare(Table)==0) && (groupby[i].second.compare(filter)==0)) {
@@ -161,7 +161,7 @@ class Ltree {
 
         vector<string>::iterator it_left_child(vector<string>::iterator indice){
             indice = indice+1;
-            return indice; 
+            return indice;
             }
 
         int ind_left_child(int indice){
@@ -322,6 +322,8 @@ void graphWorkAux(int x){
   joinAtr(start);
   //juntar tudo
   joinFilters(start);
+  //juntar groupbys
+  joinGroupby(start);
   //remover tabela e adicionar como atributo às seguintes
   if(x == 1)removeTable(start);
 }
@@ -334,58 +336,37 @@ void joinAtr(string start){
   for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     vector<string> v = g.filter[s];
-    if(it->secound == 0){ //se for medida
-      joinAtrM(s,v);
+    if(it->secound == 1){ //se for medida
+      new_elements.insert(it->first,it->secound);
     }else{                //se for dimensao
       joinAtrD(s,v);
+      new_elements.insert(a,it->secound);
     }
-    new_elements.append(a,it->secound);
   }
   g.tables[start] = new_elements;
 }
 
-void joinAtrM(string s, vector<string> v){
-  vector<string> resolvidos;
-  vector<string> relacoes;
-  resolvidos.append(v[0]);
-  for(x = 1; x < v.lenght() < v; x++){
-    relacoes.append(relacao_entre(resolvidos,v[x]));
-    resolvidos.append(v[x]);
-  }
-  next();
-  if(resolvidos.size()>1){
-    cout << a << "=filter(" << s << ",";
-    for(x = v.lenght(); x > 0; x--){ // letra = filter(OR(AND(a,b)),c);
-      cout << relacoes[x-1] << "("<< resolvidos[x] << ",";
-    }
-    cout << v[0] << ")";
-    for(x = 0; x < relacoes.lenght(); x++){
-      cout << ")";
-    cout << ")\n";
-  }else{
-    cout << a << "=filter(" << s << v[0] << ")\n"
-  }
-}
 
 void joinAtrD(string s, vector<string> v){
   vector<string> resolvidos;
   vector<string> relacoes;
-  resolvidos.append(v[0]);
+  resolvidos.insert(v[0]);
   for(x = 1; x < v.lenght() < v; x++){
-    relacoes.append(relacao_entre(resolvidos,v[x],s));
-    resolvidos.append(v[x]);
+    relacoes.insert(relacao_entre(resolvidos,v[x]));
+    resolvidos.insert(v[x]);
+  }
   next();
-  cout << a << "=filter("<< s << v[0] << ")\n";
-  for(x = 1; x < resolvidos.lenght(); x++){ // letra = AND/OR(filter(),letra_anterior);
-    string aux = a;
-    next();
-    cout << a << "=";
-    if(relacoes[x-1].compare("AND")){
-      cout << "hadamard";
-    }else{
-      cout << "hadamardOR";
+  if(resolvidos.size()>1){
+    cout << a << "=filter(" << s <<resolvidos.back() << relacoes.back();
+    for(x = v.lenght()-2; x > 0; x--){
+      cout << "("<< s << resolvidos[x] << relacoes[x-1];
     }
-    cout << "(filter(" << s << "," <<resolvidos[x] << ")," << aux << ")\n";
+    cout << s << resolvidos[0];
+    for(x = 0; x < relacoes.lenght()-1; x++){
+      cout << ")";
+    cout << ")\n";
+  }else{
+    cout << a << "=filter("  << v[0] << ")\n"
   }
 }
 
@@ -397,9 +378,13 @@ void joinFilters(string start){
   for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     if(it->secound == 0){ //se for medida
-      medidas.append(s);
+      vector<string> filters= filter[s];
+      for(vector<string>::iterator it = filters.begin(); it != filters.end(); ++it){
+        string aux3 = s+it;
+        medidas.insert(aux3);
+      }
     }else{                //se for dimensao
-      dimensoes.append(s)
+      dimensoes.insert(s)
     }
   }
   if( medidas.size() == 1){
@@ -415,20 +400,35 @@ void joinFilters(string start){
     if(dimensoes.size()>0 && medidas.size()>0){
     string aux2 = a;
   }
-    next();
+    next(); // verificar se é and ou or entre aux1 e aux2
     cout << a << "=" << "krao(" << aux << "," << aux2 << ")\n";
   }
 }
 
+
 void joinFiltersM(vector<string> v){
-  next();
-  cout << a << "= hadamard(" << v[0] << "," << v[1] << ")\n";
-  for(int x = 1; x < v.lenght() ; x++){
-    string aux = a;
-    next();
-    cout << a << "=" << "hadamard(" << aux << "," << v[x] << ")\n";
+  vector<string> resolvidos;
+  vector<string> relacoes;
+  resolvidos.insert(v[0]);
+  for(x = 1; x < v.lenght() < v; x++){
+    relacoes.insert(relacao_entre(resolvidos,v[x]));
+    resolvidos.insert(v[x]);
+  }
+  next();  // a > 3 ; b < 6 ; u > 6
+  if(resolvidos.size()>1){
+    cout << a << "=filter(" << resolvidos.back() << relacoes.back();
+    for(x = v.lenght()-2; x > 0; x--){
+      cout << "("<< resolvidos[x] << relacoes[x-1];
+    }
+    cout << v[0];
+    for(x = 0; x < relacoes.lenght()-1; x++){
+      cout << ")";
+    cout << ")\n";
+  }else{
+    cout << a << "=filter("  << v[0] << ")\n"
   }
 }
+
 
 void joinFiltersD(vector<string> v){
   next();
@@ -441,17 +441,34 @@ void joinFiltersD(vector<string> v){
 }
 
 
+void joinGroupby(string start){
+  for(vector<pair<string,string>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    if(it->first.compare(start)){
+      joinGroupbyAux(it->secound);
+    }
+  }
+}
+
+void joinGroupbyAux(string gb){
+  string alpha = a;
+  next();
+  cout << a << "=krao(" << alpha << "," << gb << ")\n"
+}
+
+
+
+
 void removeTable(string start){
   vector<string> removedKeys;
   string alpha = a;
   for(map<string,pair<string,string>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
     if(it->secound->secound.compare(start)){
       next();
-      cout << a << "=" << "dot(" << it->first << "," << alpha << ")\n";
+      cout << a << "=" << "dot(" << alpha << "," << it->first << ")\n";
       map<string,int> aux = g.tables[start];
       aux[a] = 1;           //possivel zona a melhorar
       g.tables[start] = aux;
-      removedKeys.append(it->first);
+      removedKeys.insert(it->first);
     }
   }
   for(int x = 0; x< removedKeys.lenght(); x++){
