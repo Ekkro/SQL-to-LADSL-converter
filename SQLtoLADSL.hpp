@@ -397,11 +397,12 @@ void joinFilters(string start){
     string aux2 = medias[0];
   }else{
     joinFiltersD(dimensoes);
-    if(dimensoes.size()>0 && medidas.size()>0){
     string aux2 = a;
   }
+  if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
-    cout << a << "=" << "krao(" << aux << "," << aux2 << ")\n";
+    string relacao =relacao_entre_arrays(medidas,dimensoes);
+    cout << a << "=" << relacao << "(" << aux << "," << aux2 << ")\n";
   }
 }
 
