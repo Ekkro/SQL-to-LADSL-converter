@@ -70,6 +70,7 @@ class Graph {
 //            join[Table].erase(filter);
 //        }
 
+
         void add_groupby(string Table,string filter){
             groupby.push_back(pair<string,string>(Table,filter));
         }
@@ -137,21 +138,9 @@ class Graph {
 //            }
 //            else return 0;
 //         }
-  int isThe_same_Table_array(vector<string> v){
-     int res = 1;
-     for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
-         if (!isThe_same_Table(v[0],it)) {
-             res = 0;
-             break;
-         }
-     }
-     return res;
-  }
-  int isThe_same_Table(string attribute1, string attribute2){
-     if ( relacao_entre_arrays(search_filter(attribute1),search_filter(attribute2))=="NULL") {
-         return 0;
-     }else {return 1;}
-  }
+
+
+
 };
 
 class Ltree {
@@ -168,12 +157,6 @@ class Ltree {
             }else{ return ltree[aux]; }
             }
 
-        int ind_Parent(int indice){
-            int aux = (indice-1)/2;
-            if ( aux <0 || aux >= ltree.size()) {
-                return -1;
-            }else{ return aux; }
-            }
 
         string left_child(int indice){
             string res = "NULL";
@@ -183,10 +166,6 @@ class Ltree {
             }else{ return ltree[aux]; }
             }
 
-        vector<string>::iterator it_left_child(vector<string>::iterator indice){
-            indice = indice+1;
-            return indice;
-            }
 
         int ind_left_child(int indice){
             int aux = 2*indice+1;
@@ -242,16 +221,6 @@ class Ltree {
             ltree[indice2] = aux;
         }
 
-        vector<int> parents(int i){
-           vector<int> res;
-           vector<int>::iterator it;
-           it = res.begin();
-           for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
-               //res.insert(i);
-               it = res.insert (it , i);
-           }
-           return res;
-        }
 
         string common_ancestor( int indice1, int indice2 ){
             vector<int> parent_1 = parents(indice1);
@@ -289,26 +258,83 @@ class Ltree {
             return  Ltree::split_aux(res,indice1,indice2);
         }
 
-        void add_tree(vector<string> v, vector<string>::iterator ind, int n=0){
+        void add_tree(vector<string> v, int ind, int n=0){
+                vector<string>::iterator it_ind = v.begin() + ind;
                 if (v[n] != "NULL") {
-                    ltree.insert(ind,v[n]);
-                    add_tree(v,it_left_child(ind),it_left_child(n));
+                    ltree.insert(it_ind,v[n]);
+                    add_tree(v,ind_left_child(ind),ind_left_child(n));
                     add_tree(v,ind_right_child(ind),ind_right_child(n));
                 }
         }
 
         void search_nextOR_aux(int parent, int favourite_child){
             if (favourite_child) {
-               ltree.swap(parent, ind_right_child(parent));
-               ltree.add("NULL",ind_left_child(parent));
-               ltree.add("NULL",ind_right_child(parent));
+               swap(parent,ind_right_child(parent));
+               add("NULL",ind_left_child(parent));
+               add("NULL",ind_right_child(parent));
             }else{
-               ltree.swap(parent, ind_left_child(parent));
-               ltree.add("NULL",ind_left_child(parent));
-               ltree.add("NULL",ind_right_child(parent));
+               swap(parent, ind_left_child(parent));
+               add("NULL",ind_left_child(parent));
+               add("NULL",ind_right_child(parent));
                 }
 
         }
+
+
+    int ind_Parent(int indice){
+        int aux = (indice-1)/2;
+        if ( aux <0 || aux >= ltree.size()) {
+            return -1;
+        }else{ return aux; }
+    }
+
+    vector<int> parents(int i){
+       vector<int> res;
+       vector<int>::iterator it;
+       it = res.begin();
+       for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
+           //res.insert(i);
+           it = res.insert (it , i);
+       }
+       return res;
+    }
+
+ vector<int> subvector (vector<int> v1, vector<int> v2){
+     vector<int> res(max(v1.size(),v2.size()));
+     vector<int>::iterator aux;
+     aux = set_intersection (v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(res));
+     res.resize(aux-res.begin());
+     return res;
+ }
+
+     string relacao_entre(vector<string> v, int s){
+         vector<int> aux = parents(s);
+         int i = 0;
+         for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+             aux = subvector(aux,parents(i));
+             i++;
+         }
+         if (aux.size()) {
+             return ltree[aux[0]];
+         }else {return "NULL";}
+     }
+
+    int isThe_same_Table(string attribute1, string attribute2){
+     if ( relacao_entre_arrays(search_filter(attribute1),search_filter(attribute2))=="NULL") {
+         return 0;
+     }else {return 1;}
+    }
+
+    int isThe_same_Table_array(vector<string> v){
+     int res = 1;
+     for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+         if (!isThe_same_Table(v[0],*it)) {
+             res = 0;
+             break;
+         }
+     }
+     return res;
+    }
 
         void search_nextOR(Graph g ,int ind){
           if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
@@ -371,30 +397,8 @@ class Ltree {
      func(right_child(ind));
      }
 }
- vector<int> subvector (vector<int> v1, vector<int> v2){
-     vector<int> res(max(lenght(v1),lenght(v2));
-     vector<int>::iterator aux;
-     aux =std::set_intersection (v1.begin(), v1.end(), v2.begin(), v2.end(), res.begin());
-     res.resize(aux-res.begin());
-     return res;
- }
- string relacao_entre(vector<string> v, string s){
-     vector<int> aux = parents(s);
-     for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
-         aux = subvector(aux,parents(it));
-     }
-     if (aux.size()) {
-         return ltree[aux[0]];
-     }else {return "NULL";}
- }
- string relacao_entre_arrays(vector<string> v, vector<string> s){
-     for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
-         s.push_back(v);
-     }
-     return relacao_entre(s,v[0]);
- }
 };
-
+/*
 
 string a = "A";
 Graph g;
@@ -462,7 +466,7 @@ void joinAtrD(string s, vector<string> v){
   }else{
     cout << a << "=filter("  << v[0] << ")\n"
   }
-}
+}}
 
 void joinFilters(string start){
   //pega nos filtros da mesma tabela
@@ -522,7 +526,7 @@ void joinFiltersM(vector<string> v){
   }else{
     cout << a << "=filter("  << v[0] << ")\n"
   }
-}
+}}
 
 
 void joinFiltersD(vector<string> v){
@@ -595,16 +599,13 @@ void next(){
   }
 }
 
-
-
-
-
-void trabalha(int ind)
-  trabalhaaux(ind_left_child(ind),string tabela1)
-  trabalhaaux(ind_right_child(ind),string tabela2)
-
-void trabalhaaux(int ind, int count)
-if(is_the_same_table_array(childs(ind)) == 0 ){
-  if(left_child(ind) == "AND" || right_child(ind) == "AND"){
-    trabalhaaux(int ind);
-  }
+void trabalha(int ind){
+  trabalhaaux(ind_left_child(ind),string tabela1);
+  trabalhaaux(ind_right_child(ind),string tabela2);
+}
+void trabalhaaux(int ind, int count){
+    if(is_the_same_table_array(childs(ind)) == 0 )
+      if(left_child(ind) == "AND" || right_child(ind) == "AND")
+        trabalhaaux(int ind);
+}
+*/
