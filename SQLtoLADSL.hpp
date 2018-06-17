@@ -5,32 +5,96 @@
 #include <utility>
 using namespace std;
 class Graph {
+    /* ..................................................... */
+    /* ... */
     string root;
+
+    /* .....JOIN......
+           
+           structure to save the joins 
+            key => name of the table
+            Values => ( , )
+         */
+    
     map<string, pair<string,string> > join;
+
+    /* ..... GROUPBY .....
+
+           structure to save the groupby
+            ( , )
+         */
     vector<pair <string,string> > groupby;
-    map<string,map<string,int> > tables; //int-> 0=Measure, 1 = Dimension
+    
+    /* .....TABLES.....
+
+           structure to save the tables
+            key => name of the table
+            Values => 
+                |key => name of the filter
+                |Values => filter type  [ type = 0 it is a measure ]
+                                        [ type = 1 it is a dimension ]
+         */
+    map<string,map<string,int> > tables; 
+    
+    /* ......FILTER.....
+           
+           structure to save the filters
+            key => name of the table
+            Values => filter set 
+         */
     map<string, vector<string> > filter;
+    
+    /* ......SELECT......
+       
+           structure to save the selects
+           set tables
+         */
     vector<string> select;
+
+    /* ..................................................... */
+
         public:
 
+            /* calculates the number of attributes of table */
+            /* arguments : name of a table */
+            /* returns : the number of attributes */
         int num_attributes(string str){
             return tables[str].size();
         }
 
+            /* add a filter */
+            /* arguments : name of a table */
+            /* arguments : filter name */
+            /* arguments : filter type */
         void add_filter(string Table,string filter, int type = -1){
             tables[Table].insert(pair<string,int>(filter,type));
         }
 
+            /* remove a filter from a table */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void remove_filter(string Table,string filter){
             tables[Table].erase(filter);
         }
 
+            /* to serach for a filter in table */
+            /* arguments : name of a table */
+            /* arguments : filter name */
+            /* return : found the filter in the table
+                        [ 1 -> found himself ]
+                        [ 0 -> if not found  ]
+             */
         int search_filter_in_table(string table, string filter){
             for(map<string,int>::iterator it = tables[table].begin(); it != tables[table].end(); ++it) {
                 if (it->first.compare(filter)==0) {return 1;}
             }
             return 0;
         }
+        
+
+            /* tables that have the filter */
+            /* arguments : filter name */
+            /* return : set of tables */
         vector<string> search_filter(string filter){
             vector<string> aux;
             for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
@@ -41,6 +105,12 @@ class Graph {
             return aux;
         }
 
+            /* look for a table */
+            /* arguments : name of the table */
+            /* return : if you found it or not 
+                        [ 1 -> found himself ]
+                        [ 0 -> if not found  ]
+             */
         int search_table(string table){
             for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (it->first.compare(table)==0) {return 1;}
@@ -48,6 +118,9 @@ class Graph {
             return 0;
         }
 
+            /* add a table */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void add_table(string Table, string filter, int type){
             map<string,int> aux;
             aux[filter] = type;
@@ -55,6 +128,8 @@ class Graph {
             tables.insert(pair<string,map<string,int> >(Table, aux));
         }
 
+            /* remove a table */
+            /* arguments : name of a table */
         void remove_table(string Table){
             tables.erase(Table);
         }
@@ -71,11 +146,16 @@ class Graph {
 //        }
 
 
+            /* add a filter to the group by */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void add_groupby(string Table,string filter){
             groupby.push_back(pair<string,string>(Table,filter));
         }
 
-        //groupby é um vetor, groupby[i] é um par
+            /* remove a filter to the group by */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void remove_groupby(string Table,string filter){
             for (int i = 0; i < groupby.size(); i++) {
                 if ((groupby[i].first.compare(Table)==0) && (groupby[i].second.compare(filter)==0)) {
@@ -85,15 +165,22 @@ class Graph {
             }
         }
 
+            /* add a filter to map filters */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void add_map_filter(string Table, string Filter){
-            //filter[Table].push_back(filter);
             filter[ Table ].push_back(Filter);
         }
 
+            /* remove a filter to map filters */
+            /* arguments : name of a table */
         void remove_map_Table_filter(string Table){
             filter.erase(Table);
         }
 
+            /* remove a filter to map filters */
+            /* arguments : name of a table */
+            /* arguments : filter name */
         void remove_map_filter(string Table,string Filter){
             for (int i = 0; i < filter[Table].size(); i++) {
                 if (filter[Table][i].compare(Filter)==0){
@@ -103,10 +190,14 @@ class Graph {
             }
         }
 
+            /* adds a table to the Selects */
+            /* arguments : name of a table */
         void add_select(string Table){
             select.push_back(Table);
         }
 
+            /* remove a table to the Selects */
+            /* arguments : name of a table */
         void remove_select(string Table){
             for (int i = 0; i < select.size(); i++) {
                 if (select[i].compare(Table)==0) {
@@ -116,39 +207,76 @@ class Graph {
             }
         }
 
-//        int is_measured(string filter){
-//            if (attribute_type[filter] == 1) {
-//                return 1;
-//            }else return 0;
-//        }
-//
-//        int is_dimension(string filter){
-//            if (attribute_type[filter] == 2) {
-//                return 1;
-//            }else return 0;
-//        }
+            /* whether it is measured or not */
+            /* arguments : name of a table */
+            /* arguments : filter name */
+            /* return : if you found it or not 
+                        [ 1 -> found himself ]
+                        [ 0 -> if not found  ]
+             */
+        int is_measured(string Table, string filter){
+            if (tables[Table][filter] == 0) {
+                return 1;
+            }else return 0;
+        }
 
-//        void add_table(string Table, string name){
-//            Graph[Table].insert(filter,str);
-//        }
-//
-//        int isThe_same_Table(string attribute1, string attribute2){
-//            if (!attribute_table[attribute1].compare(attribute_table[attribute2])) {
-//                return 1;
-//            }
-//            else return 0;
-//         }
+            /* whether it is dimension or not */
+            /* arguments : name of a table */
+            /* arguments : filter name */
+            /* return : if you found it or not 
+                        [ 1 -> found himself ]
+                        [ 0 -> if not found  ]
+             */
+        int is_dimension(string Table, string filter){
+            if (tables[Table][filter] == 1) {
+                return 1;
+            }else return 0;
+        }
 
+            /* add a table */
+            /* arguments : name of a table */
+            /* arguments : filter name */
+        void add_table(string Table, string name){
+            Graph[Table].insert(filter,str);
+        }
 
+            /* test if two attributes are from the same table */
+            /* arguments : name of the first attribute */
+            /* arguments : name of the second attribute */
+            /* return : whether they are from the same table or not
+                        [ 1 -> if they are ]
+                        [ 0 -> if no       ]
+             */
+        int isThe_same_Table(string attribute1, string attribute2){
+            if (!attribute_table[attribute1].compare(attribute_table[attribute2])) {
+                return 1;
+            }
+            else return 0;
+         }
 
 };
 
 class Ltree {
 
+    /* ............................................... */
+    /* .....ltree.........
+
+            structure to represent the logical tree
+    */
+
     vector<string> ltree;
+    
+    /* ............................................... */
     //vector<pair<string,string>> ltree; possivelmente será necessário alterar o codigo para esta ltree
+
     public:
+    
 //        Ltree() {ltree = new vector<string>();}
+    
+        /* 
+            arguments : 
+            retuens : return parrent
+        */
         string Parent(int indice){
             string res = "NULL";
             int aux = (indice-1)/2;
