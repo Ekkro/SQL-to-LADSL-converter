@@ -358,8 +358,18 @@ class Ltree {
                return res;
            }
 
+        /* 
+            adds a filter to the tree
+            arguments : filter
+            arguments : index
+        */
         void add(string value ,int indice ){ ltree[indice] = value; }
 
+        /* 
+            computes the index of a filter
+            arguments : filter
+            return : index
+        */
         int indice(string value){
            for ( int i = 0; i < ltree.size(); i++ ) {
                if (!ltree[i].compare(value)) {
@@ -369,6 +379,12 @@ class Ltree {
            return -1;
         }
 
+        /* 
+            change the position of one filter,
+            by the position of the other
+            arguments : index1
+            arguments : index2
+        */
         void swap(int indice1,int indice2 ){
             string aux;
             aux = ltree[indice1];
@@ -377,6 +393,12 @@ class Ltree {
         }
 
 
+        /* 
+            calculates the father, common to both,closer
+            arguments : index1
+            arguments : index2
+            return : father
+        */
         string common_ancestor( int indice1, int indice2 ){
             vector<int> parent_1 = parents(indice1);
             vector<int> parent_2 = parents(indice2);
@@ -389,6 +411,10 @@ class Ltree {
             return "NULL";
         }
 
+        /* 
+            merge the current vector with another
+            arguments : vector
+        */
         void merge(vector<string> vec){
             for ( int i = 0; ltree.size(); i++) {
                 if ((!ltree[i].compare("NULL")) && (vec[i].compare("NULL")==0)) {
@@ -397,6 +423,12 @@ class Ltree {
             }
         }
 
+        /* 
+            separates into two trees
+            arguments : vector
+            arguments : index1
+            arguments : index2
+        */
         vector<string> split_aux(vector<string> res, int indice1, int indice2){
             if (!ltree[indice2].compare("NULL")) {
                 return res;
