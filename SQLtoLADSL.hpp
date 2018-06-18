@@ -274,7 +274,8 @@ class Ltree {
 //        Ltree() {ltree = new vector<string>();}
     
         /* 
-            arguments : 
+           calculates the parent
+            arguments : childs index 
             retuens : return parrent
         */
         string Parent(int indice){
@@ -286,6 +287,11 @@ class Ltree {
             }
 
 
+        /* 
+            left child 
+            arguments : fathers index
+            retuens : return son of the left
+        */
         string left_child(int indice){
             string res = "NULL";
             int aux = 2*indice+1;
@@ -295,6 +301,11 @@ class Ltree {
             }
 
 
+        /* 
+            left child index 
+            arguments : fathers index
+            retuens : return the left child index
+        */
         int ind_left_child(int indice){
             int aux = 2*indice+1;
             if ( aux <0 || aux >= ltree.size()) {
@@ -302,6 +313,11 @@ class Ltree {
             }else{ return aux; }
             }
 
+        /* 
+            rigth child 
+            arguments : fathers index
+            retuens : return son of the rigth
+        */
         string right_child(int indice){
             string res = "NULL";
             int aux = 2*indice+2;
@@ -310,12 +326,23 @@ class Ltree {
             }else{ return ltree[aux]; }
             }
 
+        /*  
+            rigth child index 
+            arguments : fathers index
+            retuens : return the rigth child index
+        */
         int ind_right_child(int indice){
             int aux = 2*indice+2;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
             }else{ return aux; }
             }
+        
+        /* 
+            computes the list of all children
+            arguments : fathers index
+            retuens : returns the list of all children
+        */
         vector<string> childs(int ind){
                vector<string> res;
                string aux = right_child(ind);
