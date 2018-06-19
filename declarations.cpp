@@ -1,5 +1,9 @@
  #include <stdio.h>                                                                                                                      
  #include <strings.h>
+ #include <vector>
+ #include <iostream>
+ #include <map>
+ #include <utility>
  #include "SQLtoLADSL.hpp"
 
 

@@ -3,6 +3,9 @@
 #include <iostream>
 #include <map>
 #include <utility>
+#include <set>
+#include <algorithm>
+//#include "declarations.cpp"
 using namespace std;
 
     /* ..................................................... */
@@ -36,7 +39,7 @@ class Graph {
             key => name of the table
             Values => 
                 |key => name of the filter
-                |Values => filter type  [ type = 0 it is a measure ]
+                |Values => filter type  [ type = 0 it is a measure   ]
                                         [ type = 1 it is a dimension ]
          */
     map<string,map<string,int> > tables; 
@@ -237,13 +240,14 @@ class Graph {
                 return 1;
             }else return 0;
         }
-
             /* add a table */
             /* arguments : name of a table */
             /* arguments : filter name */
+/*
         void add_table(string Table, string name){
             Graph[Table].insert(filter,str);
         }
+*/
 
             /* test if two attributes are from the same table */
             /* arguments : name of the first attribute */
@@ -253,7 +257,13 @@ class Graph {
                         [ 0 -> if no       ]
              */
         int isThe_same_Table(string attribute1, string attribute2){
-            if (!attribute_table[attribute1].compare(attribute_table[attribute2])) {
+            vector<string> v1 = search_filter(attribute1);
+            vector<string> v2 = search_filter(attribute2);
+            vector<string>::iterator it;
+            vector<string> inter(max(v1.size(),v2.size()));
+
+            it = set_intresection(v1.begin(),v1.end(),v2.begin,v2.end(),back_inserter(inter));
+            if (inter.size() > 0) {
                 return 1;
             }
             else return 0;
