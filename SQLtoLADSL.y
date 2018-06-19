@@ -1,7 +1,9 @@
 %{                                                                    
  #include <stdio.h>                                                                                                                      
  #include <strings.h>
- #include "SQLtoLADSL.h"
+ #include "SQLtoLADSL.hpp"
+
+    string current_expression;
 %}
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
 %token AND OR EXISTS NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT BOOL IN ASC DESC DATE ANDOP ANY ALL
@@ -22,7 +24,7 @@ SelectBlock    : SELECT     selectList
                  ORDERBY_                                                      
                  ';'                                                               { fprintf(out,"resultado\n"); }     
 
-WHERE_         : WHERE       whereList                                             { ; }
+WHERE_         : WHERE       whereList                                             {l.funcao(g);}
                |                                                                   { ; }
                ;
 
@@ -46,17 +48,25 @@ selectListNSub : Expr                                                           
                | Expr AS NAME                                                      {add_select($1);add_rename($1,$3,table); }
                ;
 
-fromList       : subfromList                                                       { aux->sizetables++; } 
-               | subfromList ',' fromList                                          { aux->sizetables++; }
+fromList       : subfromList                                                       { ; } 
+               | subfromList ',' fromList                                          { ; }
                ;
 
-subfromList    : NAME                                                              { ; } 
+subfromList    : NAME                                                              { g.newRoot($1); } 
                | Join NAME                                                         { ; } 
-               | Join NAME ON Literal '=' Literal                                    {$$ = add_key($2,$4,$6); } 
-               | Join NAME AS NAME                                                 {$$ = add_rename($2,$4); }
-               | Join NAME AS NAME ON Literal '=' Literal                            {$$ = add_key($2,$6,$8);add_rename($2,$4); }
-               | '{' SelectBlock '}'                                               {$$ = from_select($2); } 
-               | '{' SelectBlock '}' AS NAME                                       {$$ = from_select($2); add_renameT($2,$5); } 
+               | Join NAME ON Literal '=' Literal                                  {string Table = metadata_Table();
+                                                                                    string type = metadata_type();
+                                                                                    string filter();
+                                                                                    add_join(Table,filter,type);} 
+               
+               | Join NAME AS NAME                                                 {add_rename($2,$4);}
+               | Join NAME AS NAME ON Literal '=' Literal                          {string Table = metadata_table();
+                                                                                    string type = metadata_type();
+                                                                                    string filter(); 
+                                                                                    add_join(Table,filter,type);
+                                                                                    add_rename($2,$4); }
+               | '{' SelectBlock '}'                                               { ; } 
+               | '{' SelectBlock '}' AS NAME                                       { ; } 
                ;
 
 Join           : JOIN                                                              { ; } 
@@ -66,14 +76,14 @@ Join           : JOIN                                                           
                | FULL JOIN                                                         { ; } 
                ;
 
-whereList      : whereListSub                                                      {$$ = $1 ; }
-               | whereListSub OL whereList                                         {opLogic($1,$2,$3); }
+whereList      : whereListSub                                                      { ; }
+               | whereListSub OL whereList                                         { ; }
                ;
 
-whereListSub   : Expr                                                              {add_Literalfilter($1,table); }
+whereListSub   : Expr                                                              {add_map_filter($1,current_expression); }
                | '(' whereList ')'                                                 { ; }
-               | NAME IN Inlist                                                    {$$ = add_in($1,$3); }
-               | NAME BETWEEN Literal AND Literal                                    {$$ = add_filter($1,$3,'>',table); add_filter($1,$5,'<',table); }
+               | NAME IN Inlist                                                    { ; }
+               | NAME BETWEEN Literal AND Literal                                  { ; }
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
                | Expr LIKE Expr                                                    { ; }                                        
                ;
@@ -83,7 +93,8 @@ groupbyList    : groupbyListSub                                                 
                ;
 
 groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                           { ; }
-				 | Literal
+	       | Literal                                                           {string Table = metadata_Table($1);
+                                                                                    add_groupby(Table,$1);}
                ;
 
 orderbyList    : orderbyListSub                                                    { ; }
@@ -91,8 +102,8 @@ orderbyList    : orderbyListSub                                                 
                                        
                ;
 
-orderbyListSub : NAME 	 	                                                      {add_orderby($1); }
-             | NAME order                                                       {add_orderby($1,$2); }                                         
+orderbyListSub : NAME 	 	                                                   {string Table = metadata_Table($1); add_groupby(Table,$1); }
+               | NAME order                                                        {string Table = metadata_Table($1); add_groupby(Table,$1); }                                         
                ;
 
 order          : ASC                                                               { $$ = $1; }
