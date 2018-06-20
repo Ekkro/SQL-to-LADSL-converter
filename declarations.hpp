@@ -4,15 +4,17 @@
  #include <iostream>
  #include <map>
  #include <utility>
- #include "SQLtoLADSL.hpp"
+#include <set>
+#include <algorithm>
 using namespace std;
 
 
+string relacao_entre(vector<string> v, string s);
+
+string relacao_entre_arrays(vector<string> v, vector<string> s);
+
 vector<int> subvector (vector<int> v1, vector<int> v2);
 
-int isThe_same_Table(string attribute1, string attribute2);
-
-int isThe_same_Table_array(vector<string> v);
 
 void graphWork();
 

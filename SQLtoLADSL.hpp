@@ -1,10 +1,10 @@
-#include <vector>
-#include <string>
-#include <iostream>
-#include <map>
-#include <utility>
-#include <set>
-#include <algorithm>
+//#include <vector>
+//#include <string>
+//#include <iostream>
+//#include <map>
+//#include <utility>
+//#include <set>
+//#include <algorithm>
 #include "declarations.hpp"
 using namespace std;
 
@@ -13,6 +13,7 @@ using namespace std;
     /* ..................................................... */
 
 class Graph {
+    public:
     /* ..................................................... */
     /* ... */
     string root;
@@ -20,8 +21,8 @@ class Graph {
     /* .....JOIN......
            
            structure to save the joins 
-            key => name of the table
-            Values => ( , )
+            key => foreign key
+            Values => (table1 ,table2 )
          */
     
     map<string, pair<string,string> > join;
@@ -29,7 +30,7 @@ class Graph {
     /* ..... GROUPBY .....
 
            structure to save the groupby
-            ( , )
+            (Table ,attribute )
          */
     vector<pair <string,string> > groupby;
     
@@ -47,7 +48,7 @@ class Graph {
     /* ......FILTER.....
            
            structure to save the filters
-            key => name of the table
+            key => name of the attribute
             Values => filter set 
          */
     map<string, vector<string> > filter;
@@ -55,13 +56,12 @@ class Graph {
     /* ......SELECT......
        
            structure to save the selects
-           set tables
+           set attributes
          */
     vector<string> select;
 
     /* ..................................................... */
 
-        public:
 
             /* calculates the number of attributes of table */
             /* arguments : name of a table */
@@ -72,7 +72,7 @@ class Graph {
             /* arguments : name of a table */
             /* arguments : filter name */
             /* arguments : filter type */
-        void add_filter(string Table,string filter, int type = -1);
+        void add_filter(string Table,string filter, int type);
 
             /* remove a filter from a table */
             /* arguments : name of a table */
@@ -133,9 +133,7 @@ class Graph {
 
             /* remove a filter to map filters */
             /* arguments : name of a table */
-        void remove_map_Table_filter(string Table){
-            filter.erase(Table);
-        }
+        void remove_map_Table_filter(string Table);
 
             /* remove a filter to map filters */
             /* arguments : name of a table */
@@ -186,6 +184,10 @@ class Graph {
              */
         int isThe_same_Table(string attribute1, string attribute2);
 
+
+        int isThe_same_Table_array(vector<string> v);
+
+
 };
 
     /* ..................................................... */
@@ -194,6 +196,7 @@ class Graph {
 
 class Ltree {
 
+    public:
     /* ............................................... */
     /* .....ltree.........
 
@@ -205,7 +208,6 @@ class Ltree {
     /* ............................................... */
     //vector<pair<string,string>> ltree; possivelmente será necessário alterar o codigo para esta ltree
 
-    public:
     
 //        Ltree() {ltree = new vector<string>();}
     
@@ -335,15 +337,14 @@ class Ltree {
     vector<int> parents(int i);
 
 
-    string relacao_entre(vector<string> v, int s);
-
-
-
     void search_nextOR(Graph g ,int ind);
 
+    string relacao_entre(vector<string> v, int s);
 
     void funcao(Graph g, int x=0);
     
+    int push_aux(int ind);
+
     void pushLT(int ind);
 
     void func(int ind);

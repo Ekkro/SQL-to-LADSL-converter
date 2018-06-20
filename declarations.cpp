@@ -1,20 +1,44 @@
- #include <stdio.h>                                                                                                                      
- #include <strings.h>
- #include <vector>
- #include <iostream>
- #include <map>
- #include <utility>
+ //#include <stdio.h>                                                                                                                      
+ //#include <strings.h>
+ //#include <vector>
+ //#include <iostream>
+ //#include <map>
+ //#include <utility>
  #include "SQLtoLADSL.hpp"
 using namespace std;
 
 
-/*
 
 string a = "A";
 Graph g;
-LTree l;
+Ltree l;
 
-*/
+        /* 
+            search for the closest node that is an or
+            arguments : parent index
+            arguments : favourite child
+        */
+    int Ltree::ind_Parent(int indice){
+        int aux = (indice-1)/2;
+        if ( aux <0 || aux >= ltree.size()) {
+            return -1;
+        }else{ return aux; }
+    }
+        /* 
+            all the parents of given node
+            arguments : child index
+            return : vector with all parents
+        */
+    vector<int> Ltree::parents(int i){
+       vector<int> res;
+       vector<int>::iterator it;
+       it = res.begin();
+       for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
+           //res.insert(i);
+           it = res.insert (it , i);
+       }
+       return res;
+    }
 
     /* ..................................................... */
     /* .....................GRAPH.......................... */
@@ -24,7 +48,7 @@ LTree l;
             /* calculates the number of attributes of table */
             /* arguments : name of a table */
             /* returns : the number of attributes */
-        int graph::num_attributes(string str){
+        int Graph::num_attributes(string str){
             return tables[str].size();
         }
 
@@ -32,14 +56,14 @@ LTree l;
             /* arguments : name of a table */
             /* arguments : filter name */
             /* arguments : filter type */
-        void graph::add_filter(string Table,string filter, int type = -1){
+        void Graph::add_filter(string Table,string filter, int type ){
             tables[Table].insert(pair<string,int>(filter,type));
         }
 
             /* remove a filter from a table */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void graph::remove_filter(string Table,string filter){
+        void Graph::remove_filter(string Table,string filter){
             tables[Table].erase(filter);
         }
 
@@ -50,7 +74,7 @@ LTree l;
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
-        int graph::search_filter_in_table(string table, string filter){
+        int Graph::search_filter_in_table(string table, string filter){
             for(map<string,int>::iterator it = tables[table].begin(); it != tables[table].end(); ++it) {
                 if (it->first.compare(filter)==0) {return 1;}
             }
@@ -61,7 +85,7 @@ LTree l;
             /* tables that have the filter */
             /* arguments : filter name */
             /* return : set of tables */
-        vector<string> graph::search_filter(string filter){
+        vector<string> Graph::search_filter(string filter){
             vector<string> aux;
             for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (search_filter_in_table(it->first,filter)) {
@@ -77,7 +101,7 @@ LTree l;
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
-        int graph::search_table(string table){
+        int Graph::search_table(string table){
             for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (it->first.compare(table)==0) {return 1;}
             }
@@ -87,7 +111,7 @@ LTree l;
             /* add a table */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void graph::add_table(string Table, string filter, int type){
+        void Graph::add_table(string Table, string filter, int type){
             map<string,int> aux;
             aux[filter] = type;
             pair<map<string, int>::iterator, bool > result;
@@ -96,18 +120,18 @@ LTree l;
 
             /* remove a table */
             /* arguments : name of a table */
-        void graph::remove_table(string Table){
+        void Graph::remove_table(string Table){
             tables.erase(Table);
         }
 
         // join[Table] é um par
-//        voidgraph:: add_join(string Table,string filter, string type ){
+//        voidGraph:: add_join(string Table,string filter, string type ){
 //            pair<map<string, string>::iterator, bool > result;
 //            join[Table].insert(pair<string,string>(filter,type));
 //        }
 
         // join[Table] é um par
-//        void graph::remove_join(string Table,string filter){
+//        void Graph::remove_join(string Table,string filter){
 //            join[Table].erase(filter);
 //        }
 
@@ -115,14 +139,14 @@ LTree l;
             /* add a filter to the group by */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void graph::add_groupby(string Table,string filter){
+        void Graph::add_groupby(string Table,string filter){
             groupby.push_back(pair<string,string>(Table,filter));
         }
 
             /* remove a filter to the group by */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void graph::remove_groupby(string Table,string filter){
+        void Graph::remove_groupby(string Table,string filter){
             for (int i = 0; i < groupby.size(); i++) {
                 if ((groupby[i].first.compare(Table)==0) && (groupby[i].second.compare(filter)==0)) {
                     groupby.erase(groupby.begin() + i);
@@ -134,20 +158,20 @@ LTree l;
             /* add a filter to map filters */
             /* arguments : filter name */
             /* arguments : expression */
-        void graph::add_map_filter(string Filter, string expression){
+        void Graph::add_map_filter(string Filter, string expression){
             filter[ Filter ].push_back(expression);
         }
 
             /* remove a filter to map filters */
             /* arguments : name of a table */
-        void graph::remove_map_Table_filter(string Table){
+        void Graph::remove_map_Table_filter(string Table){
             filter.erase(Table);
         }
 
             /* remove a filter to map filters */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void graph::remove_map_filter(string Table,string Filter){
+        void Graph::remove_map_filter(string Table,string Filter){
             for (int i = 0; i < filter[Table].size(); i++) {
                 if (filter[Table][i].compare(Filter)==0){
                     filter[Table].erase(filter[Table].begin() + i);
@@ -158,13 +182,13 @@ LTree l;
 
             /* adds a table to the Selects */
             /* arguments : name of a table */
-        void graph::add_select(string Table){
+        void Graph::add_select(string Table){
             select.push_back(Table);
         }
 
             /* remove a table to the Selects */
             /* arguments : name of a table */
-        void graph::remove_select(string Table){
+        void Graph::remove_select(string Table){
             for (int i = 0; i < select.size(); i++) {
                 if (select[i].compare(Table)==0) {
                     select.erase(select.begin() + i);
@@ -180,7 +204,7 @@ LTree l;
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
-        int graph::is_measured(string Table, string filter){
+        int Graph::is_measured(string Table, string filter){
             if (tables[Table][filter] == 0) {
                 return 1;
             }else return 0;
@@ -193,7 +217,7 @@ LTree l;
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
-        int graph::is_dimension(string Table, string filter){
+        int Graph::is_dimension(string Table, string filter){
             if (tables[Table][filter] == 1) {
                 return 1;
             }else return 0;
@@ -202,7 +226,7 @@ LTree l;
             /* arguments : name of a table */
             /* arguments : filter name */
 /*
-        void graph::add_table(string Table, string name){
+        void Graph::add_table(string Table, string name){
             Graph[Table].insert(filter,str);
         }
 */
@@ -214,17 +238,35 @@ LTree l;
                         [ 1 -> if they are ]
                         [ 0 -> if no       ]
              */
-        int graph::isThe_same_Table(string attribute1, string attribute2){
-            vector<string> v1 = search_filter(attribute1);
-            vector<string> v2 = search_filter(attribute2);
-            vector<string>::iterator it;
-            vector<string> inter(max(v1.size(),v2.size()));
+//        int Graph::isThe_same_Table(string attribute1, string attribute2){
+//            vector<string> v1 = search_filter(attribute1);
+//            vector<string> v2 = search_filter(attribute2);
+//            vector<string>::iterator it;
+//            vector<string> inter(max(v1.size(),v2.size()));
+//
+//            it = set_intersection(v1.begin(),v1.end(),v2.begin(),v2.end(),inter.begin());
+//            if (inter.size() > 0) {
+//                return 1;
+//            }
+//            else return 0;
+//        }
 
-            it = set_intresection(v1.begin(),v1.end(),v2.begin,v2.end(),back_inserter(inter));
-            if (inter.size() > 0) {
-                return 1;
-            }
-            else return 0;
+        int Graph::isThe_same_Table(string attribute1, string attribute2){
+         if ( relacao_entre_arrays(search_filter(attribute1),search_filter(attribute2))=="NULL") {
+             return 0;
+         }else {return 1;}
+        }
+
+        int Graph::isThe_same_Table_array(vector<string> v){
+         int res = 1;
+         for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+             if (!isThe_same_Table(v[0],*it)) {
+                 res = 0;
+                 break;
+             }
+         }
+         return res;
+        }
          
 /* ........................................................................ */
     /* ..................................................... */
@@ -235,7 +277,7 @@ LTree l;
                 arguments : childs index 
                 retuens : return parrent
             */
-        string ltree::Parent(int indice){
+        string Ltree::Parent(int indice){
             string res = "NULL";
             int aux = (indice-1)/2;
             if ( aux <0 || aux >= ltree.size()) {
@@ -249,7 +291,7 @@ LTree l;
                 arguments : fathers index
                 retuens : return son of the left
             */
-        string ltree::left_child(int indice){
+        string Ltree::left_child(int indice){
             string res = "NULL";
             int aux = 2*indice+1;
             if ( aux <0 || aux >= ltree.size()) {
@@ -263,7 +305,7 @@ LTree l;
                 arguments : fathers index
                 retuens : return the left child index
             */
-        int ltree::ind_left_child(int indice){
+        int Ltree::ind_left_child(int indice){
             int aux = 2*indice+1;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
@@ -275,7 +317,7 @@ LTree l;
                 arguments : fathers index
                 retuens : return son of the rigth
             */
-        string ltree::right_child(int indice){
+        string Ltree::right_child(int indice){
             string res = "NULL";
             int aux = 2*indice+2;
             if ( aux <0 || aux >= ltree.size()) {
@@ -288,7 +330,7 @@ LTree l;
                 arguments : fathers index
                 retuens : return the rigth child index
             */
-        int ltree::ind_right_child(int indice){
+        int Ltree::ind_right_child(int indice){
             int aux = 2*indice+2;
             if ( aux <0 || aux >= ltree.size()) {
                 return -1;
@@ -300,7 +342,7 @@ LTree l;
                 arguments : fathers index
                 retuens : returns the list of all children
             */
-        vector<string> ltree::childs(int ind){
+        vector<string> Ltree::childs(int ind){
                vector<string> res;
                string aux = right_child(ind);
                if (aux.compare("NULL") != 0) {
@@ -320,14 +362,14 @@ LTree l;
                 arguments : filter
                 arguments : index
             */
-        void ltree::add(string value ,int indice ){ ltree[indice] = value; }
+        void Ltree::add(string value ,int indice ){ ltree[indice] = value; }
 
             /* 
                 computes the index of a filter
                 arguments : filter
                 return : index
             */
-        int ltree::indice(string value){
+        int Ltree::indice(string value){
            for ( int i = 0; i < ltree.size(); i++ ) {
                if (!ltree[i].compare(value)) {
                    return i;
@@ -342,7 +384,7 @@ LTree l;
                 arguments : index1
                 arguments : index2
             */
-        void ltree::swap(int indice1,int indice2 ){
+        void Ltree::swap(int indice1,int indice2 ){
             string aux;
             aux = ltree[indice1];
             ltree[indice1] = ltree[indice2];
@@ -356,7 +398,7 @@ LTree l;
                 arguments : index2
                 return : father
             */
-        string ltree::common_ancestor( int indice1, int indice2 ){
+        string Ltree::common_ancestor( int indice1, int indice2 ){
             vector<int> parent_1 = parents(indice1);
             vector<int> parent_2 = parents(indice2);
             for ( int i = 0;i < parent_1.size(); i++) {
@@ -372,7 +414,7 @@ LTree l;
                 merge the current vector with another
                 arguments : vector
             */
-        void ltree::merge(vector<string> vec){
+        void Ltree::merge(vector<string> vec){
             for ( int i = 0; ltree.size(); i++) {
                 if ((!ltree[i].compare("NULL")) && (vec[i].compare("NULL")==0)) {
                     ltree[i] = vec[i];
@@ -386,7 +428,7 @@ LTree l;
                 arguments : index1
                 arguments : index2
             */
-        vector<string> ltree::split_aux(vector<string> res, int indice1, int indice2){
+        vector<string> Ltree::split_aux(vector<string> res, int indice1, int indice2){
             if (!ltree[indice2].compare("NULL")) {
                 return res;
             }
@@ -402,7 +444,7 @@ LTree l;
                 arguments : index1
                 arguments : index2
             */
-        vector<string> ltree::split(int indice1, int indice2){
+        vector<string> Ltree::split(int indice1, int indice2){
             vector<string> res;
             return  Ltree::split_aux(res,indice1,indice2);
         }
@@ -413,7 +455,7 @@ LTree l;
                 arguments : current tree index
                 arguments : vector index
             */
-        void ltree::add_tree(vector<string> v, int ind, int n=0){
+        void Ltree::add_tree(vector<string> v, int ind, int n){
                 vector<string>::iterator it_ind = v.begin() + ind;
                 if (v[n] != "NULL") {
                     ltree.insert(it_ind,v[n]);
@@ -427,7 +469,7 @@ LTree l;
                 arguments : parent index
                 arguments : favourite child
             */
-        void ltree::search_nextOR_aux(int parent, int favourite_child){
+        void Ltree::search_nextOR_aux(int parent, int favourite_child){
             if (favourite_child) {
                swap(parent,ind_right_child(parent));
                add("NULL",ind_left_child(parent));
@@ -440,36 +482,10 @@ LTree l;
         }
 
 
-        /* 
-            search for the closest node that is an or
-            arguments : parent index
-            arguments : favourite child
-        */
-    int ltree::ind_Parent(int indice){
-        int aux = (indice-1)/2;
-        if ( aux <0 || aux >= ltree.size()) {
-            return -1;
-        }else{ return aux; }
-    }
-
-        /* 
-            all the parents of given node
-            arguments : child index
-            return : vector with all parents
-        */
-    vector<int> ltree::parents(int i){
-       vector<int> res;
-       vector<int>::iterator it;
-       it = res.begin();
-       for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
-           //res.insert(i);
-           it = res.insert (it , i);
-       }
-       return res;
-    }
 
 
-     string ltree::relacao_entre(vector<string> v, int s){
+
+     string Ltree::relacao_entre(vector<string> v, int s){
          vector<int> aux = parents(s);
          int i = 0;
          for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
@@ -483,12 +499,12 @@ LTree l;
 
 
 
-    void ltree::search_nextOR(Graph g ,int ind){
-      if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
+    void Ltree::search_nextOR(Graph g ,int ind){
+      if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(ind))==0)){
             search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
             search_nextOR_aux(ind_right_child(ind_left_child(ind)),1);
       }else{
-          if (right_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
+          if (right_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(ind))==0)){
             search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
             search_nextOR_aux(ind_right_child(ind_right_child(ind)),1);
           }
@@ -497,35 +513,29 @@ LTree l;
     }
 
 
-    void ltree::funcao(Graph g, int x=0){
-      if(ltree.ltree[x] == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
-            int parent = ltree.ind_Parent(x);
-                vector<string> s = ltree.split(0,parent);
-                ltree.add_tree(s,ltree.ind_left_child(x));
-                ltree.add_tree(s,ltree.ind_right_child(x));
-                ltree.add("OR",parent);
-                ltree.searh_nextOR(g,parent);
+    void Ltree::funcao(Graph g, int x){
+      if(ltree[x] == "OR" && (g.isThe_same_Table_array(childs(x))==0)){
+            int parent = ind_Parent(x);
+                vector<string> s = split(0,parent);
+                add_tree(s,ind_left_child(x),0);
+                add_tree(s,ind_right_child(x),0);
+                add("OR",parent);
+                search_nextOR(g,parent);
       }else{
-        if(t.ltree!="NULL"){
-          funcao(g,(ltree.ind_left_child(x));
-          funcao(g,(ltree.ind_right_child(x));
+        if(ltree[x]!="NULL"){
+          funcao(g,(ind_left_child(x)));
+          funcao(g,(ind_right_child(x)));
         }
       }
     }
     
-    void ltree::pushLT(int ind){
-     swap(ind,ind_Parent(ind));
-     int last = pushLT(ind);
-     ltree.erase(vec.begin() + last);
-     }
-     
-     int push_aux(int ind){
-         if (left_child(ind)!= NULL){
+     int Ltree::push_aux(int ind){
+         if (left_child(ind)!= "NULL"){
              int child = ind_left_child(ind);
              swap(child,ind);
              push_aux(child);
          }
-         if (right_child(ind)!= NULL){
+         if (right_child(ind)!= "NULL"){
              int child = ind_right_child(ind);
              swap(child,ind);
              push_aux(child);
@@ -533,47 +543,59 @@ LTree l;
          return ind;
      }
 
-     void ltree::func(int ind){
-       if((ltree[ind]=="AND" || ltree[ind]=="OR"){
-         if (left_child(ind)== NULL){
+    void Ltree::pushLT(int ind){
+     swap(ind,ind_Parent(ind));
+     int last = push_aux(ind);
+     ltree.erase(ltree.begin() + last);
+     }
+     
+
+     void Ltree::func(int ind){
+       if((ltree[ind]=="AND" || ltree[ind]=="OR")){
+         if (left_child(ind)== "NULL"){
            pushLT(ind_right_child(ind));
          }
-         if(right_child(ind) == NULL){
+         if(right_child(ind) == "NULL"){
            pushLT(ind_left_child(ind));
          }
        }
        if(ltree[ind]!="NULL"){
-         func(left_child(ind));
-         func(right_child(ind));
+         func(ind_left_child(ind));
+         func(ind_right_child(ind));
          }
     }
 /* ........................................................................ */
 
- vector<int> subvector (vector<int> v1, vector<int> v2){
-     vector<int> res(max(v1.size(),v2.size()));
-     vector<int>::iterator aux;
-     aux = set_intersection (v1.begin(), v1.end(), v2.begin(), v2.end(), back_inserter(res));
-     res.resize(aux-res.begin());
-     return res;
- }
+         vector<int> subvector (vector<int> v1, vector<int> v2){
+             vector<int> res(max(v1.size(),v2.size()));
+             vector<int>::iterator aux;
+             aux = set_intersection (v1.begin(), v1.end(), v2.begin(), v2.end(), res.begin());
+             res.resize(aux-res.begin());
+             return res;
+         }
+
+        string relacao_entre(vector<string> v, string s){
+            vector<int> aux = l.parents(l.indice(s));
+            for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
+                aux = subvector(aux,l.parents(l.indice(*it)));
+
+            }
+
+            if (aux.size()) {
+                int x = aux[0];
+                return l.ltree[x];
+            }else {return "NULL";}
+        }
+
+        string relacao_entre_arrays(vector<string> v, vector<string> s){
+            for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+                s.push_back(*it);
+            }
+            return relacao_entre(s,v[0]);
+        }
 
 
-int isThe_same_Table(string attribute1, string attribute2){
- if ( relacao_entre_arrays(search_filter(attribute1),search_filter(attribute2))=="NULL") {
-     return 0;
- }else {return 1;}
-}
 
-int isThe_same_Table_array(vector<string> v){
- int res = 1;
- for(vector<string>::iterator it = v.begin(); it != v.end(); ++it) {
-     if (!isThe_same_Table(v[0],*it)) {
-         res = 0;
-         break;
-     }
- }
- return res;
-}
 
 void graphWork(){
   while (!g.join.empty()) {
@@ -598,16 +620,16 @@ void graphWorkAux(int x){
 void joinAtr(string start){
   //pega nos filtros no mesmo atributo
   map<string,int> work = g.tables[start];
-  vetor<string> v;
+  vector<string> v;
   vector<string,int> new_elements;
   for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     vector<string> v = g.filter[s];
-    if(it->secound == 1){ //se for medida
-      new_elements.insert(it->first,it->secound);
+    if(it->second == 1){ //se for medida
+      new_elements.insert(it->first,it->second);
     }else{                //se for dimensao
       joinAtrD(s,v);
-      new_elements.insert(a,it->secound);
+      new_elements.insert(a,it->second);
     }
   }
   g.tables[start] = new_elements;
@@ -616,54 +638,55 @@ void joinAtr(string start){
 void joinAtrD(string s, vector<string> v){
   vector<string> resolvidos;
   vector<string> relacoes;
-  resolvidos.insert(v[0]);
-  for(x = 1; x < v.lenght() < v; x++){
-    relacoes.insert(relacao_entre(resolvidos,v[x]));
-    resolvidos.insert(v[x]);
+  resolvidos.push_back(v[0]);
+  for(int x = 1; x < v.size(); x++){
+    relacoes.push_back(relacao_entre(resolvidos,v[x]));
+    resolvidos.push_back(v[x]);
   }
   next();
   if(resolvidos.size()>1){
     cout << a << "=filter(" << s <<resolvidos.back() << relacoes.back();
-    for(x = v.lenght()-2; x > 0; x--){
+    for(int x = v.size()-2; x > 0; x--){
       cout << "("<< s << resolvidos[x] << relacoes[x-1];
     }
     cout << s << resolvidos[0];
-    for(x = 0; x < relacoes.lenght()-1; x++){
+    for(int x = 0; x < relacoes.size()-1; x++)
       cout << ")";
     cout << ")\n";
   }else{
-    cout << a << "=filter("  << v[0] << ")\n"
+    cout << a << "=filter("  << v[0] << ")\n";
   }
-}}
+}
 
 void joinFilters(string start){
   //pega nos filtros da mesma tabela
+  string aux;
+  string aux2;
   map<string,int> work = g.tables[start];
   vector<string> medidas;
   vector<string> dimensoes;
   for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
-    if(it->secound == 0){ //se for medida
-      vector<string> filters= filter[s];
+    if(it->second == 0){ //se for medida
+      vector<string> filters= g.filter[s];
       for(vector<string>::iterator it = filters.begin(); it != filters.end(); ++it){
-        string aux3 = s+it;
-        medidas.insert(aux3);
+        medidas.push_back(*it);
       }
     }else{                //se for dimensao
-      dimensoes.insert(s)
+      dimensoes.push_back(s);
     }
   }
   if( medidas.size() == 1){
-    string aux = medias[0];
+    aux = medidas[0];
   }else{
     joinFiltersM(medidas);
-    string aux = a;
+    aux = a;
   }
   if( dimensoes.size() == 1){
-    string aux2 = medias[0];
+    aux2 = medidas[0];
   }else{
     joinFiltersD(dimensoes);
-    string aux2 = a;
+    aux2 = a;
   }
   if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
@@ -675,30 +698,30 @@ void joinFilters(string start){
 void joinFiltersM(vector<string> v){
   vector<string> resolvidos;
   vector<string> relacoes;
-  resolvidos.insert(v[0]);
-  for(x = 1; x < v.lenght() < v; x++){
-    relacoes.insert(relacao_entre(resolvidos,v[x]));
-    resolvidos.insert(v[x]);
+  resolvidos.push_back(v[0]);
+  for(int x = 1; x < v.size(); x++){
+    relacoes.push_back(relacao_entre(resolvidos,v[x]));
+    resolvidos.push_back(v[x]);
   }
   next();  // a > 3 ; b < 6 ; u > 6
   if(resolvidos.size()>1){
     cout << a << "=filter(" << resolvidos.back() << relacoes.back();
-    for(x = v.lenght()-2; x > 0; x--){
+    for(int x = v.size()-2; x > 0; x--){
       cout << "("<< resolvidos[x] << relacoes[x-1];
     }
     cout << v[0];
-    for(x = 0; x < relacoes.lenght()-1; x++){
+    for(int x = 0; x < relacoes.size()-1; x++)
       cout << ")";
     cout << ")\n";
   }else{
-    cout << a << "=filter("  << v[0] << ")\n"
+    cout << a << "=filter("  << v[0] << ")\n";
   }
-}}
+}
 
 void joinFiltersD(vector<string> v){
   next();
   cout << a << "= krao(" << v[0] << "," << v[1] << ")\n";
-  for(int x = 1; x < v.lenght() ; x++){
+  for(int x = 1; x < v.size() ; x++){
     string aux = a;
     next();
     cout << a << "=" << "krao(" << aux << "," << v[x] << ")\n";
@@ -706,9 +729,9 @@ void joinFiltersD(vector<string> v){
 }
 
 void joinGroupby(string start){
-  for(vector<pair<string,string>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+  for(vector<pair<string,string> >::iterator it = g.groupby.begin(); it != g.groupby.end(); ++it) {
     if(it->first.compare(start)){
-      joinGroupbyAux(it->secound);
+      joinGroupbyAux(it->second);
     }
   }
 }
@@ -716,55 +739,66 @@ void joinGroupby(string start){
 void joinGroupbyAux(string gb){
   string alpha = a;
   next();
-  cout << a << "=krao(" << alpha << "," << gb << ")\n"
+  cout << a << "=krao(" << alpha << "," << gb << ")\n";
 }
 
 void removeTable(string start){
   vector<string> removedKeys;
   string alpha = a;
-  for(map<string,pair<string,string>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    if(it->secound->secound.compare(start)){
+  for(map<string,pair<string,string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    if(it->second.second.compare(start)){
       next();
       cout << a << "=" << "dot(" << alpha << "," << it->first << ")\n";
       map<string,int> aux = g.tables[start];
       aux[a] = 1;           //possivel zona a melhorar
       g.tables[start] = aux;
-      removedKeys.insert(it->first);
+      removedKeys.push_back(it->first);
     }
   }
-  for(int x = 0; x< removedKeys.lenght(); x++){
+  for(int x = 0; x< removedKeys.size(); x++){
     g.join.erase(removedKeys[x]);
   }
 }
 
 string giveMeStart(string root){
-  vector<string> values;
-  for(map<string,pair<string,string>>::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    values.push_back(it->secound);
+  vector<pair<string, string> > values;
+  for(map<string,pair<string,string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    values.push_back(it->second);
   }
-  for(x = 0; x < values.lenght(); x++){
-    if(values[x]->first==root){
-      return giveMeStart(values[x]->secound);
+  for(int x = 0; x < values.size(); x++){
+    if(values[x].first==root){
+      return giveMeStart(values[x].second);
     }
   }
   return root;
 }
 
 void next(){
-  if(a[a.lenght()-1] == "Z"){
+  if(a[a.length()-1] == 'Z'){
     a.append("A");
   }else{
-    a[a.lenght()-1]++;
+    a[a.length()-1]++;
   }
 }
 
-void trabalha(int ind){
-  trabalhaaux(ind_left_child(ind),string tabela1);
-  trabalhaaux(ind_right_child(ind),string tabela2);
-}
+//void trabalha(int ind){
+//  trabalhaaux(l.ind_left_child(ind),string tabela1);
+//  trabalhaaux(l.ind_right_child(ind),string tabela2);
+//}
+//
+//void trabalhaaux(int ind, int count){
+//    if(is_the_same_table_array(childs(ind)) == 0 )
+//      if(left_child(ind) == "AND" || right_child(ind) == "AND")
+//        trabalhaaux(int ind);
+//}
 
-void trabalhaaux(int ind, int count){
-    if(is_the_same_table_array(childs(ind)) == 0 )
-      if(left_child(ind) == "AND" || right_child(ind) == "AND")
-        trabalhaaux(int ind);
-}
+
+
+
+
+
+
+
+
+
+
