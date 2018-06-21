@@ -795,7 +795,9 @@ void next(){
 //        trabalhaaux(int ind);
 //}
 
-
+int main(){
+    return 0;
+}
 
 
 
