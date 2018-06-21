@@ -13,32 +13,6 @@ string a = "A";
 Graph g;
 Ltree l;
 
-        /* 
-            search for the closest node that is an or
-            arguments : parent index
-            arguments : favourite child
-        */
-    int Ltree::ind_Parent(int indice){
-        int aux = (indice-1)/2;
-        if ( aux <0 || aux >= ltree.size()) {
-            return -1;
-        }else{ return aux; }
-    }
-        /* 
-            all the parents of given node
-            arguments : child index
-            return : vector with all parents
-        */
-    vector<int> Ltree::parents(int i){
-       vector<int> res;
-//       vector<int>::iterator it;
- //      it = res.begin();
-       for (int ind = i;ind_Parent(ind)>=0;i = ind_Parent(ind)) {
-           //res.insert(i);
-           res.push_back(ind);
-       }
-       return res;
-    }
 
     /* ..................................................... */
     /* .....................GRAPH.......................... */
@@ -498,6 +472,32 @@ Ltree l;
      }
 
 
+        /* 
+            search for the closest node that is an or
+            arguments : parent index
+            arguments : favourite child
+        */
+    int Ltree::ind_Parent(int indice){
+        int aux = (indice-1)/2;
+        if ( aux <0 || aux >= ltree.size()) {
+            return -1;
+        }else{ return aux; }
+    }
+        /* 
+            all the parents of given node
+            arguments : child index
+            return : vector with all parents
+        */
+    vector<int> Ltree::parents(int i){
+       vector<int> res;
+//       vector<int>::iterator it;
+ //      it = res.begin();
+       for (int ind = i;ind_Parent(ind)>=0;i = ind_Parent(ind)) {
+           //res.insert(i);
+           res.push_back(ind);
+       }
+       return res;
+    }
 
     void Ltree::search_nextOR(Graph g ,int ind){
       if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(ind))==0)){
@@ -619,17 +619,20 @@ void graphWorkAux(int x){
 
 void joinAtr(string start){
   //pega nos filtros no mesmo atributo
-  map<string,int> work = g.tables[start];
+  //map<string,int> work = g.tables[start];
+  map<string,int> work( g.tables[start] );
   vector<string> v;
-  vector<string,int> new_elements;
+  //vector<string,int> new_elements;
+  map<string,int> new_elements;
   for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
-    vector<string> v = g.filter[s];
+    //vector<string> v = g.filter[s];
+    vector<string> v ( g.filter[s] );
     if(it->second == 1){ //se for medida
-      new_elements.insert(it->first,it->second);
+      new_elements.insert(pair<string,int>(it->first,it->second));
     }else{                //se for dimensao
       joinAtrD(s,v);
-      new_elements.insert(a,it->second);
+      new_elements.insert(pair<string,int>(a,it->second));
     }
   }
   g.tables[start] = new_elements;
