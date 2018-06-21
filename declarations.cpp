@@ -31,11 +31,11 @@ Ltree l;
         */
     vector<int> Ltree::parents(int i){
        vector<int> res;
-       vector<int>::iterator it;
-       it = res.begin();
-       for (int ind = i;ind_Parent(i)>=0;i = ind_Parent(i)) {
+//       vector<int>::iterator it;
+ //      it = res.begin();
+       for (int ind = i;ind_Parent(ind)>=0;i = ind_Parent(ind)) {
            //res.insert(i);
-           it = res.insert (it , i);
+           res.push_back(ind);
        }
        return res;
     }
