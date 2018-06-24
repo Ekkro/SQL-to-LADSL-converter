@@ -4,10 +4,14 @@
  #include "SQLtoLADSL.hpp"
 
     string current_expression;
+    string current_expression2;
+    int current = 0;
 %}
-%token SELECT FROM WHERE GROUPBY ORDERBY HAVING NAME AS  
-%token AND OR EXISTS NOT BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT BOOL IN ASC DESC DATE ANDOP ANY ALL
-%token LIKE BOP  
+%token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS  
+%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT BOOL IN ASC DESC DATE ANDOP ANY ALL
+%token LIKE 
+
+%token <string> NAME BOP NOT
 
 %right '=' 
 %left OP
@@ -22,13 +26,13 @@ SelectBlock    : SELECT     selectList
                  WHERE_                                                          
                  GROUPBY_                                                       
                  ORDERBY_                                                      
-                 ';'                                                               { fprintf(out,"resultado\n"); }     
+                 ';'                                                               { ; }     
 
 WHERE_         : WHERE       whereList                                             {l.funcao(g);}
                |                                                                   { ; }
                ;
 
-GROUPBY_       : GROUPBY    groupbyList                                                   { ; }
+GROUPBY_       : GROUPBY    groupbyList                                            { ; }
                |                                                                   { ; }
                ;
 
@@ -54,16 +58,10 @@ fromList       : subfromList                                                    
 
 subfromList    : NAME                                                              { g.newRoot($1); } 
                | Join NAME                                                         { ; } 
-               | Join NAME ON Literal '=' Literal                                  {string Table = metadata_Table();
-                                                                                    string type = metadata_type();
-                                                                                    string filter();
-                                                                                    add_join(Table,filter,type);} 
+               | Join NAME ON Literal '=' Literal                                  {add_join($6,getTable($4),getTable($6));} 
                
                | Join NAME AS NAME                                                 {add_rename($2,$4);}
-               | Join NAME AS NAME ON Literal '=' Literal                          {string Table = metadata_table();
-                                                                                    string type = metadata_type();
-                                                                                    string filter(); 
-                                                                                    add_join(Table,filter,type);
+               | Join NAME AS NAME ON Literal '=' Literal                          {add_join($6,getTable($4),getTable($6)); 
                                                                                     add_rename($2,$4); }
                | '{' SelectBlock '}'                                               { ; } 
                | '{' SelectBlock '}' AS NAME                                       { ; } 
@@ -76,12 +74,13 @@ Join           : JOIN                                                           
                | FULL JOIN                                                         { ; } 
                ;
 
-whereList      : whereListSub                                                      { ; }
-               | whereListSub OL whereList                                         { ; }
+whereList      : whereListSub                                                      { l.ltree[current] = current_expression; }
+               | whereList OL whereList                                         { ; }
+               | '(' whereList ')'                                                 { ; }
                ;
 
-whereListSub   : Expr                                                              {add_map_filter($1,current_expression); }
-               | '(' whereList ')'                                                 { ; }
+whereListSub   : Expr                                                              {aux($1,current_expression,current_expression2); 
+                                                                                    cleanexp();}
                | NAME IN Inlist                                                    { ; }
                | NAME BETWEEN Literal AND Literal                                  { ; }
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
@@ -93,7 +92,7 @@ groupbyList    : groupbyListSub                                                 
                ;
 
 groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                           { ; }
-	       | Literal                                                           {string Table = metadata_Table($1);
+	       | Literal                                                           {string Table = getTable($1);
                                                                                     add_groupby(Table,$1);}
                ;
 
@@ -102,8 +101,8 @@ orderbyList    : orderbyListSub                                                 
                                        
                ;
 
-orderbyListSub : NAME 	 	                                                   {string Table = metadata_Table($1); add_groupby(Table,$1); }
-               | NAME order                                                        {string Table = metadata_Table($1); add_groupby(Table,$1); }                                         
+orderbyListSub : NAME 	 	                                                   {;}
+               | NAME order                                                        {;}
                ;
 
 order          : ASC                                                               { $$ = $1; }
@@ -116,7 +115,8 @@ OL             : AND                                                            
                ;
 
 Literal        : NAME                                                              {$$ = $1 ; }
-               | NAME'.'NAME                                                       {$$ = $3 ; table = $1; }
+               | NAME'.'NAME                                                       {$$ = $3 ; addexp($3);}
+               /* | NAME'_'NAME                                                       {$$ = $3 ; addexp($3);}*/
                | DATE                                                              {$$ = $1 ; }
                | CONSTANT                                                          {$$ = $1 ; }
                | BOOL                                                              {$$ = $1 ; }
@@ -126,10 +126,10 @@ Literal        : NAME                                                           
 
 
 Expr           : Literal                                                            {$$ = $1 ; }
-               | NOT Expr                                                          {$$ = not($2) ; }
-               | Expr BOP Expr                                                     {$$ = bop($1,$2,$3) ; }
-               | Expr '=' Expr                                                     {$$ = add_key($1,$2,$3) ; }
-               | NAME '(' Expr ')'                                                 {$$ = func($1,$3) ; }
+               | NOT Expr                                                          {$$ = $1 + $2 ; }
+               | Expr BOP Expr                                                     {$$ = $1+$2+$3 ; }
+               | Expr '=' Expr                                                     {$$ = $1+$2+$3 ; }
+               | NAME '(' Expr ')'                                                 {$$ = $1+$2+$3+$4 ; }
                | '('SelectBlock')'                                                 { ; }
                ;
 

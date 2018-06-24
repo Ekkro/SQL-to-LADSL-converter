@@ -19,6 +19,9 @@ Ltree l;
     /* ..................................................... */
 
 
+        void Graph::newRoot(string newRoot){
+            root = newRoot;
+        }
             /* calculates the number of attributes of table */
             /* arguments : name of a table */
             /* returns : the number of attributes */
@@ -99,14 +102,17 @@ Ltree l;
         }
 
         // join[Table] é um par
-//        voidGraph:: add_join(string Table,string filter, string type ){
-//            pair<map<string, string>::iterator, bool > result;
-//            join[Table].insert(pair<string,string>(filter,type));
-//        }
+        void Graph::add_join(string fk,string table1, string table2){
+            vector<string> aux ;
+            aux.push_back(fk);
+            aux.push_back(table1);
+            aux.push_back(table2);
+            join.push_back(aux);
+        }
 
-        // join[Table] é um par
-//        void Graph::remove_join(string Table,string filter){
-//            join[Table].erase(filter);
+//        // join[Table] é um par
+//        void Graph::remove_join(string fk){
+//            join.erase(fk);
 //        }
 
 
@@ -746,31 +752,27 @@ void joinGroupbyAux(string gb){
 }
 
 void removeTable(string start){
-  vector<string> removedKeys;
+  vector<vector <string> > Keys;
   string alpha = a;
-  for(map<string,pair<string,string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    if(it->second.second.compare(start)){
+  for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    if(it->at(2).compare(start)){
       next();
-      cout << a << "=" << "dot(" << alpha << "," << it->first << ")\n";
+      cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
       map<string,int> aux = g.tables[start];
       aux[a] = 1;           //possivel zona a melhorar
       g.tables[start] = aux;
-      removedKeys.push_back(it->first);
+    }
+    else{
+      Keys.push_back(*it);
     }
   }
-  for(int x = 0; x< removedKeys.size(); x++){
-    g.join.erase(removedKeys[x]);
-  }
+  g.join = Keys;
 }
 
 string giveMeStart(string root){
-  vector<pair<string, string> > values;
-  for(map<string,pair<string,string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    values.push_back(it->second);
-  }
-  for(int x = 0; x < values.size(); x++){
-    if(values[x].first==root){
-      return giveMeStart(values[x].second);
+  for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+    if(it->at(1).compare(root)){
+        return giveMeStart(it->at(2));
     }
   }
   return root;
@@ -794,6 +796,27 @@ void next(){
 //      if(left_child(ind) == "AND" || right_child(ind) == "AND")
 //        trabalhaaux(int ind);
 //}
+
+void cleanexp(){
+    current_expression.clear();
+    current_expression2.clear();
+}
+    
+void addexp(string exp){
+    if (current_expression.empty()){
+        current_expression = exp;
+        return;
+    }
+    current_expression2 = exp;
+}
+
+void aux(string exp){
+    if (current_expression2.empty()){
+        g.add_map_filter( current_expression, exp);
+    }else {
+        g.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
+    }
+}
 
 int main(){
     return 0;

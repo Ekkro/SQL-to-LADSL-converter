@@ -25,7 +25,7 @@ class Graph {
             Values => (table1 ,table2 )
          */
     
-    map<string, pair<string,string> > join;
+    vector<vector<string>  > join;
 
     /* ..... GROUPBY .....
 
@@ -62,6 +62,8 @@ class Graph {
 
     /* ..................................................... */
 
+
+        void newRoot(string newRoot);
 
             /* calculates the number of attributes of table */
             /* arguments : name of a table */
@@ -111,9 +113,9 @@ class Graph {
             /* arguments : name of a table */
         void remove_table(string Table);
 
-        void add_join(string Table,string filter, string type );
+        void add_join(string fk,string table1, string table2);
 
-        void remove_join(string Table,string filter);
+        void remove_join(string fk);
 
 
             /* add a filter to the group by */
