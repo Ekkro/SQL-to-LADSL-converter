@@ -19,12 +19,12 @@ class Graph {
     string root;
 
     /* .....JOIN......
-           
-           structure to save the joins 
+
+           structure to save the joins
             key => foreign key
             Values => (table1 ,table2 )
          */
-    
+
     vector<vector<string>  > join;
 
     /* ..... GROUPBY .....
@@ -33,28 +33,28 @@ class Graph {
             (Table ,attribute )
          */
     vector<pair <string,string> > groupby;
-    
+
     /* .....TABLES.....
 
            structure to save the tables
             key => name of the table
-            Values => 
+            Values =>
                 |key => name of the filter
                 |Values => filter type  [ type = 0 it is a measure   ]
                                         [ type = 1 it is a dimension ]
          */
-    map<string,map<string,int> > tables; 
-    
+    map<string,map<string,string> > tables;
+
     /* ......FILTER.....
-           
+
            structure to save the filters
             key => name of the attribute
-            Values => filter set 
+            Values => filter set
          */
     map<string, vector<string> > filter;
-    
+
     /* ......SELECT......
-       
+
            structure to save the selects
            set attributes
          */
@@ -89,7 +89,7 @@ class Graph {
                         [ 0 -> if not found  ]
              */
         int search_filter_in_table(string table, string filter);
-        
+
 
             /* tables that have the filter */
             /* arguments : filter name */
@@ -98,7 +98,7 @@ class Graph {
 
             /* look for a table */
             /* arguments : name of the table */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
@@ -153,7 +153,7 @@ class Graph {
             /* whether it is measured or not */
             /* arguments : name of a table */
             /* arguments : filter name */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
@@ -162,7 +162,7 @@ class Graph {
             /* whether it is dimension or not */
             /* arguments : name of a table */
             /* arguments : filter name */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
@@ -206,72 +206,72 @@ class Ltree {
     */
 
     vector<string> ltree;
-    
+
     /* ............................................... */
     //vector<pair<string,string>> ltree; possivelmente será necessário alterar o codigo para esta ltree
 
-    
+
 //        Ltree() {ltree = new vector<string>();}
-    
-            /* 
+
+            /*
                calculates the parent
-                arguments : childs index 
+                arguments : childs index
                 retuens : return parrent
             */
         string Parent(int indice);
 
 
-            /* 
-                left child 
+            /*
+                left child
                 arguments : fathers index
                 retuens : return son of the left
             */
         string left_child(int indice);
 
 
-            /* 
-                left child index 
+            /*
+                left child index
                 arguments : fathers index
                 retuens : return the left child index
             */
         int ind_left_child(int indice);
 
-            /* 
-                rigth child 
+            /*
+                rigth child
                 arguments : fathers index
                 retuens : return son of the rigth
             */
         string right_child(int indice);
 
-            /*  
-                rigth child index 
+            /*
+                rigth child index
                 arguments : fathers index
                 retuens : return the rigth child index
             */
         int ind_right_child(int indice);
-        
-            /* 
+
+            /*
                 computes the list of all children
                 arguments : fathers index
                 retuens : returns the list of all children
             */
         vector<string> childs(int ind);
 
-            /* 
+            /*
                 adds a filter to the tree
                 arguments : filter
                 arguments : index
             */
         void add(string value ,int indice );
 
-            /* 
+            /*
                 computes the index of a filter
                 arguments : filter
                 return : index
             */
         int indice(string value);
 
-            /* 
+            /*
                 change the position of one filter,
                 by the position of the other
                 arguments : index1
@@ -280,7 +280,7 @@ class Ltree {
         void swap(int indice1,int indice2 );
 
 
-            /* 
+            /*
                 calculates the father, common to both,closer
                 arguments : index1
                 arguments : index2
@@ -288,13 +288,13 @@ class Ltree {
             */
         string common_ancestor( int indice1, int indice2 );
 
-            /* 
+            /*
                 merge the current vector with another
                 arguments : vector
             */
         void merge(vector<string> vec);
 
-            /* 
+            /*
                 separates into two trees (AUX)
                 arguments : vector
                 arguments : index1
@@ -302,14 +302,14 @@ class Ltree {
             */
         vector<string> split_aux(vector<string> res, int indice1, int indice2);
 
-            /* 
+            /*
                 separates into two trees
                 arguments : index1
                 arguments : index2
             */
         vector<string> split(int indice1, int indice2);
 
-            /* 
+            /*
                 add a tree to the current tree
                 arguments : vector
                 arguments : current tree index
@@ -317,21 +317,21 @@ class Ltree {
             */
         void add_tree(vector<string> v, int ind, int n=0);
 
-            /* 
+            /*
                 search for the closest node that is an or
                 arguments : parent index
                 arguments : favourite child
             */
         void search_nextOR_aux(int parent, int favourite_child);
 
-        /* 
+        /*
             search for the closest node that is an or
             arguments : parent index
             arguments : favourite child
         */
     int ind_Parent(int indice);
 
-        /* 
+        /*
             all the parents of given node
             arguments : child index
             return : vector with all parents
@@ -344,7 +344,7 @@ class Ltree {
     string relacao_entre(vector<string> v, int s);
 
     void funcao(Graph g, int x=0);
-    
+
     int push_aux(int ind);
 
     void pushLT(int ind);

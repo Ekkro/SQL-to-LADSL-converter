@@ -36,40 +36,40 @@ ALL|all                         {return ALL;}
 
     /* numbers */
 
--?[0-9]+                	                	{ yylval.intval = atoi(yytext); return CONSTANTE; } 
+-?[0-9]+                	                	{ yylval.intval = atoi(yytext); return CONSTANTE; }
 
 -?[0-9]+"."[0-9]* |
 -?"."[0-9]+ |
 -?[0-9]+E[-+]?[0-9]+ |
 -?[0-9]+"."[0-9]*E[-+]?[0-9]+ |
 -?"."[0-9]+E[-+]?[0-9]+ 	                	{ yylval.floatval = atof(yytext) ;return CONSTANTE; }
-    
+
 	/* booleans */
 TRUE    						{ yylval.intval = 1; return BOOL; }
 FALSE   						{ yylval.intval = 0; return BOOL; }
 
 
 
-    /* operators*/ 
+    /* operators*/
 [ -+&~ | ^ / % *(), .; ! =]                             { return yytext[0]; }
 
 "&&"                                                    { return ANDOP; }
 "||"                                                    { return OR; }
-"="                                                     { yylval.subtok = 4; return BOP; }
-"<=>"                                                   { yylval.subtok = 12; return BOP; }
-">="                                                    { yylval.subtok = 6;return BOP; }
-">"                                                     { yylval.subtok = 2; return BOP; }
-"<="                                                    { yylval.subtok = 5; return BOP; }
-"<"                                                     { yylval.subtok = 1; return BOP; }
-"!="|"<>"                                               { yylval.subtok = 3; return BOP; }
-"<<"                                                    { yylval.subtok = 1; return BOP; }
-">>"                                                    { yylval.subtok = 2; return BOP; }
+"="                                                     { yylval.subtok = 4; return BBOP; }
+"<=>"                                                   { yylval.subtok = 12; return BBOP; }
+">="                                                    { yylval.subtok = 6;return BBOP; }
+">"                                                     { yylval.subtok = 2; return BBOP; }
+"<="                                                    { yylval.subtok = 5; return BBOP; }
+"<"                                                     { yylval.subtok = 1; return BBOP; }
+"!="|"<>"                                               { yylval.subtok = 3; return BBOP; }//alterar
+"<<"                                                    { yylval.subtok = 1; return IBOP; }
+">>"                                                    { yylval.subtok = 2; return IBOP; }
 ":="                                                    { return ASSIGN; }
 
-"*"                                                     { yylval.cha = 'm' ; return BOP: }
-"/"                                                     { yylval.cha = 'd' ; return BOP: }
-"+"                                                     { yylval.cha = 'P' ; return BOP: }
-"-"                                                     { yylval.cha = 'M' ; return BOP: }
+"*"                                                     { yylval.cha = 'm' ; return IBOP: }
+"/"                                                     { yylval.cha = 'd' ; return IBOP: }
+"+"                                                     { yylval.cha = 'P' ; return IBOP: }
+"-"                                                     { yylval.cha = 'M' ; return IBOP: }
     /* functions */
 
 SUBSTR(ING)?/"("                                        { return FSUBSTRING; }
@@ -81,11 +81,12 @@ DATE_SUB/"("                                            { return FDATE_SUB; }
 
 date \'.*\'                                             { yylval.strval = strdup(yytext);return NAME; }
 [A - Za - z][A - Za - z0 - 9_]*                         { yylval.strval = strdup(yytext);return NAME; }
+"(.*?)"                                                 { yylval.strval = strdup(yytext);return REGEX; }
 
 
 
 %%
-                     
+
 int main(){
     yylex();
     return 0;

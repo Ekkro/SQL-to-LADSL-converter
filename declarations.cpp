@@ -1,4 +1,4 @@
- //#include <stdio.h>                                                                                                                      
+ //#include <stdio.h>
  //#include <strings.h>
  //#include <vector>
  //#include <iostream>
@@ -25,6 +25,7 @@ Ltree l;
             /* calculates the number of attributes of table */
             /* arguments : name of a table */
             /* returns : the number of attributes */
+
         int Graph::num_attributes(string str){
             return tables[str].size();
         }
@@ -33,17 +34,19 @@ Ltree l;
             /* arguments : name of a table */
             /* arguments : filter name */
             /* arguments : filter type */
+/*
         void Graph::add_filter(string Table,string filter, int type ){
             tables[Table].insert(pair<string,int>(filter,type));
         }
-
+*/
             /* remove a filter from a table */
             /* arguments : name of a table */
             /* arguments : filter name */
+/*
         void Graph::remove_filter(string Table,string filter){
             tables[Table].erase(filter);
         }
-
+*/
             /* to serach for a filter in table */
             /* arguments : name of a table */
             /* arguments : filter name */
@@ -52,19 +55,19 @@ Ltree l;
                         [ 0 -> if not found  ]
              */
         int Graph::search_filter_in_table(string table, string filter){
-            for(map<string,int>::iterator it = tables[table].begin(); it != tables[table].end(); ++it) {
+            for(map<string,string>::iterator it = tables[table].begin(); it != tables[table].end(); ++it) {
                 if (it->first.compare(filter)==0) {return 1;}
             }
             return 0;
         }
-        
+
 
             /* tables that have the filter */
             /* arguments : filter name */
             /* return : set of tables */
         vector<string> Graph::search_filter(string filter){
             vector<string> aux;
-            for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
+            for(map<string, map<string,string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (search_filter_in_table(it->first,filter)) {
                     aux.push_back(it->first);
                 }
@@ -74,12 +77,12 @@ Ltree l;
 
             /* look for a table */
             /* arguments : name of the table */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
         int Graph::search_table(string table){
-            for(map<string, map<string,int> >::iterator it = tables.begin(); it != tables.end(); ++it) {
+            for(map<string, map<string,string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (it->first.compare(table)==0) {return 1;}
             }
             return 0;
@@ -88,20 +91,23 @@ Ltree l;
             /* add a table */
             /* arguments : name of a table */
             /* arguments : filter name */
+        /*
         void Graph::add_table(string Table, string filter, int type){
             map<string,int> aux;
             aux[filter] = type;
             pair<map<string, int>::iterator, bool > result;
             tables.insert(pair<string,map<string,int> >(Table, aux));
         }
+        */
 
             /* remove a table */
             /* arguments : name of a table */
+        /*
         void Graph::remove_table(string Table){
             tables.erase(Table);
         }
+        */
 
-        // join[Table] é um par
         void Graph::add_join(string fk,string table1, string table2){
             vector<string> aux ;
             aux.push_back(fk);
@@ -180,12 +186,12 @@ Ltree l;
             /* whether it is measured or not */
             /* arguments : name of a table */
             /* arguments : filter name */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
         int Graph::is_measured(string Table, string filter){
-            if (tables[Table][filter] == 0) {
+            if (tables[Table][filter].compare("measure") == 0) {
                 return 1;
             }else return 0;
         }
@@ -193,12 +199,12 @@ Ltree l;
             /* whether it is dimension or not */
             /* arguments : name of a table */
             /* arguments : filter name */
-            /* return : if you found it or not 
+            /* return : if you found it or not
                         [ 1 -> found himself ]
                         [ 0 -> if not found  ]
              */
         int Graph::is_dimension(string Table, string filter){
-            if (tables[Table][filter] == 1) {
+            if (tables[Table][filter].compare("dimension") == 0) {
                 return 1;
             }else return 0;
         }
@@ -247,14 +253,14 @@ Ltree l;
          }
          return res;
         }
-         
+
 /* ........................................................................ */
     /* ..................................................... */
     /* .....................LTREE.......................... */
     /* ..................................................... */
-            /* 
+            /*
                calculates the parent
-                arguments : childs index 
+                arguments : childs index
                 retuens : return parrent
             */
         string Ltree::Parent(int indice){
@@ -266,8 +272,8 @@ Ltree l;
             }
 
 
-            /* 
-                left child 
+            /*
+                left child
                 arguments : fathers index
                 retuens : return son of the left
             */
@@ -280,8 +286,8 @@ Ltree l;
             }
 
 
-            /* 
-                left child index 
+            /*
+                left child index
                 arguments : fathers index
                 retuens : return the left child index
             */
@@ -292,8 +298,8 @@ Ltree l;
             }else{ return aux; }
             }
 
-            /* 
-                rigth child 
+            /*
+                rigth child
                 arguments : fathers index
                 retuens : return son of the rigth
             */
@@ -305,8 +311,8 @@ Ltree l;
             }else{ return ltree[aux]; }
             }
 
-            /*  
-                rigth child index 
+            /*
+                rigth child index
                 arguments : fathers index
                 retuens : return the rigth child index
             */
@@ -316,8 +322,8 @@ Ltree l;
                 return -1;
             }else{ return aux; }
             }
-        
-            /* 
+
+            /*
                 computes the list of all children
                 arguments : fathers index
                 retuens : returns the list of all children
@@ -337,14 +343,14 @@ Ltree l;
                return res;
            }
 
-            /* 
+            /*
                 adds a filter to the tree
                 arguments : filter
                 arguments : index
             */
         void Ltree::add(string value ,int indice ){ ltree[indice] = value; }
 
-            /* 
+            /*
                 computes the index of a filter
                 arguments : filter
                 return : index
@@ -358,7 +364,7 @@ Ltree l;
            return -1;
         }
 
-            /* 
+            /*
                 change the position of one filter,
                 by the position of the other
                 arguments : index1
@@ -372,7 +378,7 @@ Ltree l;
         }
 
 
-            /* 
+            /*
                 calculates the father, common to both,closer
                 arguments : index1
                 arguments : index2
@@ -390,7 +396,7 @@ Ltree l;
             return "NULL";
         }
 
-            /* 
+            /*
                 merge the current vector with another
                 arguments : vector
             */
@@ -402,7 +408,7 @@ Ltree l;
             }
         }
 
-            /* 
+            /*
                 separates into two trees (AUX)
                 arguments : vector
                 arguments : index1
@@ -419,7 +425,7 @@ Ltree l;
             return res;
         }
 
-            /* 
+            /*
                 separates into two trees
                 arguments : index1
                 arguments : index2
@@ -429,7 +435,7 @@ Ltree l;
             return  Ltree::split_aux(res,indice1,indice2);
         }
 
-            /* 
+            /*
                 add a tree to the current tree
                 arguments : vector
                 arguments : current tree index
@@ -444,7 +450,7 @@ Ltree l;
                 }
         }
 
-            /* 
+            /*
                 search for the closest node that is an or
                 arguments : parent index
                 arguments : favourite child
@@ -474,11 +480,11 @@ Ltree l;
          }
          if (aux.size()) {
              return ltree[aux[0]];
-         }else {return "NULL";}
+         }else {return "NULL";}//nunca acontece em teoria mas quem sabe
      }
 
 
-        /* 
+        /*
             search for the closest node that is an or
             arguments : parent index
             arguments : favourite child
@@ -489,7 +495,7 @@ Ltree l;
             return -1;
         }else{ return aux; }
     }
-        /* 
+        /*
             all the parents of given node
             arguments : child index
             return : vector with all parents
@@ -503,6 +509,37 @@ Ltree l;
            res.push_back(ind);
        }
        return res;
+    }
+
+    string Ltree::all_same_table_aux(int indice){
+      if(ltree[indice].compare("AND")==0 || ltree[indice].compare("OR")==0){
+        return all_same_table(ind_left_child(indice))
+      }else{
+        smatch m;
+        regex e ("\\ [^.]*\\.");
+        regex_search (ltree[indice],m,e);
+        string s = m[0];
+        return s;
+      }
+
+
+    }
+    bool Ltree::all_same_table(int indice){
+      string s =all_same_table_aux(indice);
+      vector<string> aux = childs(indice);
+      smatch m;
+      regex e ("\\ [^.]*\\.");
+      string s2;
+      for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
+        regex_search (it,m,e);
+        s2 = m[0];
+        if(s2.compare(s) != 0){
+          return false
+        }
+      }
+      return true
+
+
     }
 
     void Ltree::search_nextOR(Graph g ,int ind){
@@ -534,7 +571,7 @@ Ltree l;
         }
       }
     }
-    
+
      int Ltree::push_aux(int ind){
          if (left_child(ind)!= "NULL"){
              int child = ind_left_child(ind);
@@ -554,7 +591,7 @@ Ltree l;
      int last = push_aux(ind);
      ltree.erase(ltree.begin() + last);
      }
-     
+
 
      void Ltree::func(int ind){
        if((ltree[ind]=="AND" || ltree[ind]=="OR")){
@@ -626,19 +663,19 @@ void graphWorkAux(int x){
 void joinAtr(string start){
   //pega nos filtros no mesmo atributo
   //map<string,int> work = g.tables[start];
-  map<string,int> work( g.tables[start] );
+  map<string,string> work( g.tables[start] );
   vector<string> v;
   //vector<string,int> new_elements;
-  map<string,int> new_elements;
-  for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
+  map<string,string> new_elements;
+  for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     //vector<string> v = g.filter[s];
     vector<string> v ( g.filter[s] );
-    if(it->second == 1){ //se for medida
-      new_elements.insert(pair<string,int>(it->first,it->second));
-    }else{                //se for dimensao
+    if(it->second.compare("measure") == 0){ //se for medida
+      new_elements.insert(pair<string,string>(it->first,it->second));
+    }else{
       joinAtrD(s,v);
-      new_elements.insert(pair<string,int>(a,it->second));
+      new_elements.insert(pair<string,string>(a,it->second));
     }
   }
   g.tables[start] = new_elements;
@@ -671,12 +708,12 @@ void joinFilters(string start){
   //pega nos filtros da mesma tabela
   string aux;
   string aux2;
-  map<string,int> work = g.tables[start];
+  map<string,string> work = g.tables[start];
   vector<string> medidas;
   vector<string> dimensoes;
-  for(map<string,int>::iterator it = work.begin(); it != work.end(); ++it) {
+  for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
-    if(it->second == 0){ //se for medida
+    if(it->second.compare("measure") == 0){ //se for medida
       vector<string> filters= g.filter[s];
       for(vector<string>::iterator it = filters.begin(); it != filters.end(); ++it){
         medidas.push_back(*it);
@@ -758,8 +795,8 @@ void removeTable(string start){
     if(it->at(2).compare(start)){
       next();
       cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
-      map<string,int> aux = g.tables[start];
-      aux[a] = 1;           //possivel zona a melhorar
+      map<string,string> aux = g.tables[start];
+      aux[a] = "dimension";           //possivel zona a melhorar
       g.tables[start] = aux;
     }
     else{
@@ -801,7 +838,7 @@ void cleanexp(){
     current_expression.clear();
     current_expression2.clear();
 }
-    
+
 void addexp(string exp){
     if (current_expression.empty()){
         current_expression = exp;
@@ -821,12 +858,3 @@ void aux(string exp){
 int main(){
     return 0;
 }
-
-
-
-
-
-
-
-
-

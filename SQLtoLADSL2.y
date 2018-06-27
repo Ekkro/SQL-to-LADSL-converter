@@ -72,23 +72,45 @@ Join           : JOIN                                                           
                | FULL JOIN                                                         { ; }
                ;
 
-whereList      : whereListSub                                                      { l.ltree[current] = current_expression; }
-               | whereList OL whereList                                            { ; }
-               | '(' whereList ')'                                                 { ; }
+whereList      : ExpR                                                              { ; }
                ;
 
-whereListSub   : Expr                                                              {aux($1,current_expression,current_expression2); cleanexp();}
+ExpR           : Exp BBOP Exp                                                      { ; }
+               | Exp                                                               { ; }
+               ;
+
+Exp            : Term                                                              { ; }
+               | Exp OR Term                                                       { ; }
+               ;
+
+Term           : Factor                                                            { ; }
+               | Term AND Factor                                                   { ; }
+               | Term IBOP Factor                                                  { ; }
+/*             | Term '/' Factor                                                   { ; }
+               | Term '+' Factor                                                   { ; }
+               | Term '-' Factor                                                   { ; }
+               | Term '*' Factor                                                   { ; }
+*/
+               | NAME '(' Term ')'                                                 { ; }
+               | NOT Factor                                                        { ; }
+               ;
+
+Factor         : Literal                                                           { ; }
+               | '(' ExpR ')'                                                      { ; }
+               ;
+/*
                | NAME IN Inlist                                                    { ; }
                | NAME BETWEEN Literal AND Literal                                  { ; }
                | EXISTS '(' SelectBlock ')' ';'                                    { ; }
-               | Literal LIKE Literal                                              { ; }// expressao regular
+               | Literal LIKE REGEX                                                { ; }// expressao regular
                ;
+*/
 
-groupbyList    : groupbyListSub                                                    {$$ =$1  ; }
+groupbyList    : groupbyListSub                                                    {$$ =$1; }
                | groupbyList ',' groupbyListSub                                    { ; }
                ;
 
-groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                           { ; }
+groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal                          { ; }
                | Literal                                                           {string Table = getTable($1); add_groupby(Table,$1);}
                ;
 
@@ -103,14 +125,14 @@ orderbyListSub : NAME                                                           
 
 order          : ASC                                                               { $$ = $1; }
                | DESC                                                              { $$ = $1; }
-               ;
+/*               ;
 
 OL             : AND                                                               {$$ = $1 ; }
                | ANDOP                                                             {$$ = $1 ; }
                | OR                                                                {$$ = $1 ; }
                ;
-
-Literal        : NAME                                                              {$$ = $1 ; }
+*/
+Literal         : NAME                                                              {$$ = $1 ; }
                | NAME'.'NAME                                                       {$$ = $3 ; addexp($3);}
                /* | NAME'_'NAME                                                       {$$ = $3 ; addexp($3);}*/
                | DATE                                                              {$$ = $1 ; }
@@ -120,7 +142,7 @@ Literal        : NAME                                                           
                | ALL                                                               {$$ = $1 ; }
                ;
 
-
+/*
 Expr           : Literal                                                           {$$ = $1 ; }
                | NOT Expr                                                          {$$ = $1 + $2 ; }
                | Expr BOP Expr                                                     {$$ = $1+$2+$3 ; }
@@ -129,9 +151,9 @@ Expr           : Literal                                                        
                | '('SelectBlock')'                                                 { ; }
                ;
 
-
+*/
 Inlist         : Literal                                                           {$$ = $1 ; }
-               | Literal  ','  Inlist                                              {$$ = $1 ; }
+               | InList ',' Literal                                                {$$ = $3 ; }
                ;
 
 %%
