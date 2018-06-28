@@ -521,8 +521,6 @@ Ltree l;
         string s = m[0];
         return s;
       }
-
-
     }
     bool Ltree::all_same_table(int indice){
       string s =all_same_table_aux(indice);
@@ -531,15 +529,15 @@ Ltree l;
       regex e ("\\ [^.]*\\.");
       string s2;
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
-        regex_search (it,m,e);
-        s2 = m[0];
-        if(s2.compare(s) != 0){
-          return false
+        if(it*.compare("AND")!=0 && it*.compare("OR")!=0){
+          regex_search (it,m,e);
+          s2 = m[0];
+          if(s2.compare(s) != 0){
+            return false
+          }
         }
       }
       return true
-
-
     }
 
     void Ltree::search_nextOR(Graph g ,int ind){
@@ -854,6 +852,23 @@ void aux(string exp){
         g.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
     }
 }
+
+void resolve(int x){
+  if(l.ltree[x].compare("OR") == 0){
+
+  }
+
+
+
+}
+
+
+
+
+
+
+
+
 
 int main(){
     return 0;
