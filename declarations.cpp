@@ -400,6 +400,13 @@ Ltree l;
                return res;
            }
 
+        void Ltree::erasechilds(int ind){ 
+            if (ltree[ind].compare("NULL")) {
+                ltree[ind] = "NULL";
+                erasechilds(ind_left_child(ind));
+                erasechilds(ind_right_child(ind));
+            }
+        }
             /*
                 adds a filter to the tree
                 arguments : filter
@@ -825,19 +832,21 @@ void joinGroupbyAux(string gb){
 void removeTable(string start){
   vector<vector <string> > Keys;
   string alpha = a;
-  for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    if(it->at(2).compare(start)){
-      next();
-      cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
-      map<string,string> aux = g.tables[start];
-      aux[a] = "dimension";           //possivel zona a melhorar
-      g.tables[start] = aux;
-    }
-    else{
-      Keys.push_back(*it);
-    }
-  }
-  g.join = Keys;
+  if (g.tables[start].size() == 1) {
+      for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
+        if(it->at(2).compare(start)){
+          next();
+          cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
+          map<string,string> aux = g.tables[it->at(1)];
+          aux[a] = "dimension";           
+          g.tables[it->at(1)] = aux;
+        }
+        else{
+          Keys.push_back(*it);
+        }
+      }
+      g.join = Keys;
+      }
 }
 
 string giveMeStart(string root){
@@ -889,12 +898,64 @@ void aux(string exp){
     }
 }
 
+void merge(vector<string> v){
+  // g
+  // mainGraph
+  pair<string,string> aux;
+  string table;
+  for(map<string,map<string, string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
+      if (!(*it).empty()) {
+          for(map<string, string> >::iterator i = it->second.begin(); i != it->second.end(); ++it) {
+              aux = pair<string,string>(i->first,i->second);
+              table = it->first;
+              break;
+          }
+          break;
+    }
+  }
+
+    mainGraph.tables[table].insert(aux);
+   //empty table 
+   vector<string> emptytable;
+
+    map<string, vector<string> > newfilter;
+    for(map<string,vector<string> >::iterator it = mainGraph.filter.begin(); it != mainGraph.filter.end(); ++it) {
+        vector<string> aux;
+        for(vector<string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
+            if (!has(v, *i)) {
+                aux.push_back(*i);
+            }
+        }
+        if (!aux.empty()) {
+            newfilter.insert(pair<string,vector<string> >(it->first,aux));
+        }else{ emptytable.push_back(it->first);}
+        //acrescenta no empty
+        }
+        mainGraph.filter = newfilter;
+        vector<pair<string,string> > eraseIt;
+
+    for(map<string,map<string, string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+       // se it->second->first in empty elimina map<string,string> 
+        for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
+            if (has(emptytable, i->first)) {
+                eraseIt.insert(it->first, it->second);
+            }
+        }
+    }
+    for(vector<pair<string,string> >::iterator it = eraseIt.begin(); it != eraseIt.end(); ++it) {
+        mainGraph.tables[it->first].erase(it->second);
+    }
+
+}
+
+
 void resolveS(int indice, string type){
-  g = mainGraph.clone(l.childs(indice));
+  vector<string> v =  l.childs(indice);
+  g = mainGraph.clone(v);
   graphWork(type);
   l.ltree[indice] = a;
-  //falta aqui uma funcao que remove todos o filhos de indice que nao sejam NULL
-  merge(); //between mainGraph and g...
+  erasechilds(indice);
+  merge(v); //between mainGraph and g...
   //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
 
