@@ -669,51 +669,38 @@ void graphWorkAux(int x,string type){
   if(x == 1)removeTable(start);
 }
 
-void joinAtr(string start){
+void joinAtr(string start, string type){
   //pega nos filtros no mesmo atributo
   //map<string,int> work = g.tables[start];
-  map<string,string> 1work( g.tables[start] );
+  map<string,string> work( g.tables[start] );
   vector<string> v;
   //vector<string,int> new_elements;
   map<string,string> new_elements;
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     //vector<string> v = g.filter[s];
-    vector<string> v ( g.filter[s] );
     if(it->second.compare("measure") == 0){ //se for medida
       new_elements.insert(pair<string,string>(it->first,it->second));
     }else{
-      joinAtrD(s,v);
+      vector<string> v ( g.filter[s] );
+      joinAtrD(v,type);
       new_elements.insert(pair<string,string>(a,it->second));
     }
   }
   g.tables[start] = new_elements;
 }
 
-void joinAtrD(string s, vector<string> v){
-  vector<string> resolvidos;
-  vector<string> relacoes;
-  resolvidos.push_back(v[0]);
-  for(int x = 1; x < v.size(); x++){
-    relacoes.push_back(relacao_entre(resolvidos,v[x]));
-    resolvidos.push_back(v[x]);
-  }
+void joinAtrD(vector<string> v, string type){
   next();
-  if(resolvidos.size()>1){
-    cout << a << "=filter(" << s <<resolvidos.back() << relacoes.back();
-    for(int x = v.size()-2; x > 0; x--){
-      cout << "("<< s << resolvidos[x] << relacoes[x-1];
+  if(v.size()>1){
+    cout << a << "=filter(" << v[0];
+    for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+      cout << type << it;
     }
-    cout << s << resolvidos[0];
-    for(int x = 0; x < relacoes.size()-1; x++)
-      cout << ")";
     cout << ")\n";
-  }else{
-    cout << a << "=filter("  << v[0] << ")\n";
-  }
 }
 
-void joinFilters(string start){
+void joinFilters(string start, string type){
   //pega nos filtros da mesma tabela
   string aux;
   string aux2;
@@ -731,55 +718,37 @@ void joinFilters(string start){
       dimensoes.push_back(s);
     }
   }
-  if( medidas.size() == 1){
-    aux = medidas[0];
-  }else{
-    joinFiltersM(medidas);
-    aux = a;
-  }
+  joinAtrD(medidas,type);
+  aux = a;
   if( dimensoes.size() == 1){
     aux2 = medidas[0];
   }else{
-    joinFiltersD(dimensoes);
+    joinFiltersD(dimensoes,type);
     aux2 = a;
   }
   if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
-    string relacao =relacao_entre_arrays(medidas,dimensoes);
-    cout << a << "=" << relacao << "(" << aux << "," << aux2 << ")\n";
-  }
-}
-
-void joinFiltersM(vector<string> v){
-  vector<string> resolvidos;
-  vector<string> relacoes;
-  resolvidos.push_back(v[0]);
-  for(int x = 1; x < v.size(); x++){
-    relacoes.push_back(relacao_entre(resolvidos,v[x]));
-    resolvidos.push_back(v[x]);
-  }
-  next();  // a > 3 ; b < 6 ; u > 6
-  if(resolvidos.size()>1){
-    cout << a << "=filter(" << resolvidos.back() << relacoes.back();
-    for(int x = v.size()-2; x > 0; x--){
-      cout << "("<< resolvidos[x] << relacoes[x-1];
+    if(type.compare("AND") == 0){
+      cout << a << "=" << "krao" << "(" << aux << "," << aux2 << ")\n";
+    else{
+      cout << a << "=" << "kraoOR" << "(" << aux << "," << aux2 << ")\n";
     }
-    cout << v[0];
-    for(int x = 0; x < relacoes.size()-1; x++)
-      cout << ")";
-    cout << ")\n";
-  }else{
-    cout << a << "=filter("  << v[0] << ")\n";
   }
 }
 
-void joinFiltersD(vector<string> v){
+void joinFiltersD(vector<string> v, string type){
   next();
-  cout << a << "= krao(" << v[0] << "," << v[1] << ")\n";
-  for(int x = 1; x < v.size() ; x++){
+  string s;
+  if(type.compare("AND") == 0){
+    s = "krao";
+  }else{
+    s = "kraoOR";
+  }
+  cout << a << "="<< s <<"(" << v[0] << "," << v[1] << ")\n";
+  for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
     string aux = a;
     next();
-    cout << a << "=" << "krao(" << aux << "," << v[x] << ")\n";
+    cout << a << "=" << s <<"(" << aux << "," << *it << ")\n";
   }
 }
 
@@ -870,10 +839,6 @@ void resolveS(int indice, string type){
   l.ltree[indice] = a;
   merge(); //between mainGraph and g
 }
-
-
-
-
 
 
 void resolve(int indice){
