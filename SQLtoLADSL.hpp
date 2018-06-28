@@ -258,6 +258,8 @@ class Ltree {
             */
         vector<string> childs(int ind);
 
+        void erasechilds(int ind); 
+
             /*
                 adds a filter to the tree
                 arguments : filter
@@ -342,6 +344,7 @@ class Ltree {
 
     string Ltree::all_same_table_aux(int indice);
 
+    bool dependencies(int indice);
 
     void search_nextOR(Graph g ,int ind);
 
