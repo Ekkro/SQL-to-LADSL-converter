@@ -10,6 +10,7 @@ using namespace std;
 
 
 string a = "A";
+Graph mainGraph;
 Graph g;
 Ltree l;
 
@@ -577,8 +578,6 @@ Ltree l;
         string s = m[0];
         return s;
       }
-
-
     }
     bool Ltree::all_same_table(int indice){
       string s =all_same_table_aux(indice);
@@ -587,15 +586,25 @@ Ltree l;
       regex e ("\\ [^.]*\\.");
       string s2;
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
-        regex_search (it,m,e);
-        s2 = m[0];
-        if(s2.compare(s) != 0){
-          return false
+        if(it*.compare("AND")!=0 && it*.compare("OR")!=0){
+          regex_search (it,m,e);
+          s2 = m[0];
+          if(s2.compare(s) != 0){
+            return false
+          }
         }
       }
       return true
+    }
 
-
+    bool Ltree::dependencies(int indice){
+      if(ltree[indice].compare("NULL") == 0){
+        return true;
+      }
+      if(ltree[indice].compare("OR") == 0){
+        return all_same_table(indice);
+      }
+      return dependencies(ind_left_child(indice)) && dependencies(ind_right_child(indice));
     }
 
     void Ltree::search_nextOR(Graph g ,int ind){
@@ -696,27 +705,27 @@ Ltree l;
 
 
 
-void graphWork(){
-  while (!g.join.empty()) {
-    graphWorkAux(1);
+void graphWork(string type){
+  while (!g.filters.empty()) {// parar quando só houver uma tabela com atributos
+    graphWorkAux(1,type);
   }
-  graphWorkAux(0);
+  graphWorkAux(0,type);
 }
 
-void graphWorkAux(int x){
+void graphWorkAux(int x,string type){
   //pega nas pontas
   string start = giveMeStart(g.root);
   //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
-  joinAtr(start);
+  joinAtr(start, type);
   //juntar tudo
-  joinFilters(start);
+  joinFilters(start, type);
   //juntar groupbys
-  joinGroupby(start);
+  joinGroupby(start, type);
   //remover tabela e adicionar como atributo às seguintes
   if(x == 1)removeTable(start);
 }
 
-void joinAtr(string start){
+void joinAtr(string start, string type){
   //pega nos filtros no mesmo atributo
   //map<string,int> work = g.tables[start];
   map<string,string> work( g.tables[start] );
@@ -726,41 +735,28 @@ void joinAtr(string start){
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     //vector<string> v = g.filter[s];
-    vector<string> v ( g.filter[s] );
     if(it->second.compare("measure") == 0){ //se for medida
       new_elements.insert(pair<string,string>(it->first,it->second));
     }else{
-      joinAtrD(s,v);
+      vector<string> v ( g.filter[s] );
+      joinAtrD(v,type);
       new_elements.insert(pair<string,string>(a,it->second));
     }
   }
   g.tables[start] = new_elements;
 }
 
-void joinAtrD(string s, vector<string> v){
-  vector<string> resolvidos;
-  vector<string> relacoes;
-  resolvidos.push_back(v[0]);
-  for(int x = 1; x < v.size(); x++){
-    relacoes.push_back(relacao_entre(resolvidos,v[x]));
-    resolvidos.push_back(v[x]);
-  }
+void joinAtrD(vector<string> v, string type){
   next();
-  if(resolvidos.size()>1){
-    cout << a << "=filter(" << s <<resolvidos.back() << relacoes.back();
-    for(int x = v.size()-2; x > 0; x--){
-      cout << "("<< s << resolvidos[x] << relacoes[x-1];
+  if(v.size()>1){
+    cout << a << "=filter(" << v[0];
+    for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+      cout << type << it;
     }
-    cout << s << resolvidos[0];
-    for(int x = 0; x < relacoes.size()-1; x++)
-      cout << ")";
     cout << ")\n";
-  }else{
-    cout << a << "=filter("  << v[0] << ")\n";
-  }
 }
 
-void joinFilters(string start){
+void joinFilters(string start, string type){
   //pega nos filtros da mesma tabela
   string aux;
   string aux2;
@@ -778,55 +774,37 @@ void joinFilters(string start){
       dimensoes.push_back(s);
     }
   }
-  if( medidas.size() == 1){
-    aux = medidas[0];
-  }else{
-    joinFiltersM(medidas);
-    aux = a;
-  }
+  joinAtrD(medidas,type);
+  aux = a;
   if( dimensoes.size() == 1){
     aux2 = medidas[0];
   }else{
-    joinFiltersD(dimensoes);
+    joinFiltersD(dimensoes,type);
     aux2 = a;
   }
   if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
-    string relacao =relacao_entre_arrays(medidas,dimensoes);
-    cout << a << "=" << relacao << "(" << aux << "," << aux2 << ")\n";
-  }
-}
-
-void joinFiltersM(vector<string> v){
-  vector<string> resolvidos;
-  vector<string> relacoes;
-  resolvidos.push_back(v[0]);
-  for(int x = 1; x < v.size(); x++){
-    relacoes.push_back(relacao_entre(resolvidos,v[x]));
-    resolvidos.push_back(v[x]);
-  }
-  next();  // a > 3 ; b < 6 ; u > 6
-  if(resolvidos.size()>1){
-    cout << a << "=filter(" << resolvidos.back() << relacoes.back();
-    for(int x = v.size()-2; x > 0; x--){
-      cout << "("<< resolvidos[x] << relacoes[x-1];
+    if(type.compare("AND") == 0){
+      cout << a << "=" << "krao" << "(" << aux << "," << aux2 << ")\n";
+    else{
+      cout << a << "=" << "kraoOR" << "(" << aux << "," << aux2 << ")\n";
     }
-    cout << v[0];
-    for(int x = 0; x < relacoes.size()-1; x++)
-      cout << ")";
-    cout << ")\n";
-  }else{
-    cout << a << "=filter("  << v[0] << ")\n";
   }
 }
 
-void joinFiltersD(vector<string> v){
+void joinFiltersD(vector<string> v, string type){
   next();
-  cout << a << "= krao(" << v[0] << "," << v[1] << ")\n";
-  for(int x = 1; x < v.size() ; x++){
+  string s;
+  if(type.compare("AND") == 0){
+    s = "krao";
+  }else{
+    s = "kraoOR";
+  }
+  cout << a << "="<< s <<"(" << v[0] << "," << v[1] << ")\n";
+  for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
     string aux = a;
     next();
-    cout << a << "=" << "krao(" << aux << "," << v[x] << ")\n";
+    cout << a << "=" << s <<"(" << aux << "," << *it << ")\n";
   }
 }
 
@@ -905,11 +883,51 @@ void addexp(string exp){
 
 void aux(string exp){
     if (current_expression2.empty()){
-        g.add_map_filter( current_expression, exp);
+        mainGraph.add_map_filter( current_expression, exp);
     }else {
-        g.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
+        mainGraph.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
     }
 }
+
+void resolveS(int indice, string type){
+  g = mainGraph.clone(l.childs(indice));
+  graphWork(type);
+  l.ltree[indice] = a;
+  //falta aqui uma funcao que remove todos o filhos de indice que nao sejam NULL
+  merge(); //between mainGraph and g...
+  //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
+}
+
+
+void resolve(int indice){
+  if(l.ltree[indice].compare("OR") == 0){
+    resolve(l.ind_left_child(indice));
+    resolve(l.ind_right_child(indice));
+    if(l.dependencies(indice) != true){
+      resolveS(indice,"OR");
+    }else{
+      dot_all(indice);/*----------------*/
+      resolve(indice);
+    }
+  }
+  if(l.ltree[indice].compare("AND") == 0){
+    if(l.childs(indice).has("OR")){/
+      resolve(l.ind_left_child(indice));
+      resolve(l.ind_right_child(indice));
+      resolveS(indice,"AND");
+    }else{
+      resolveS(indice,"AND");
+    }
+  }
+}
+
+
+
+
+
+
+
+
 
 int main(){
     return 0;
