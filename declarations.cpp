@@ -10,6 +10,7 @@ using namespace std;
 
 
 string a = "A";
+Graph mainGraph;
 Graph g;
 Ltree l;
 
@@ -540,6 +541,16 @@ Ltree l;
       return true
     }
 
+    bool Ltree::dependencies(int indice){
+      if(ltree[indice].compare("NULL") == 0){
+        return true;
+      }
+      if(ltree[indice].compare("OR") == 0){
+        return all_same_table(indice);
+      }
+      return dependencies(ind_left_child(indice)) && dependencies(ind_right_child(indice));
+    }
+
     void Ltree::search_nextOR(Graph g ,int ind){
       if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(ind))==0)){
             search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
@@ -638,22 +649,22 @@ Ltree l;
 
 
 
-void graphWork(){
-  while (!g.join.empty()) {
-    graphWorkAux(1);
+void graphWork(string type){
+  while (!g.filters.empty()) {// parar quando só houver uma tabela com atributos
+    graphWorkAux(1,type);
   }
-  graphWorkAux(0);
+  graphWorkAux(0,type);
 }
 
-void graphWorkAux(int x){
+void graphWorkAux(int x,string type){
   //pega nas pontas
   string start = giveMeStart(g.root);
   //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
-  joinAtr(start);
+  joinAtr(start, type);
   //juntar tudo
-  joinFilters(start);
+  joinFilters(start, type);
   //juntar groupbys
-  joinGroupby(start);
+  joinGroupby(start, type);
   //remover tabela e adicionar como atributo às seguintes
   if(x == 1)removeTable(start);
 }
@@ -661,7 +672,7 @@ void graphWorkAux(int x){
 void joinAtr(string start){
   //pega nos filtros no mesmo atributo
   //map<string,int> work = g.tables[start];
-  map<string,string> work( g.tables[start] );
+  map<string,string> 1work( g.tables[start] );
   vector<string> v;
   //vector<string,int> new_elements;
   map<string,string> new_elements;
@@ -847,19 +858,43 @@ void addexp(string exp){
 
 void aux(string exp){
     if (current_expression2.empty()){
-        g.add_map_filter( current_expression, exp);
+        mainGraph.add_map_filter( current_expression, exp);
     }else {
-        g.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
+        mainGraph.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
     }
 }
 
-void resolve(int x){
-  if(l.ltree[x].compare("OR") == 0){
+void resolveS(int indice, string type){
+  g = mainGraph.clone(l.childs(indice));
+  graphWork(type);
+  l.ltree[indice] = a;
+  merge(); //between mainGraph and g
+}
 
+
+
+
+
+
+void resolve(int indice){
+  if(l.ltree[indice].compare("OR") == 0){
+    resolve(l.ind_left_child(indice));
+    resolve(l.ind_right_child(indice));
+    if(l.dependencies(indice) != true){
+      resolveS(indice,"OR");/*----------------*/
+    }else{
+      dot_all(indice);/*----------------*/
+    }
   }
-
-
-
+  if(l.ltree[indice].compare("AND") == 0){
+    if(l.childs(indice).has("OR")){/*----------------*/
+      resolve(l.ind_left_child(indice));
+      resolve(l.ind_right_child(indice));
+      resolveS(indice,"AND");/*----------------*/
+    }else{
+      resolveS(indice,"AND");/*----------------*/
+    }
+  }
 }
 
 
