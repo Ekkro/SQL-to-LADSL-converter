@@ -837,7 +837,9 @@ void resolveS(int indice, string type){
   g = mainGraph.clone(l.childs(indice));
   graphWork(type);
   l.ltree[indice] = a;
-  merge(); //between mainGraph and g
+  //falta aqui uma funcao que remove todos o filhos de indice que nao sejam NULL
+  merge(); //between mainGraph and g...
+  //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
 
 
@@ -846,18 +848,19 @@ void resolve(int indice){
     resolve(l.ind_left_child(indice));
     resolve(l.ind_right_child(indice));
     if(l.dependencies(indice) != true){
-      resolveS(indice,"OR");/*----------------*/
+      resolveS(indice,"OR");
     }else{
       dot_all(indice);/*----------------*/
+      resolve(indice);
     }
   }
   if(l.ltree[indice].compare("AND") == 0){
-    if(l.childs(indice).has("OR")){/*----------------*/
+    if(l.childs(indice).has("OR")){/
       resolve(l.ind_left_child(indice));
       resolve(l.ind_right_child(indice));
-      resolveS(indice,"AND");/*----------------*/
+      resolveS(indice,"AND");
     }else{
-      resolveS(indice,"AND");/*----------------*/
+      resolveS(indice,"AND");
     }
   }
 }
