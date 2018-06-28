@@ -18,6 +18,62 @@ Ltree l;
     /* .....................GRAPH.......................... */
     /* ..................................................... */
 
+        bool has(vector<string> v, string s){
+            return  (find(v.begin(), v.end(), s) != v.end()); 
+        }
+
+        Graph Graph::clone(vector<string> v){
+            Graph newgraph;
+            //root
+            //join
+            //retirar de filter os filtros
+            newgraph.root = root;
+            newgraph.join = vector<vector<string> >(join);
+           // newgraph.tables = map<string,map<string,string> >(tables);
+            
+            map<string, vector<string> > f;
+            map<string,map<string,string> > t;
+            vector<pair <string,string> > g;
+            vector<string> notEmpty;
+
+            for(map<string,vector<string> >::iterator it = filter.begin(); it != filter.end(); ++it) {
+                vector<string> aux;
+                for(vector<string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
+                    if (has(v, *i)) {
+                        aux.push_back(*i);
+                    }
+                }
+                if (aux.empty()) {
+                    notEmpty.push_back(it->first);
+                    f.insert(pair<string, vector<string> >((it->first), aux));
+                }
+            }
+
+            newgraph.filter = f;
+
+            for(map<string,map<string, string> >::iterator it = filter.begin(); it != filter.end(); ++it) {
+                map<string, string> aux;
+                for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
+                    if (has(notEmpty, i->first)) {
+                        aux.insert(pair<string, string> (i->first, i->second);
+                    }
+                }
+                t.insert(pair<string, map<string, string> > ((it->first), aux));
+            }
+            
+            newgraph.tables= t;
+            
+            for(vector<pair<string, string> >::iterator it = groupby.begin(); it != groupby.end(); ++it) {
+                if (has(notEmpty,it->second)) {
+                    g.push_back(*it);
+                }
+            }
+
+            newgraph.groupby = g;
+
+            return newgraph;
+
+        }
 
         void Graph::newRoot(string newRoot){
             root = newRoot;

@@ -62,6 +62,7 @@ class Graph {
 
     /* ..................................................... */
 
+        Graph clone(vector<string> v);
 
         void newRoot(string newRoot);
 
@@ -337,6 +338,9 @@ class Ltree {
             return : vector with all parents
         */
     vector<int> parents(int i);
+
+
+    string Ltree::all_same_table_aux(int indice);
 
 
     void search_nextOR(Graph g ,int ind);
