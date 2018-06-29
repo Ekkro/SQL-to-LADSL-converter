@@ -13,12 +13,23 @@
 
 %token <string> NAME BOP NOT
 
+%type <pair<string,string> >
+
+
+/*
+union para definir tipos
+token para terminais
+type para nao terminais
+
+*/
+/*
 %right '='
 %left OP
 %right NOT
 %left COMPARISSON
 %left SHIFT
 %left BOP
+*/
 %%
 
 SelectBlock    : SELECT     selectList
@@ -86,17 +97,26 @@ Exp            : Term                                                           
 Term           : Factor                                                            { ; }
                | Term AND Factor                                                   { ; }
                | Term IBOP Factor                                                  { ; }
+               | Term From Factor                                                  { ; }
 /*             | Term '/' Factor                                                   { ; }
                | Term '+' Factor                                                   { ; }
                | Term '-' Factor                                                   { ; }
                | Term '*' Factor                                                   { ; }
 */
-               | NAME '(' Term ')'                                                 { ; }
-               | NOT Factor                                                        { ; }
                ;
 
 Factor         : Literal                                                           { ; }
+               | NAME '(' Args ')'                                                 { ; }
+               | NOT Factor                                                        { ; }
                | '(' ExpR ')'                                                      { ; }
+               ;
+
+Args           : Args1                                                             { ; }
+               |                                                                   { ; }
+               ;
+
+Args1          : Exp
+               | Args1 ',' Exp                                                     { ; }
                ;
 /*
                | NAME IN Inlist                                                    { ; }
@@ -132,15 +152,15 @@ OL             : AND                                                            
                | OR                                                                {$$ = $1 ; }
                ;
 */
-Literal         : NAME                                                              {$$ = $1 ; }
-               | NAME'.'NAME                                                       {$$ = $3 ; addexp($3);}
-               /* | NAME'_'NAME                                                       {$$ = $3 ; addexp($3);}*/
+Literal        : NAME                                                              {string s = getTable($1); $$ = s+"."+$1 ;}
+               | NAME'.'NAME                                                       {$$ = $1+$3 ; addexp($1+$3);}//?
                | DATE                                                              {$$ = $1 ; }
                | CONSTANT                                                          {$$ = $1 ; }
                | BOOL                                                              {$$ = $1 ; }
                | ANY                                                               {$$ = $1 ; }
                | ALL                                                               {$$ = $1 ; }
                ;
+
 
 /*
 Expr           : Literal                                                           {$$ = $1 ; }

@@ -20,7 +20,7 @@ Ltree l;
     /* ..................................................... */
 
         bool has(vector<string> v, string s){
-            return  (find(v.begin(), v.end(), s) != v.end()); 
+            return  (find(v.begin(), v.end(), s) != v.end());
         }
 
         Graph Graph::clone(vector<string> v){
@@ -31,7 +31,7 @@ Ltree l;
             newgraph.root = root;
             newgraph.join = vector<vector<string> >(join);
            // newgraph.tables = map<string,map<string,string> >(tables);
-            
+
             map<string, vector<string> > f;
             map<string,map<string,string> > t;
             vector<pair <string,string> > g;
@@ -61,9 +61,9 @@ Ltree l;
                 }
                 t.insert(pair<string, map<string, string> > ((it->first), aux));
             }
-            
+
             newgraph.tables= t;
-            
+
             for(vector<pair<string, string> >::iterator it = groupby.begin(); it != groupby.end(); ++it) {
                 if (has(notEmpty,it->second)) {
                     g.push_back(*it);
@@ -400,7 +400,7 @@ Ltree l;
                return res;
            }
 
-        void Ltree::erasechilds(int ind){ 
+        void Ltree::erasechilds(int ind){
             if (ltree[ind].compare("NULL")) {
                 ltree[ind] = "NULL";
                 erasechilds(ind_left_child(ind));
@@ -838,7 +838,7 @@ void removeTable(string start){
           next();
           cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
           map<string,string> aux = g.tables[it->at(1)];
-          aux[a] = "dimension";           
+          aux[a] = "dimension";
           g.tables[it->at(1)] = aux;
         }
         else{
@@ -915,7 +915,7 @@ void merge(vector<string> v){
   }
 
     mainGraph.tables[table].insert(aux);
-   //empty table 
+   //empty table
    vector<string> emptytable;
 
     map<string, vector<string> > newfilter;
@@ -935,7 +935,7 @@ void merge(vector<string> v){
         vector<pair<string,string> > eraseIt;
 
     for(map<string,map<string, string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
-       // se it->second->first in empty elimina map<string,string> 
+       // se it->second->first in empty elimina map<string,string>
         for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
             if (has(emptytable, i->first)) {
                 eraseIt.insert(it->first, it->second);
@@ -972,7 +972,7 @@ void resolve(int indice){
     }
   }
   if(l.ltree[indice].compare("AND") == 0){
-    if(l.childs(indice).has("OR")){/
+    if(l.childs(indice).has("OR")){
       resolve(l.ind_left_child(indice));
       resolve(l.ind_right_child(indice));
       resolveS(indice,"AND");
