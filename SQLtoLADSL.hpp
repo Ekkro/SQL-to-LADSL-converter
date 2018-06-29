@@ -9,6 +9,14 @@
 using namespace std;
 
     /* ..................................................... */
+    /* .....................YACC.......................... */
+    /* ..................................................... */
+
+                string current_expression;
+                string current_expression2;
+                int current = 0;
+    /* ..................................................... */
+
     /* .....................GRAPH.......................... */
     /* ..................................................... */
 
@@ -342,7 +350,9 @@ class Ltree {
     vector<int> parents(int i);
 
 
-    string Ltree::all_same_table_aux(int indice);
+    string all_same_table_aux(int indice);
+
+    bool all_same_table(int indice);
 
     bool dependencies(int indice);
 

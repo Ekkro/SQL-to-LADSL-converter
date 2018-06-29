@@ -4,6 +4,7 @@
  //#include <iostream>
  //#include <map>
  //#include <utility>
+#include <regex>
  #include "SQLtoLADSL.hpp"
 using namespace std;
 
@@ -52,11 +53,11 @@ Ltree l;
 
             newgraph.filter = f;
 
-            for(map<string,map<string, string> >::iterator it = filter.begin(); it != filter.end(); ++it) {
+            for(map<string,map<string, string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 map<string, string> aux;
                 for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
                     if (has(notEmpty, i->first)) {
-                        aux.insert(pair<string, string> (i->first, i->second);
+                        aux.insert(pair<string, string> (i->first, i->second));
                     }
                 }
                 t.insert(pair<string, map<string, string> > ((it->first), aux));
@@ -577,7 +578,7 @@ Ltree l;
 
     string Ltree::all_same_table_aux(int indice){
       if(ltree[indice].compare("AND")==0 || ltree[indice].compare("OR")==0){
-        return all_same_table(ind_left_child(indice))
+        return all_same_table_aux(ind_left_child(indice));
       }else{
         smatch m;
         regex e ("\\ [^.]*\\.");
@@ -593,15 +594,15 @@ Ltree l;
       regex e ("\\ [^.]*\\.");
       string s2;
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
-        if(it*.compare("AND")!=0 && it*.compare("OR")!=0){
-          regex_search (it,m,e);
+        if(it->compare("AND")!=0 && it->compare("OR")!=0){
+          regex_search (*it,m,e);
           s2 = m[0];
           if(s2.compare(s) != 0){
-            return false
+            return false;
           }
         }
       }
-      return true
+      return true;
     }
 
     bool Ltree::dependencies(int indice){
@@ -681,6 +682,20 @@ Ltree l;
     }
 /* ........................................................................ */
 
+    /* ..................................................... */
+    /* .....................DECLARATIONS.......................... */
+    /* ..................................................... */
+        string getTable(string attribute) {
+            vector<string> v = g.search_filter(attribute); 
+            if (v.size() < 1) {
+                return "NULL";
+            }else{
+                if (v.size() > 2) {
+                    return "AMBIGUOUS";
+                }
+                return v[0];
+            }
+        }
          vector<int> subvector (vector<int> v1, vector<int> v2){
              vector<int> res(max(v1.size(),v2.size()));
              vector<int>::iterator aux;
@@ -711,25 +726,15 @@ Ltree l;
 
 
 
-
-void graphWork(string type){
-  while (!g.filters.empty()) {// parar quando só houver uma tabela com atributos
-    graphWorkAux(1,type);
-  }
-  graphWorkAux(0,type);
+void joinAtrD(vector<string> v, string type){
+  next();
+  if(v.size()>1){
+    cout << a << "=filter(" << v[0];
+    for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+      cout << type << *it;
+    }
+    cout << ")\n";
 }
-
-void graphWorkAux(int x,string type){
-  //pega nas pontas
-  string start = giveMeStart(g.root);
-  //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
-  joinAtr(start, type);
-  //juntar tudo
-  joinFilters(start, type);
-  //juntar groupbys
-  joinGroupby(start, type);
-  //remover tabela e adicionar como atributo às seguintes
-  if(x == 1)removeTable(start);
 }
 
 void joinAtr(string start, string type){
@@ -753,14 +758,21 @@ void joinAtr(string start, string type){
   g.tables[start] = new_elements;
 }
 
-void joinAtrD(vector<string> v, string type){
+
+void joinFiltersD(vector<string> v, string type){
   next();
-  if(v.size()>1){
-    cout << a << "=filter(" << v[0];
-    for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
-      cout << type << it;
-    }
-    cout << ")\n";
+  string s;
+  if(type.compare("AND") == 0){
+    s = "krao";
+  }else{
+    s = "kraoOR";
+  }
+  cout << a << "="<< s <<"(" << v[0] << "," << v[1] << ")\n";
+  for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+    string aux = a;
+    next();
+    cout << a << "=" << s <<"(" << aux << "," << *it << ")\n";
+  }
 }
 
 void joinFilters(string start, string type){
@@ -791,28 +803,20 @@ void joinFilters(string start, string type){
   }
   if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
-    if(type.compare("AND") == 0){
+    if(type.compare("AND") == 0)
       cout << a << "=" << "krao" << "(" << aux << "," << aux2 << ")\n";
     else{
       cout << a << "=" << "kraoOR" << "(" << aux << "," << aux2 << ")\n";
     }
+  
   }
 }
 
-void joinFiltersD(vector<string> v, string type){
+
+void joinGroupbyAux(string gb){
+  string alpha = a;
   next();
-  string s;
-  if(type.compare("AND") == 0){
-    s = "krao";
-  }else{
-    s = "kraoOR";
-  }
-  cout << a << "="<< s <<"(" << v[0] << "," << v[1] << ")\n";
-  for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
-    string aux = a;
-    next();
-    cout << a << "=" << s <<"(" << aux << "," << *it << ")\n";
-  }
+  cout << a << "=krao(" << alpha << "," << gb << ")\n";
 }
 
 void joinGroupby(string start){
@@ -823,11 +827,28 @@ void joinGroupby(string start){
   }
 }
 
-void joinGroupbyAux(string gb){
-  string alpha = a;
-  next();
-  cout << a << "=krao(" << alpha << "," << gb << ")\n";
+
+void graphWorkAux(int x,string type){
+  //pega nas pontas
+  string start = giveMeStart(g.root);
+  //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
+  joinAtr(start, type);
+  //juntar tudo
+  joinFilters(start, type);
+  //juntar groupbys
+  //joinGroupby(start, type);
+  joinGroupby(start);
+  //remover tabela e adicionar como atributo às seguintes
+  if(x == 1)removeTable(start);
 }
+
+void graphWork(string type){
+  while (!g.filter.empty()) {// parar quando só houver uma tabela com atributos
+    graphWorkAux(1,type);
+  }
+  graphWorkAux(0,type);
+}
+
 
 void removeTable(string start){
   vector<vector <string> > Keys;
@@ -904,8 +925,8 @@ void merge(vector<string> v){
   pair<string,string> aux;
   string table;
   for(map<string,map<string, string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
-      if (!(*it).empty()) {
-          for(map<string, string> >::iterator i = it->second.begin(); i != it->second.end(); ++it) {
+      if (!(it->second.empty())) {
+          for(map<string, string> ::iterator i = it->second.begin(); i != it->second.end(); ++it) {
               aux = pair<string,string>(i->first,i->second);
               table = it->first;
               break;

@@ -3,8 +3,8 @@
  #include <strings.h>
  #include "SQLtoLADSL.hpp"
 
-    string current_expression;
-    string current_expression2;
+    string currentexpression1;
+    string currentexpression12;
     int current = 0;
 %}
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS
