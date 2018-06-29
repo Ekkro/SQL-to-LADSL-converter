@@ -7,13 +7,29 @@
     string currentexpression12;
     int current = 0;
 %}
+
+typedef struct{
+    string literal;
+    string type;
+} par;
+
+%union{
+    string str;
+    //pair<string,string> pair;
+    par pair;
+
+}
+
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS
 %token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT BOOL IN ASC DESC DATE ANDOP ANY ALL
 %token LIKE
 
-%token <string> NAME BOP NOT
 
-%type <pair<string,string> >
+%token <str> NAME 
+%token <str> BOP NOT
+%token <str> NOT
+
+%type <pair> literal
 
 
 /*
@@ -22,14 +38,13 @@ token para terminais
 type para nao terminais
 
 */
-/*
 %right '='
 %left OP
 %right NOT
 %left COMPARISSON
 %left SHIFT
 %left BOP
-*/
+
 %%
 
 SelectBlock    : SELECT     selectList
@@ -152,13 +167,22 @@ OL             : AND                                                            
                | OR                                                                {$$ = $1 ; }
                ;
 */
-Literal        : NAME                                                              {string s = getTable($1); $$ = s+"."+$1 ;}
-               | NAME'.'NAME                                                       {$$ = $1+$3 ; addexp($1+$3);}//?
-               | DATE                                                              {$$ = $1 ; }
-               | CONSTANT                                                          {$$ = $1 ; }
-               | BOOL                                                              {$$ = $1 ; }
-               | ANY                                                               {$$ = $1 ; }
-               | ALL                                                               {$$ = $1 ; }
+Literal        : NAME                                                              {string s = getTable($1); 
+                                                                                    $<literal>$ = s+"."+$1;
+                                                                                    $<type>$ = "dimension";}
+               | NAME'.'NAME                                                       {$<literal>$ = $1+"."+$3;
+                                                                                    $<type>$ = "dimension"
+                                                                                    addexp($1+$3);}//?
+               | DATE                                                              {$<literal>$ = $1 ;
+                                                                                    $<type>$ = "measure"}
+               | CONSTANT                                                          {$<literal>$ = $1 ;
+                                                                                    $<type>$ = "measure"}
+               | BOOL                                                              {$<literal>$ = $1 ;
+                                                                                    $<type>$ = "measure"}
+               | ANY                                                               {$<literal>$ = $1 ;
+                                                                                    $<type>$ = "measure"}
+               | ALL                                                               {$<literal>$ = $1 ;
+                                                                                    $<type>$ = "measure"}
                ;
 
 
