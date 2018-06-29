@@ -15,6 +15,12 @@ using namespace std;
                 string current_expression;
                 string current_expression2;
                 int current = 0;
+
+                typedef struct {
+                    string literal;
+                    string type;
+                } par;
+
     /* ..................................................... */
 
     /* .....................GRAPH.......................... */
