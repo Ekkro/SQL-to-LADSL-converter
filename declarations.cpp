@@ -685,6 +685,16 @@ Ltree l;
     /* ..................................................... */
     /* .....................DECLARATIONS.......................... */
     /* ..................................................... */
+
+        void dot_all(int ind){
+            if ((l.left_child(ind) != "NULL") && (l.right_child(ind) != "NULL")) {
+                cout << "dot(" << l.left_child(ind) << "," << l.right_child(ind) << ")" << "\n";
+                dot_all(l.ind_left_child(ind));
+                dot_all(l.ind_right_child(ind));
+            }
+
+        }
+
         string getTable(string attribute) {
             vector<string> v = g.search_filter(attribute); 
             if (v.size() < 1) {
@@ -959,7 +969,7 @@ void merge(vector<string> v){
        // se it->second->first in empty elimina map<string,string>
         for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
             if (has(emptytable, i->first)) {
-                eraseIt.insert(it->first, it->second);
+                eraseIt.push_back(make_pair(it->first, i->first));
             }
         }
     }
@@ -975,7 +985,7 @@ void resolveS(int indice, string type){
   g = mainGraph.clone(v);
   graphWork(type);
   l.ltree[indice] = a;
-  erasechilds(indice);
+  l.erasechilds(indice);
   merge(v); //between mainGraph and g...
   //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
@@ -993,7 +1003,7 @@ void resolve(int indice){
     }
   }
   if(l.ltree[indice].compare("AND") == 0){
-    if(l.childs(indice).has("OR")){
+    if(has(l.childs(indice),"OR")){
       resolve(l.ind_left_child(indice));
       resolve(l.ind_right_child(indice));
       resolveS(indice,"AND");

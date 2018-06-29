@@ -11,6 +11,10 @@ using namespace std;
 
 bool has(vector<string> v, string s);
 
+void dot_all(int ind);
+
+string getTable(string attribute);
+
 vector<int> subvector (vector<int> v1, vector<int> v2);
 
 string relacao_entre(vector<string> v, string s);
