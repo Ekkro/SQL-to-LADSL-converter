@@ -3,9 +3,6 @@
  #include <strings.h>
  #include "SQLtoLADSL.hpp"
 
-    string currentexpression1;
-    string currentexpression12;
-    int current = 0;
 %}
 
 typedef struct{
@@ -30,6 +27,7 @@ typedef struct{
 %token <str> NOT
 
 %type <pair> literal
+%type <str> Join
 
 
 /*
@@ -38,6 +36,7 @@ token para terminais
 type para nao terminais
 
 */
+
 %right '='
 %left OP
 %right NOT
@@ -58,19 +57,19 @@ WHERE_         : WHERE       whereList                                          
                |                                                                   { ; }
                ;
 
-GROUPBY_       : GROUPBY    groupbyList                                            { ; }
+GROUPBY_       : GROUPBY    groupbyList                                            {$$ = $2;}
+               |                                                                   {$$ = $2;}
+               ;
+
+ORDERBY_       : ORDERBY    orderbyList                                            {$$ = $2;}
                |                                                                   { ; }
                ;
 
-ORDERBY_       : ORDERBY    orderbyList                                            { ; }
-               |                                                                   { ; }
-               ;
-
-selectList     : selectListN                                                       { ; }
+selectList     : selectListN                                                       {$$ = $1;}
                | '*'                                                               { ; }
                ;
 
-selectListN    : selectListNSub                                                    { ; }
+selectListN    : selectListNSub                                                    {$$ = $1;}
                | selectListN ',' selectListNSub                                    { ; }
                ;
 
@@ -78,7 +77,7 @@ selectListNSub : Expr                                                           
                | Expr AS NAME                                                      {add_select($1); /*add_rename($1,$3,table); */}
                ;
 
-fromList       : subfromList                                                       { ; }
+fromList       : subfromList                                                       {$$ = $1;}
                | fromList ',' subfromList                                          { ; }
                ;
 
@@ -91,25 +90,25 @@ subfromList    : NAME                                                           
                | '{' SelectBlock '}' AS NAME                                       { ; }
                ;
 
-Join           : JOIN                                                              { ; }
-               | INNER JOIN                                                        { ; }
-               | LEFT JOIN                                                         { ; }
-               | RIGHT JOIN                                                        { ; }
-               | FULL JOIN                                                         { ; }
+Join           : JOIN                                                              {$$ = "Normal";}
+               | INNER JOIN                                                        {$$ = "Inner";}
+               | LEFT JOIN                                                         {$$ = "Left";}
+               | RIGHT JOIN                                                        {$$ = "Rigth";}
+               | FULL JOIN                                                         {$$ = "Full";}
                ;
 
-whereList      : ExpR                                                              { ; }
+whereList      : ExpR                                                              {$$ = $1;}
                ;
 
 ExpR           : Exp BBOP Exp                                                      { ; }
-               | Exp                                                               { ; }
+               | Exp                                                               {$$ = $1;}
                ;
 
-Exp            : Term                                                              { ; }
+Exp            : Term                                                              {$$ = $1;}
                | Exp OR Term                                                       { ; }
                ;
 
-Term           : Factor                                                            { ; }
+Term           : Factor                                                            {$$ = $1;}
                | Term AND Factor                                                   { ; }
                | Term IBOP Factor                                                  { ; }
                | Term From Factor                                                  { ; }
@@ -120,17 +119,17 @@ Term           : Factor                                                         
 */
                ;
 
-Factor         : Literal                                                           { ; }
+Factor         : Literal                                                           {$$ = $1;}
                | NAME '(' Args ')'                                                 { ; }
-               | NOT Factor                                                        { ; }
-               | '(' ExpR ')'                                                      { ; }
+               | NOT Factor                                                        {$$ = $2;}
+               | '(' ExpR ')'                                                      {$$ = $2;}
                ;
 
-Args           : Args1                                                             { ; }
+Args           : Args1                                                             {$$ = $1;}
                |                                                                   { ; }
                ;
 
-Args1          : Exp
+Args1          : Exp                                                               {$$ = $1;}
                | Args1 ',' Exp                                                     { ; }
                ;
 /*
@@ -141,7 +140,7 @@ Args1          : Exp
                ;
 */
 
-groupbyList    : groupbyListSub                                                    {$$ =$1; }
+groupbyList    : groupbyListSub                                                    {$$ = $1;}
                | groupbyList ',' groupbyListSub                                    { ; }
                ;
 
@@ -149,17 +148,17 @@ groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal                       
                | Literal                                                           {string Table = getTable($1); add_groupby(Table,$1);}
                ;
 
-orderbyList    : orderbyListSub                                                    { ; }
+orderbyList    : orderbyListSub                                                    {$$ = $1;}
                | orderbyList ',' orderbyListSub                                    { ; }
 
                ;
 
-orderbyListSub : NAME                                                              { ; }
+orderbyListSub : NAME                                                              {$$ = $1;}
                | NAME order                                                        { ; }
                ;
 
-order          : ASC                                                               { $$ = $1; }
-               | DESC                                                              { $$ = $1; }
+order          : ASC                                                               {$$ = $1;}
+               | DESC                                                              {$$ = $1;}
 /*               ;
 
 OL             : AND                                                               {$$ = $1 ; }
@@ -196,8 +195,8 @@ Expr           : Literal                                                        
                ;
 
 */
-Inlist         : Literal                                                           {$$ = $1 ; }
-               | InList ',' Literal                                                {$$ = $3 ; }
+Inlist         : Literal                                                           {$$ = $1;}
+               | InList ',' Literal                                                {$$ = $3;}
                ;
 
 %%

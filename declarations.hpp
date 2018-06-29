@@ -4,9 +4,9 @@
  #include <iostream>
  #include <map>
  #include <utility>
-#include <set>
-#include <algorithm>
-using namespace std;
+ #include <set>
+ #include <algorithm>
+ using namespace std;
 
 
 bool has(vector<string> v, string s);
