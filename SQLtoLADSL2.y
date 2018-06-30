@@ -13,13 +13,14 @@
 }
 
 %token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS
-%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP 
+%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP
 %token LIKE REGEX
 /*%token REGEX*/
 
 
-%token <str> NAME 
-%token <str> BOP 
+%token <str> NAME
+%token <str> BBOP
+%token <str> IBOP
 %token <str> NOT
 %token <str> ASC
 %token <str> DESC
@@ -48,7 +49,8 @@ type para nao terminais
 
 */
 %precedence OR
-%precedence BOP
+%precedence IBOP
+%precedence BBOP
 %precedence FROM
 
 /*
@@ -89,7 +91,7 @@ ORDERBY_       : ORDERBY    orderbyList                      { ; }
                |                                             { ; }
                ;
 
-selectList     : selectListN                                 { ; } 
+selectList     : selectListN                                 { ; }
                | '*'                                         { ; }
                ;
 
@@ -114,28 +116,28 @@ subfromList    : NAME                                        { g.newRoot($1); }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
 
-Join           : JOIN                                        {$$ = "Normal";}
-               | INNER JOIN                                  {$$ = "Inner";}
-               | LEFT JOIN                                   {$$ = "Left";}
-               | RIGHT JOIN                                  {$$ = "Rigth";}
-               | FULL JOIN                                   {$$ = "Full";}
+Join           : JOIN                                        {/*$$ = "Normal"*/;}
+               | INNER JOIN                                  {/*$$ = "Inner"*/;}
+               | LEFT JOIN                                   {/*$$ = "Left"*/;}
+               | RIGHT JOIN                                  {/*$$ = "Rigth"*/;}
+               | FULL JOIN                                   {/*$$ = "Full"*/;}
                ;
 
 whereList      : ExpR                                        { ; }
                ;
 
-ExpR           : Exp BOP Exp                                 { ; }
-               | Exp                                         { ; }
+ExpR           : Exp BBOP Exp                                {$$ = $1+$2+$3; }
+               | Exp                                         {$$ = $1 ; }
                ;
 
-Exp            : Term                                        { ; }
+Exp            : Term                                        {$$ = $1 ; }
                | Exp OR Term                                 { ; }
                ;
 
 Term           : Factor                                      {$$ = $1;}
                | Term AND Factor                             { ; }
-               | Term BOP Factor                             { ; }
-               | Term FROM Factor                            { ; }
+               | Term IBOP Factor                            {$$ = $1+$2+$3 ; }
+               | Term FROM Factor                            {$$ = $1+$2+$3 ; }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
                | Term '-' Factor                             { ; }
@@ -144,8 +146,8 @@ Term           : Factor                                      {$$ = $1;}
                ;
 
 Factor         : Literal                                     {$$ = $1;}
-               | NAME '(' Args ')'                           { ; }
-               | NOT Factor                                  {$$ = $2;}
+               | NAME '(' Args ')'                           {$$ = $1+$2+$3+$4; }
+               | NOT Factor                                  {$$ = $1+$2;}
                | '(' ExpR ')'                                {$$ = $2;}
                ;
 
@@ -170,7 +172,7 @@ groupbyList    : groupbyListSub                              {$$ = $1;}
 
 groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal     { ; }
                | Literal                                     {string Table = getTable($1);
-                                                              add_groupby(Table,$1);}
+                                                              add_groupby(Table,Table+"."+$1);}
                ;
 
 orderbyList    : orderbyListSub                              { ; }
@@ -191,7 +193,7 @@ OL             : AND                                         {$$ = $1 ; }
                | OR                                          {$$ = $1 ; }
                ;
 */
-Literal        : NAME                                        {string s = getTable($1); 
+Literal        : NAME                                        {string s = getTable($1);
                                                               $<literal>$ = s+"."+$1;
                                                               $<type>$ = "dimension";}
 
