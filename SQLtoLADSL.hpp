@@ -9,18 +9,13 @@
 using namespace std;
 
     /* ..................................................... */
-    /* .....................YACC.......................... */
+    /* .....................YACC......string.................... */
     /* ..................................................... */
 
-                string current_expression;
-                string current_expression2;
-                int current = 0;
-
-                typedef struct {
-                    string literal;
-                    string type;
-                } par;
-
+    typedef struct {
+        string expr;
+        int type;
+    } par;
     /* ..................................................... */
 
     /* .....................GRAPH.......................... */
@@ -272,7 +267,7 @@ class Ltree {
             */
         vector<string> childs(int ind);
 
-        void erasechilds(int ind); 
+        void erasechilds(int ind);
 
             /*
                 adds a filter to the tree

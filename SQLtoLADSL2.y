@@ -33,8 +33,9 @@
 %type <pair> Literal
 %type <str> Join
 %type <str> ExpR
-%type <str> Term
-%type <str> Factor
+%type <str> Exp
+%type <pair> Term
+%type <pair> Factor
 %type <str> groupbyList
 %type <str> groupbyListSub
 %type <str> order
@@ -126,7 +127,7 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
 whereList      : ExpR                                        { ; }
                ;
 
-ExpR           : Exp BBOP Exp                                {$$ = $1+$2+$3; }
+ExpR           : Exp BBOP Exp                                {$$ = $1.expr+$2+$3.expr; /*if type == 0*/}
                | Exp                                         {$$ = $1 ; }
                ;
 
@@ -136,8 +137,8 @@ Exp            : Term                                        {$$ = $1 ; }
 
 Term           : Factor                                      {$$ = $1;}
                | Term AND Factor                             { ; }
-               | Term IBOP Factor                            {$$ = $1+$2+$3 ; }
-               | Term FROM Factor                            {$$ = $1+$2+$3 ; }
+               | Term IBOP Factor                            {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
+               | Term FROM Factor                            {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
                | Term '-' Factor                             { ; }
@@ -146,17 +147,17 @@ Term           : Factor                                      {$$ = $1;}
                ;
 
 Factor         : Literal                                     {$$ = $1;}
-               | NAME '(' Args ')'                           {$$ = $1+$2+$3+$4; }
-               | NOT Factor                                  {$$ = $1+$2;}
+               | NAME '(' Args ')'                           {$$.expr = $1+$2+$3.expr+$4; $$.type = 3; }
+               | NOT Factor                                  {$$.expr = $1+$2.expr; $$.type = $2.type;}
                | '(' ExpR ')'                                {$$ = $2;}
                ;
 
-Args           : Args1                                       { ; }
+Args           : Args1                                       {$$ = $1 ; }
                |                                             { ; }
                ;
 
-Args1          : Exp                                         { ; }
-               | Args1 ',' Exp                               { ; }
+Args1          : Exp                                         {$$ = $1 ; }
+               | Args1 ',' Exp                               {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
                ;
 /*
                | NAME IN Inlist                              { ; }
@@ -171,8 +172,8 @@ groupbyList    : groupbyListSub                              {$$ = $1;}
                ;
 
 groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal     { ; }
-               | Literal                                     {string Table = getTable($1);
-                                                              add_groupby(Table,Table+"."+$1);}
+               | Literal                                     {string Table = getTable($1.expr);
+                                                              add_groupby(Table,Table+"."+$1.expr);}
                ;
 
 orderbyList    : orderbyListSub                              { ; }
@@ -194,27 +195,27 @@ OL             : AND                                         {$$ = $1 ; }
                ;
 */
 Literal        : NAME                                        {string s = getTable($1);
-                                                              $<literal>$ = s+"."+$1;
-                                                              $<type>$ = "dimension";}
+                                                              $<expression>$ = s+"."+$1;
+                                                              $<type>$ = 1;}
 
-               | NAME'.'NAME                                 {$<literal>$ = $1+"."+$3;
-                                                              $<type>$ = "dimension"
+               | NAME'.'NAME                                 {$<expression>$ = $1+"."+$3;
+                                                              $<type>$ = 0;
                                                               addexp($1+$3);}//?
 
-               | DATE                                        {$<literal>$ = $1 ;
-                                                              $<type>$ = "measure"}
+               | DATE                                        {$<expression>$ = $1 ;
+                                                              $<type>$ = 1;}
 
-               | CONSTANT                                    {$<literal>$ = $1 ;
-                                                              $<type>$ = "measure"}
+               | CONSTANT                                    {$<expression>$ = $1 ;
+                                                              $<type>$ = 1;}
 
-               | BOOL                                        {$<literal>$ = $1 ;
-                                                              $<type>$ = "measure"}
+               | BOOL                                        {$<expression>$ = $1 ;
+                                                              $<type>$ = 1;}
 
-               | ANY                                         {$<literal>$ = $1 ;
-                                                              $<type>$ = "measure"}
+               | ANY                                         {$<expression>$ = $1 ;
+                                                              $<type>$ = 1;}
 
-               | ALL                                         {$<literal>$ = $1 ;
-                                                              $<type>$ = "measure"}
+               | ALL                                         {$<expression>$ = $1 ;
+                                                              $<type>$ = 1;}
                ;
 
 
