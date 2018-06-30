@@ -47,13 +47,18 @@ token para terminais
 type para nao terminais
 
 */
+%precedence OR
+%precedence BOP
+%precedence FROM
 
+/*
+%precedence OR
+%precedence BOP
+%precedence FROM
 %left AND
 %left OR
 %left BOP
 %right FROM
-
-/*
 %nonassoc
 %right '='
 %left OP
