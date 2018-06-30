@@ -12,7 +12,7 @@
 
 }
 
-%token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS
+%token SELECT WHERE GROUPBY ORDERBY HAVING AS
 %token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP
 %token LIKE REGEX
 /*%token REGEX*/
@@ -20,6 +20,7 @@
 
 %token <str> NAME
 %token <str> BBOP
+%token <str> BOP
 %token <str> IBOP
 %token <str> NOT
 %token <str> ASC
@@ -29,6 +30,7 @@
 %token <str> BOOL
 %token <str> ANY
 %token <str> ALL
+%token <str> FROM
 
 %type <pair> Literal
 %type <str> Join
@@ -39,6 +41,8 @@
 %type <str> groupbyList
 %type <str> groupbyListSub
 %type <str> order
+%type <pair> Args1
+%type <pair> Args
 /*%type <str> Inlist*/
 
 
@@ -49,12 +53,12 @@ token para terminais
 type para nao terminais
 
 */
+%left AND
+/*
 %precedence OR
 %precedence IBOP
 %precedence BBOP
 %precedence FROM
-
-/*
 %precedence OR
 %precedence BOP
 %precedence FROM
@@ -127,8 +131,8 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
 whereList      : ExpR                                        { ; }
                ;
 
-ExpR           : Exp BBOP Exp                                {$$ = $1.expr+$2+$3.expr; /*if type == 0*/}
-               | Exp                                         {$$ = $1 ; }
+ExpR           : Exp BBOP Exp                                {$$ = (($1.type == 0)&&($3.type == 0))? ($1.expr+$2+$3.expr ):"";}
+               | Exp                                         {$$ = $1.expr ; }
                ;
 
 Exp            : Term                                        {$$ = $1 ; }
@@ -146,18 +150,18 @@ Term           : Factor                                      {$$ = $1;}
 */
                ;
 
-Factor         : Literal                                     {$$ = $1;}
-               | NAME '(' Args ')'                           {$$.expr = $1+$2+$3.expr+$4; $$.type = 3; }
+Factor         : Literal                                     {$$.expr = $1;}
+               | NAME '(' Args ')'                           {$$.expr = $1+"("+$3.expr+")"; $$.type = 3; }
                | NOT Factor                                  {$$.expr = $1+$2.expr; $$.type = $2.type;}
-               | '(' ExpR ')'                                {$$ = $2;}
+               | '(' ExpR ')'                                {$$.expr = $2;}
                ;
 
-Args           : Args1                                       {$$ = $1 ; }
+Args           : Args1                                       {$$.expr = $1 ; }
                |                                             { ; }
                ;
 
 Args1          : Exp                                         {$$ = $1 ; }
-               | Args1 ',' Exp                               {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
+               | Args1 ',' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type * $3.type; }
                ;
 /*
                | NAME IN Inlist                              { ; }
@@ -200,7 +204,7 @@ Literal        : NAME                                        {string s = getTabl
 
                | NAME'.'NAME                                 {$<expression>$ = $1+"."+$3;
                                                               $<type>$ = 0;
-                                                              addexp($1+$3);}//?
+                                                              addexp($1+$3);}
 
                | DATE                                        {$<expression>$ = $1 ;
                                                               $<type>$ = 1;}
