@@ -55,6 +55,9 @@ type para nao terminais
 
 */
 %left AND
+%left OR
+%left IBOP
+%left BBOP
 /*
 %precedence OR
 %precedence IBOP
@@ -129,12 +132,11 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
                | FULL JOIN                                   {/*$$ = "Full"*/;}
                ;
 
-whereList      : ExpR                                        { ; }
+whereList      : Exp                                         { ; }
                ;
 
 ExpR           : Exp AND Exp                                {$$ = join_trees($1,$3,"AND"); }
                | Exp OR  Exp                                {$$ = join_trees($1,$3,"OR"); }
-               | Exp                                        {$$ = $1; }
                ;
 
 Exp            : Term                                        {$$ = cria_arvore($1.expr,$1.type) ; }
@@ -149,7 +151,7 @@ Term           : Factor                                      {$$ = $1;}
                                                                         }else{
                                                                               add_map_filter($1.type,$1.expr+$2+$3.expr);
                                                                         }
-                                                              $$.type = $1.type;
+                                                              $$.type = $1.type;}
                | Term IBOP Term                              {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type + $3.type; }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
@@ -163,13 +165,13 @@ Factor         : Literal                                     {$$.expr = $1;}
                | NOT Factor                                  {$$.expr = $1+$2.expr; $$.type = $2.type;}
                ;
 
-Args           : Args1                                       {$$.expr = $1 ; }
+Args           : Args1                                       {$$ = $1 ; }
                |                                             { ; }
                ;
 
-Args1          : Exp                                         {$$ = $1 ; }
-               | Args1 ',' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
-               | Args1 ' ' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
+Args1          : Term                                        {$$ = $1 ; }
+               | Args1 ',' Term                              {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
+               | Args1 ' ' Term                              {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
                ;
 /*
                | NAME IN Inlist                              { ; }
@@ -183,7 +185,7 @@ groupbyList    : groupbyListSub                              {$$ = $1;}
                | groupbyList ',' groupbyListSub              { ; }
                ;
 
-groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal     { ; }
+groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
                | Literal                                     {string Table = getTable($1.expr);
                                                               add_groupby(Table,Table+"."+$1.expr);}
                ;
