@@ -5,7 +5,12 @@
 #include <utility>
 #include <set>
 #include <algorithm>
+#include <stdio.h>
+#include <strings.h>
 using namespace std;
+
+
+bool has(vector<string> v, string s);
 
     /* ..................................................... */
     /* .....................YACC......string.................... */
@@ -220,7 +225,7 @@ class Ltree {
     //vector<pair<string,string>> ltree; possivelmente será necessário alterar o codigo para esta ltree
 
 
-        Ltree(); 
+        Ltree();
         Ltree(string s);
 
             /*
@@ -379,3 +384,54 @@ class Ltree {
 Ltree create_tree(string term, string type);
 
 Ltree join_trees(Ltree l1, Ltree l2, string type);
+
+
+void dot_all(int ind);
+
+string getTable(string attribute);
+
+vector<int> subvector (vector<int> v1, vector<int> v2);
+
+string relacao_entre(vector<string> v, string s);
+
+string relacao_entre_arrays(vector<string> v, vector<string> s);
+
+void graphWork();
+
+void graphWorkAux(int x);
+
+void joinAtr(string start);
+
+void joinAtrD(string s, vector<string> v);
+
+void joinFilters(string start);
+
+void joinFiltersM(vector<string> v);
+
+void joinFiltersD(vector<string> v);
+
+void joinGroupby(string start);
+
+void joinGroupbyAux(string gb);
+
+void removeTable(string start);
+
+string giveMeStart(string root);
+
+void next();
+
+void trabalha(int ind);
+
+void trabalhaaux(int ind, int count);
+
+void cleanexp();
+
+void addexp(string exp);
+
+void aux(string exp);
+
+void merge(vector<string> v);
+
+void resolveS(int indice, string type);
+
+void resolve(int indice);
