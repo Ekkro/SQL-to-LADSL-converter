@@ -51,31 +51,30 @@ FALSE   						{ yylval.intval = 0; return BOOL; }
 
 
     /* operators*/
-[ -+&~ | ^ / % *(), .; ! =]                             { return yytext[0]; }
 
-"&&"                                                    { return ANDOP; }
-"||"                                                    { return OR; }
-"="                                                     { yylval.subtok = 4; return BBOP; }
-"<=>"                                                   { yylval.subtok = 12; return BBOP; }
-">="                                                    { yylval.subtok = 6;return BBOP; }
-">"                                                     { yylval.subtok = 2; return BBOP; }
-"<="                                                    { yylval.subtok = 5; return BBOP; }
-"<"                                                     { yylval.subtok = 1; return BBOP; }
-"!="|"<>"                                               { yylval.subtok = 3; return BBOP; }//alterar
-"<<"                                                    { yylval.subtok = 1; return IBOP; }
-">>"                                                    { yylval.subtok = 2; return IBOP; }
-":="                                                    { return ASSIGN; }
+"&&"                                                    { yylval.strval = strdup(yytext);return ANDOP; }
+"||"                                                    { yylval.strval = strdup(yytext);return OR; }
+"="                                                     { yylval.strval = strdup(yytext);return BBOP; }
+"<=>"                                                   { yylval.strval = strdup(yytext);return BBOP; }
+">="                                                    { yylval.strval = strdup(yytext);return BBOP; }
+">"                                                     { yylval.strval = strdup(yytext);return BBOP; }
+"<="                                                    { yylval.strval = strdup(yytext);return BBOP; }
+"<"                                                     { yylval.strval = strdup(yytext);return BBOP; }
+"!="|"<>"                                               { yylval.strval = strdup(yytext);return BBOP; }//alterar
+"<<"                                                    { yylval.strval = strdup(yytext);return IBOP; }
+">>"                                                    { yylval.strval = strdup(yytext);return IBOP; }
+":="                                                    { yylval.strval = strdup(yytext);return ASSIGN; }
 
-"*"                                                     { yylval.cha = 'm' ; return IBOP: }
-"/"                                                     { yylval.cha = 'd' ; return IBOP: }
-"+"                                                     { yylval.cha = 'P' ; return IBOP: }
-"-"                                                     { yylval.cha = 'M' ; return IBOP: }
+"*"                                                     { yylval.strval = strdup(yytext); return IBOP: }
+"/"                                                     { yylval.strval = strdup(yytext); return IBOP: }
+"+"                                                     { yylval.strval = strdup(yytext); return IBOP: }
+"-"                                                     { yylval.strval = strdup(yytext); return IBOP: }
     /* functions */
 
-SUBSTR(ING)?/"("                                        { return FSUBSTRING; }
-TRIM/"("                                                { return FTRIM; }
-DATE_ADD/"("                                            { return FDATE_ADD; }
-DATE_SUB/"("                                            { return FDATE_SUB; }
+SUBSTR(ING)?/"("                                        { yylval.strval = strdup(yytext);return FSUBSTRING; }
+TRIM/"("                                                { yylval.strval = strdup(yytext);return FTRIM; }
+DATE_ADD/"("                                            { yylval.strval = strdup(yytext);return FDATE_ADD; }
+DATE_SUB/"("                                            { yylval.strval = strdup(yytext);return FDATE_SUB; }
 
     /* NAMES */
 
