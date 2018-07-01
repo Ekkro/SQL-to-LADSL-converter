@@ -6,9 +6,10 @@
 %}
 
 %union{
-    string str;
+    string *str;
     //pair<string,string> pair;
-    par pair;
+    par *pair;
+    Ltree tree;
 
 }
 
@@ -34,8 +35,8 @@
 
 %type <pair> Literal
 %type <str> Join
-%type <str> ExpR
-%type <str> Exp
+%type <tree> ExpR
+%type <tree> Exp
 %type <pair> Term
 %type <pair> Factor
 %type <str> groupbyList
@@ -104,8 +105,8 @@ selectListN    : selectListNSub                              { ; }
                | selectListN ',' selectListNSub              { ; }
                ;
 
-selectListNSub : ExpR                                        {add_select($1); }
-               | ExpR AS NAME                                {add_select($1); /*add_rename($1,$3,table); */}
+selectListNSub : Term                                        {add_select($1.expr); }
+               | Term AS NAME                                {add_select($1.expr); /*add_rename($1,$3,table); */}
                ;
 
 fromList       : subfromList                                 { ; }
@@ -114,9 +115,9 @@ fromList       : subfromList                                 { ; }
 
 subfromList    : NAME                                        { g.newRoot($1); }
                | Join NAME                                   { ; }
-               | Join NAME ON Literal '=' Literal            {add_join($6,getTable($4),getTable($6));}
+               | Join NAME ON Literal '=' Literal            {add_join($6,getTable($4.type),getTable($6.type));}
                | Join NAME AS NAME                           {/*add_rename($2,$4)*/;}
-               | Join NAME AS NAME ON Literal '=' Literal    {add_join($6,getTable($4),getTable($6)); /*add_rename($2,$4);*/ }
+               | Join NAME AS NAME ON Literal '=' Literal    {add_join($6.type,getTable($4.type),getTable($6.type)); /*add_rename($2,$4);*/ }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
