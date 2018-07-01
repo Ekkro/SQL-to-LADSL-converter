@@ -1,6 +1,7 @@
 %{
 /* Declaraçoes C diversas */
 
+#include "SQLtoLADSL.hpp"
 #include "y.tab.h"
 %}
 

@@ -435,3 +435,15 @@ void merge(vector<string> v);
 void resolveS(int indice, string type);
 
 void resolve(int indice);
+
+
+
+
+string a = "A";
+Graph mainGraph;
+Graph g;
+Ltree l;
+vector<Ltree> trees;
+int itr = 0;
+vector<par> types;
+int itr2 = 0;

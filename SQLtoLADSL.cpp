@@ -2,10 +2,6 @@
 #include "SQLtoLADSL.hpp"
 using namespace std;
 
-string a = "A";
-Graph mainGraph;
-Graph g;
-Ltree l;
 
 
 bool has(vector<string> v, string s){
@@ -1038,3 +1034,4 @@ void resolve(int indice){
 int main(){
   return 0;
 }
+

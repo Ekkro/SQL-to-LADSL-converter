@@ -7,9 +7,7 @@
 
 %union{
     string *str;
-    //pair<string,string> pair;
-    par *pair;
-    Ltree tree;
+    int integer;
 
 }
 
@@ -33,17 +31,17 @@
 %token <str> ALL
 %token <str> FROM
 
-%type <pair> Literal
+%type <integer> Literal
 %type <str> Join
-%type <tree> ExpR
-%type <tree> Exp
-%type <pair> Term
-%type <pair> Factor
+%type <integer> ExpR
+%type <integer> Exp
+%type <integer> Term
+%type <integer> Factor
 %type <str> groupbyList
 %type <str> groupbyListSub
 %type <str> order
-%type <pair> Args1
-%type <pair> Args
+%type <integer> Args1
+%type <integer> Args
 /*%type <str> Inlist*/
 
 
@@ -108,19 +106,19 @@ selectListN    : selectListNSub                              { ; }
                | selectListN ',' selectListNSub              { ; }
                ;
 
-selectListNSub : Term                                        {mainGraph.add_select($1.expr); }
-               | Term AS NAME                                {mainGraph.add_select($1.expr); /*add_rename($1,$3,table); */}
+selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr); }
+               | Term AS NAME                                {mainGraph.add_select(types[$1].expr); /*add_rename(types[$1],$3,table); */}
                ;
 
 fromList       : subfromList                                 { ; }
                | fromList ',' subfromList                    { ; }
                ;
 
-subfromList    : NAME                                        { mainGraph.newRoot($1); }
+subfromList    : NAME                                        { mainGraph.newRoot(*$1); }
                | Join NAME                                   { ; }
-               | Join NAME ON Literal '=' Literal            {mainGraph.add_join($6.type,getTable($4.type),getTable($6.type));}
-               | Join NAME AS NAME                           {/*add_rename($2,$4)*/;}
-               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join($6.type,getTable($4.type),getTable($6.type)); /*add_rename($2,$4);*/ }
+               | Join NAME ON Literal '=' Literal            {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
+               | Join NAME AS NAME                           {/*add_rename($2,types[$4])*/;}
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); /*add_rename($2,types[$4]);*/ }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
@@ -135,26 +133,30 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
 whereList      : Exp                                         { ; }
                ;
 
-ExpR           : Exp AND Exp                                {$$ = join_trees($1,$3,"AND"); }
-               | Exp OR  Exp                                {$$ = join_trees($1,$3,"OR"); }
+ExpR           : Exp AND Exp                                {$$ = $1;trees[ $1 ] = join_trees(trees[$1],trees[$3],"AND"); }
+               | Exp OR  Exp                                {$$ = $1;trees[ $1 ] = join_trees( trees[$1],trees[$3],"OR"); }//delete $3
                ;
 
-Exp            : Term                                        {$$ = create_tree($1.expr,$1.type) ; }
+Exp            : Term                                        {$$ = itr;trees[ itr++ ] =  create_tree(types[$1].expr,types[$1].type) ; }
                | ExpR                                        {$$ = $1 ; }
                | '(' ExpR ')'                                {$$ = $2 ; }
                ;
 
 Term           : Factor                                      {$$ = $1;}
-               | Term BBOP Term                              {$$.expr = $1.expr+$2+$3.expr;
-                                                                        if(($1.type.size()!=0)&&($3.type.size()!=0)){
-                                                                              (add_join($2.type,getTable($1.type),getTable($2.type));
-                                                                              $$.type = "JOIN";
+               | Term BBOP Term                              {$$ = $1;
+                                                              types[$1].expr.append(*$2); 
+                                                              types[$1].expr.append(types[$3].expr);
+                                                                        if((types[$1].type.size()!=0)&&(types[$3].type.size()!=0)){
+                                                                              mainGraph.add_join(types[$3].type,getTable(types[$1].type),getTable(types[$3].type));
+                                                                              types[$1].type = "JOIN";
                                                                         }else{
-                                                                              add_map_filter($1.type,$1.expr+$2+$3.expr);
-                                                                              $$.type = "NOT JOIN";
+                                                                              mainGraph.add_map_filter(types[$1].type,types[$1].expr);
+                                                                              types[$1].type = "NOT JOIN";
                                                                         }}
 
-               | Term IBOP Term                              {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type + $3.type; }
+               | Term IBOP Term                              {$$ = $1; types[$1].expr.append(*$2);
+                                                            types[$1].expr.append(types[$3].expr) ; 
+                                                            types[$1].type.append(types[$3].type); }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
                | Term '-' Factor                             { ; }
@@ -162,18 +164,35 @@ Term           : Factor                                      {$$ = $1;}
 */
                ;
 
-Factor         : Literal                                     {$$.expr = $1;}
-               | NAME '(' Args ')'                           {$$.expr = $1+"("+$3.expr+")"; $$.type = $3.type; }
-               | NOT Factor                                  {$$.expr = $1+$2.expr; $$.type = $2.type;}
+Factor         : Literal                                     {$$ = $1;}
+               | NAME '(' Args ')'                           {$$ = $3; 
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append("(");
+                                                              s.append(types[$3].expr);
+                                                              s.append(")");
+                                                              types[$3].expr = s;}
+               | NOT Factor                                  {$$ = $2; 
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append(" ");
+                                                              s.append(types[$2].expr);
+                                                              types[$2].expr = s;}
                ;
 
-Args           : Args1                                       {$$ = $1 ; }
+Args           : Args1                                       {$$ = $1;}
                |                                             { ; }
                ;
 
 Args1          : Term                                        {$$ = $1 ; }
-               | Args1 ',' Term                              {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
-               | Args1 ' ' Term                              {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
+               | Args1 ',' Term                              {$$ = $1;
+                                                            types[$1].expr.append( ",");
+                                                            types[$1].expr.append(types[$3].expr) ;
+                                                            types[$1].type.append(types[$3].type); }
+               | Args1 ' ' Term                              {$$ = $1;
+                                                            types[$1].expr.append( " ");
+                                                            types[$1].expr.append(types[$3].expr) ;
+                                                            types[$1].type.append(types[$3].type); }
                ;
 /*
                | NAME IN Inlist                              { ; }
@@ -183,13 +202,16 @@ Args1          : Term                                        {$$ = $1 ; }
                ;
 */
 
-groupbyList    : groupbyListSub                              {$$ = $1;}
+groupbyList    : groupbyListSub                              { ; }
                | groupbyList ',' groupbyListSub              { ; }
                ;
 
 groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
-               | Literal                                     {string Table = getTable($1.expr);
-                                                              mainGraph.add_groupby(Table,Table+"."+$1.expr);}
+               | Literal                                     {string Table = getTable(types[$1].expr);
+                                                              string s = Table;
+                                                              s.append(".");
+                                                              s.append(types[$1].expr);
+                                                              mainGraph.add_groupby(Table,s);}
                ;
 
 orderbyList    : orderbyListSub                              { ; }
@@ -201,8 +223,8 @@ orderbyListSub : NAME                                        { ; }
                | NAME order                                  { ; }
                ;
 
-order          : ASC                                         {$$ = $1;}
-               | DESC                                        {$$ = $1;}
+order          : ASC                                         { ; }
+               | DESC                                        { ; }
 /*               ;
 
 OL             : AND                                         {$$ = $1 ; }
@@ -210,27 +232,46 @@ OL             : AND                                         {$$ = $1 ; }
                | OR                                          {$$ = $1 ; }
                ;
 */
-Literal        : NAME                                        {string s = getTable($1)+".";
-                                                              $$.expr = s+$1;
-                                                              $$.type = (!s.compare("."))?"": s + $1;}
+Literal        : NAME                                        {string s = getTable(*$1);
+                                                               s.append(".");
+                                                              $$ = itr2;
+                                                              if(!s.compare(".")){
+                                                                  types[itr2].type = "";
+                                                                  types[itr2++].expr = *$1;
+                                                              }else{
+                                                                  s.append(*$1);
+                                                                  types[itr2].type = s;
+                                                                  types[itr2++].expr = s;
+                                                              }}
+                                                              
 
-               | NAME'.'NAME                                 {$$.expr = $1+"."+$3;
-                                                              $$.type = $1+"."+$3;}
+               | NAME'.'NAME                                 {$$ = itr2;
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append(".");
+                                                              s.append(*$3);
+                                                              types[itr2++].type = s;
+                                                              types[itr2++].expr = s;}
 
-               | DATE                                        {$$.expr = $1 ;
-                                                              $$.type = "";}
+               | DATE                                        {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
 
-               | CONSTANT                                    {$$.expr = $1 ;
-                                                              $$.type = "";}
+               | CONSTANT                                    {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
 
-               | BOOL                                        {$$.expr = $1 ;
-                                                              $$.type = "";}
+               | BOOL                                        {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
 
-               | ANY                                         {$$.expr = $1 ;
-                                                              $$.type = "";}
+               | ANY                                         {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
 
-               | ALL                                         {$$.expr = $1 ;
-                                                              $$.type = "";}
+               | ALL                                         {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
                ;
 
 
@@ -253,12 +294,12 @@ Inlist         : Literal                                     {$$ = $1;}
 %%
 int main(int argc, char **argv){
 
-    out = fopen("name.vm", "w");
+    FILE *  out = fopen("name.vm", "w");
     if (out == NULL){
         printf("Error opening file!\n");
         exit(1);
     }
-    char codigo[1023*1024];
+//    char codigo[1023*1024];
     fprintf(out, "start\n");
     yyparse();
     fprintf(out, "stop\n");
