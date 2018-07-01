@@ -108,19 +108,19 @@ selectListN    : selectListNSub                              { ; }
                | selectListN ',' selectListNSub              { ; }
                ;
 
-selectListNSub : Term                                        {add_select($1.expr); }
-               | Term AS NAME                                {add_select($1.expr); /*add_rename($1,$3,table); */}
+selectListNSub : Term                                        {mainGraph.add_select($1.expr); }
+               | Term AS NAME                                {mainGraph.add_select($1.expr); /*add_rename($1,$3,table); */}
                ;
 
 fromList       : subfromList                                 { ; }
                | fromList ',' subfromList                    { ; }
                ;
 
-subfromList    : NAME                                        { g.newRoot($1); }
+subfromList    : NAME                                        { mainGraph.newRoot($1); }
                | Join NAME                                   { ; }
-               | Join NAME ON Literal '=' Literal            {add_join($6.type,getTable($4.type),getTable($6.type));}
+               | Join NAME ON Literal '=' Literal            {mainGraph.add_join($6.type,getTable($4.type),getTable($6.type));}
                | Join NAME AS NAME                           {/*add_rename($2,$4)*/;}
-               | Join NAME AS NAME ON Literal '=' Literal    {add_join($6.type,getTable($4.type),getTable($6.type)); /*add_rename($2,$4);*/ }
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join($6.type,getTable($4.type),getTable($6.type)); /*add_rename($2,$4);*/ }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
@@ -189,7 +189,7 @@ groupbyList    : groupbyListSub                              {$$ = $1;}
 
 groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
                | Literal                                     {string Table = getTable($1.expr);
-                                                              add_groupby(Table,Table+"."+$1.expr);}
+                                                              mainGraph.add_groupby(Table,Table+"."+$1.expr);}
                ;
 
 orderbyList    : orderbyListSub                              { ; }
