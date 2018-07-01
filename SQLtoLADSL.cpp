@@ -310,7 +310,7 @@ Ltree l;
             ltree = vector<string>();
             ltree.push_back(s);
         }
-        
+
             /*
                calculates the parent
                 arguments : childs index
@@ -576,22 +576,22 @@ Ltree l;
         return all_same_table_aux(ind_left_child(indice));
       }else{
         smatch m;
-        regex e ("\\ [^.]*\\.");
+        regex e ("\\.([^ ]+)\\ ");
         regex_search (ltree[indice],m,e);
-        string s = m[0];
-        return s;
+        string s = m[1];
+        return getTable(s);
       }
     }
     bool Ltree::all_same_table(int indice){
       string s =all_same_table_aux(indice);
       vector<string> aux = childs(indice);
       smatch m;
-      regex e ("\\ [^.]*\\.");
+      regex e ("\\.([^ ]+)\\ ");
       string s2;
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
         if(it->compare("AND")!=0 && it->compare("OR")!=0){
           regex_search (*it,m,e);
-          s2 = m[0];
+          s2 = getTable(m[1]);
           if(s2.compare(s) != 0){
             return false;
           }
