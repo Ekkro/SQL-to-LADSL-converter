@@ -1,11 +1,10 @@
-//#include <vector>
-//#include <string>
-//#include <iostream>
-//#include <map>
-//#include <utility>
-//#include <set>
-//#include <algorithm>
-#include "declarations.hpp"
+#include <vector>
+#include <string>
+#include <iostream>
+#include <map>
+#include <utility>
+#include <set>
+#include <algorithm>
 using namespace std;
 
     /* ..................................................... */
@@ -221,7 +220,8 @@ class Ltree {
     //vector<pair<string,string>> ltree; possivelmente será necessário alterar o codigo para esta ltree
 
 
-//        Ltree() {ltree = new vector<string>();}
+        Ltree(); 
+        Ltree(string s);
 
             /*
                calculates the parent
@@ -367,5 +367,15 @@ class Ltree {
 
     void pushLT(int ind);
 
-    void func(int ind);
+    void rewrite(int ind);
 };
+
+
+
+    /* ..................................................... */
+    /* .....................DECLARATIONS.......................... */
+    /* ..................................................... */
+
+Ltree create_tree(string term, string type);
+
+Ltree join_trees(Ltree l1, Ltree l2, string type);

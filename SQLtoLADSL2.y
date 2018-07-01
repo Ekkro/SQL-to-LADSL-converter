@@ -139,7 +139,7 @@ ExpR           : Exp AND Exp                                {$$ = join_trees($1,
                | Exp OR  Exp                                {$$ = join_trees($1,$3,"OR"); }
                ;
 
-Exp            : Term                                        {$$ = cria_arvore($1.expr,$1.type) ; }
+Exp            : Term                                        {$$ = create_tree($1.expr,$1.type) ; }
                | ExpR                                        {$$ = $1 ; }
                | '(' ExpR ')'                                {$$ = $2 ; }
                ;
@@ -148,10 +148,12 @@ Term           : Factor                                      {$$ = $1;}
                | Term BBOP Term                              {$$.expr = $1.expr+$2+$3.expr;
                                                                         if(($1.type.size()!=0)&&($3.type.size()!=0)){
                                                                               (add_join($2.type,getTable($1.type),getTable($2.type));
+                                                                              $$.type = "JOIN";
                                                                         }else{
                                                                               add_map_filter($1.type,$1.expr+$2+$3.expr);
-                                                                        }
-                                                              $$.type = $1.type;}
+                                                                              $$.type = "NOT JOIN";
+                                                                        }}
+
                | Term IBOP Term                              {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type + $3.type; }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
@@ -210,7 +212,7 @@ OL             : AND                                         {$$ = $1 ; }
 */
 Literal        : NAME                                        {string s = getTable($1)+".";
                                                               $$.expr = s+$1;
-                                                              $$.type = "";}
+                                                              $$.type = (!s.compare("."))?"": s + $1;}
 
                | NAME'.'NAME                                 {$$.expr = $1+"."+$3;
                                                               $$.type = $1+"."+$3;}
