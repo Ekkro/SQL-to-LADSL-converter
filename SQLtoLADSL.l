@@ -12,7 +12,7 @@ AND|and 		                        	{ return AND; }
 AS|as    						{ return AS; }
 BEFORE|before		        			{ return BEFORE; }
 JOIN|join		        			{ return JOIN; }
-RIGTH|rigth		        			{ return RIGTH; }
+RIGHT|right		        			{ return RIGHT; }
 LEFT|left		        			{ return LEFT; }
 FULL|full		        			{ return FULL; }
 INNER|inner		        			{ return INNER; }
@@ -37,13 +37,13 @@ ALL|all                         {return ALL;}
 
     /* numbers */
 
--?[0-9]+                	                	{ yylval.intval = atoi(yytext); return CONSTANTE; }
+-?[0-9]+                	                	{ yylval.intval = atoi(yytext); return CONSTANT; }
 
 -?[0-9]+"."[0-9]* |
 -?"."[0-9]+ |
 -?[0-9]+E[-+]?[0-9]+ |
 -?[0-9]+"."[0-9]*E[-+]?[0-9]+ |
--?"."[0-9]+E[-+]?[0-9]+ 	                	{ yylval.floatval = atof(yytext) ;return CONSTANTE; }
+-?"."[0-9]+E[-+]?[0-9]+ 	                	{ yylval.floatval = atof(yytext) ;return CONSTANT; }
 
 	/* booleans */
 TRUE    						{ yylval.intval = 1; return BOOL; }
