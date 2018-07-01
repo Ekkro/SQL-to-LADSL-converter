@@ -45,7 +45,7 @@ Ltree l;
         }
 
         string getTable(string attribute) {
-            int ind = find(attribute,"."); 
+            int ind = attribute.find("."); 
             if (ind != (-1)) {
                 attribute = attribute.substr(ind);
             }
