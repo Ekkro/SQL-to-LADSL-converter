@@ -899,7 +899,7 @@ void next(){
 //      if(left_child(ind) == "AND" || right_child(ind) == "AND")
 //        trabalhaaux(int ind);
 //}
-
+/*
 void cleanexp(){
     current_expression.clear();
     current_expression2.clear();
@@ -920,7 +920,7 @@ void aux(string exp){
         mainGraph.add_join(current_expression2,getTable(current_expression),getTable(current_expression2));
     }
 }
-
+*/
 void merge(vector<string> v){
   // g
   // mainGraph

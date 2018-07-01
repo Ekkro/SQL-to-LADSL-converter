@@ -14,7 +14,7 @@ using namespace std;
 
     typedef struct {
         string expr;
-        int type;
+        string type;
     } par;
     /* ..................................................... */
 

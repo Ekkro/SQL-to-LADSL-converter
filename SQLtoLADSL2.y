@@ -115,7 +115,7 @@ fromList       : subfromList                                 { ; }
 
 subfromList    : NAME                                        { g.newRoot($1); }
                | Join NAME                                   { ; }
-               | Join NAME ON Literal '=' Literal            {add_join($6,getTable($4.type),getTable($6.type));}
+               | Join NAME ON Literal '=' Literal            {add_join($6.type,getTable($4.type),getTable($6.type));}
                | Join NAME AS NAME                           {/*add_rename($2,$4)*/;}
                | Join NAME AS NAME ON Literal '=' Literal    {add_join($6.type,getTable($4.type),getTable($6.type)); /*add_rename($2,$4);*/ }
                | '{' SelectBlock '}'                         { ; }
@@ -132,18 +132,25 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
 whereList      : ExpR                                        { ; }
                ;
 
-ExpR           : Exp BBOP Exp                                {$$ = (($1.type == 0)&&($3.type == 0))? ($1.expr+$2+$3.expr ):"";}
-               | Exp                                         {$$ = $1.expr ; }
+ExpR           : Exp AND Exp                                {$$ = join_trees($1,$3,"AND"); }
+               | Exp OR  Exp                                {$$ = join_trees($1,$3,"OR"); }
+               | Exp                                        {$$ = $1; }
                ;
 
-Exp            : Term                                        {$$ = $1 ; }
-               | Exp OR Term                                 { ; }
+Exp            : Term                                        {$$ = cria_arvore($1.expr,$1.type) ; }
+               | ExpR                                        {$$ = $1 ; }
+               | '(' ExpR ')'                                {$$ = $2 ; }
                ;
 
 Term           : Factor                                      {$$ = $1;}
-               | Term AND Factor                             { ; }
-               | Term IBOP Factor                            {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
-               | Term FROM Factor                            {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type * $3.type; }
+               | Term BBOP Term                              {$$.expr = $1.expr+$2+$3.expr;
+                                                                        if(($1.type.size()!=0)&&($3.type.size()!=0)){
+                                                                              (add_join($2.type,getTable($1.type),getTable($2.type));
+                                                                        }else{
+                                                                              add_map_filter($1.type,$1.expr+$2+$3.expr);
+                                                                        }
+                                                              $$.type = $1.type;
+               | Term IBOP Term                              {$$.expr = $1.expr+$2+$3.expr ; $$.type = $1.type + $3.type; }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
                | Term '-' Factor                             { ; }
@@ -152,9 +159,8 @@ Term           : Factor                                      {$$ = $1;}
                ;
 
 Factor         : Literal                                     {$$.expr = $1;}
-               | NAME '(' Args ')'                           {$$.expr = $1+"("+$3.expr+")"; $$.type = 3; }
+               | NAME '(' Args ')'                           {$$.expr = $1+"("+$3.expr+")"; $$.type = $3.type; }
                | NOT Factor                                  {$$.expr = $1+$2.expr; $$.type = $2.type;}
-               | '(' ExpR ')'                                {$$.expr = $2;}
                ;
 
 Args           : Args1                                       {$$.expr = $1 ; }
@@ -162,7 +168,8 @@ Args           : Args1                                       {$$.expr = $1 ; }
                ;
 
 Args1          : Exp                                         {$$ = $1 ; }
-               | Args1 ',' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type * $3.type; }
+               | Args1 ',' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
+               | Args1 ' ' Exp                               {$$.expr = $1.expr+"."+$3.expr ; $$.type = $1.type + $3.type; }
                ;
 /*
                | NAME IN Inlist                              { ; }
@@ -199,28 +206,27 @@ OL             : AND                                         {$$ = $1 ; }
                | OR                                          {$$ = $1 ; }
                ;
 */
-Literal        : NAME                                        {string s = getTable($1);
-                                                              $<expression>$ = s+"."+$1;
-                                                              $<type>$ = 1;}
+Literal        : NAME                                        {string s = getTable($1)+".";
+                                                              $$.expr = s+$1;
+                                                              $$.type = "";}
 
-               | NAME'.'NAME                                 {$<expression>$ = $1+"."+$3;
-                                                              $<type>$ = 0;
-                                                              addexp($1+$3);}
+               | NAME'.'NAME                                 {$$.expr = $1+"."+$3;
+                                                              $$.type = $1+"."+$3;}
 
-               | DATE                                        {$<expression>$ = $1 ;
-                                                              $<type>$ = 1;}
+               | DATE                                        {$$.expr = $1 ;
+                                                              $$.type = "";}
 
-               | CONSTANT                                    {$<expression>$ = $1 ;
-                                                              $<type>$ = 1;}
+               | CONSTANT                                    {$$.expr = $1 ;
+                                                              $$.type = "";}
 
-               | BOOL                                        {$<expression>$ = $1 ;
-                                                              $<type>$ = 1;}
+               | BOOL                                        {$$.expr = $1 ;
+                                                              $$.type = "";}
 
-               | ANY                                         {$<expression>$ = $1 ;
-                                                              $<type>$ = 1;}
+               | ANY                                         {$$.expr = $1 ;
+                                                              $$.type = "";}
 
-               | ALL                                         {$<expression>$ = $1 ;
-                                                              $<type>$ = 1;}
+               | ALL                                         {$$.expr = $1 ;
+                                                              $$.type = "";}
                ;
 
 
