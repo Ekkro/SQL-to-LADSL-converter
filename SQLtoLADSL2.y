@@ -84,9 +84,9 @@ SelectBlock    : SELECT     selectList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 ';'                                         { ; }
+                 ';'                                         { l = trees[0];resolve(0); }
 
-WHERE_         : WHERE       whereList                       {l.funcao(g);}
+WHERE_         : WHERE       whereList                       { ; }
                |                                             { ; }
                ;
 
