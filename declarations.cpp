@@ -686,17 +686,9 @@ Ltree l;
     /* .....................DECLARATIONS.......................... */
     /* ..................................................... */
 
-        void dot_all(int ind){
-            if ((l.left_child(ind) != "NULL") && (l.right_child(ind) != "NULL")) {
-                cout << "dot(" << l.left_child(ind) << "," << l.right_child(ind) << ")" << "\n";
-                dot_all(l.ind_left_child(ind));
-                dot_all(l.ind_right_child(ind));
-            }
-
-        }
 
         string getTable(string attribute) {
-            vector<string> v = g.search_filter(attribute); 
+            vector<string> v = g.search_filter(attribute);
             if (v.size() < 1) {
                 return "NULL";
             }else{
@@ -818,7 +810,7 @@ void joinFilters(string start, string type){
     else{
       cout << a << "=" << "kraoOR" << "(" << aux << "," << aux2 << ")\n";
     }
-  
+
   }
 }
 
@@ -979,6 +971,21 @@ void merge(vector<string> v){
 
 }
 
+void dot_all(){
+  for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
+    string key = it->at(0);
+    string table = it->at(1);
+    string table2 = it->at(2);
+    map<string,string> aux = mainGraph.tables[table];
+    for(map<string,string>::iterator it = mainGraph.tables[table2].begin(); it != mainGraph.tables[table2].end(); ++it) {
+      next();
+      cout << a << "=" << "dot(" << alpha << "," << key << ")\n";
+      aux[a] = "dimension";
+    }
+    mainGraph.tables[table] = aux;
+  }
+}
+
 
 void resolveS(int indice, string type){
   vector<string> v =  l.childs(indice);
@@ -998,7 +1005,7 @@ void resolve(int indice){
     if(l.dependencies(indice) != true){
       resolveS(indice,"OR");
     }else{
-      dot_all(indice);/*----------------*/
+      dot_all();
       resolve(indice);
     }
   }
