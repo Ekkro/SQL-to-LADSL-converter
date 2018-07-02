@@ -1,24 +1,89 @@
 %{
+
  #include <stdio.h>
  #include <strings.h>
  #include "SQLtoLADSL.hpp"
 
-    string current_expression;
-    string current_expression2;
-    int current = 0;
+ void yyerror(char *s);
+ int yylex(void);
+
 %}
-%token SELECT FROM WHERE GROUPBY ORDERBY HAVING AS
-%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON CONSTANT BOOL IN ASC DESC DATE ANDOP ANY ALL
-%token LIKE
 
-%token <string> NAME BOP NOT
+%union{
+    string *str;
+    int integer;
 
+}
+
+
+
+
+%token SELECT WHERE GROUPBY ORDERBY HAVING AS
+%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP
+%token LIKE REGEX
+/*%token REGEX*/
+
+
+%token <str> NAME
+%token <str> BBOP
+%token <str> BOP
+%token <str> IBOP
+%token <str> NOT
+%token <str> ASC
+%token <str> DESC
+%token <str> DATE
+%token <str> CONSTANT
+%token <str> BOOL
+%token <str> ANY
+%token <str> ALL
+%token <str> FROM
+
+%type <integer> Literal
+%type <str> Join
+%type <integer> ExpR
+%type <integer> Exp
+%type <integer> Term
+%type <integer> Factor
+%type <str> groupbyList
+%type <str> groupbyListSub
+%type <str> order
+%type <integer> Args1
+%type <integer> Args
+/*%type <str> Inlist*/
+
+
+
+/*
+union para definir tipos
+token para terminais
+type para nao terminais
+
+*/
+%left AND
+%left OR
+%left IBOP
+%left BBOP
+/*
+%precedence OR
+%precedence IBOP
+%precedence BBOP
+%precedence FROM
+%precedence OR
+%precedence BOP
+%precedence FROM
+%left AND
+%left OR
+%left BOP
+%right FROM
+%nonassoc
 %right '='
 %left OP
 %right NOT
 %left COMPARISSON
 %left SHIFT
 %left BOP
+*/
+
 %%
 
 SelectBlock    : SELECT     selectList
@@ -26,123 +91,223 @@ SelectBlock    : SELECT     selectList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 ';'                                                               { ; }
+                 ';'                                         { l = trees[0];resolve(0); }
 
-WHERE_         : WHERE       whereList                                             {l.funcao(g);}
-               |                                                                   { ; }
+WHERE_         : WHERE       whereList                       { ; }
+               |                                             { ; }
                ;
 
-GROUPBY_       : GROUPBY    groupbyList                                            { ; }
-               |                                                                   { ; }
+GROUPBY_       : GROUPBY    groupbyList                      { ; }
+               |                                             { ; }
                ;
 
-ORDERBY_       : ORDERBY    orderbyList                                            { ; }
-               |                                                                   { ; }
+ORDERBY_       : ORDERBY    orderbyList                      { ; }
+               |                                             { ; }
                ;
 
-selectList     : selectListN                                                       { ; }
-               | '*'                                                               { ; }
+selectList     : selectListN                                 { ; }
+               | '*'                                         { ; }
                ;
 
-selectListN    : selectListNSub                                                    { ; }
-               | selectListN ',' selectListNSub                                    { ; }
+selectListN    : selectListNSub                              { ; }
+               | selectListN ',' selectListNSub              { ; }
                ;
 
-selectListNSub : Expr                                                              {add_select($1); }
-               | Expr AS NAME                                                      {add_select($1); /*add_rename($1,$3,table); */}
+selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr); }
+               | Term AS NAME                                {mainGraph.add_select(types[$1].expr); /*add_rename(types[$1],$3,table); */}
                ;
 
-fromList       : subfromList                                                       { ; }
-               | fromList ',' subfromList                                          { ; }
+fromList       : subfromList                                 { ; }
+               | fromList ',' subfromList                    { ; }
                ;
 
-subfromList    : NAME                                                              { g.newRoot($1); }
-               | Join NAME                                                         { ; }
-               | Join NAME ON Literal '=' Literal                                  {add_join($6,getTable($4),getTable($6));}
-               | Join NAME AS NAME                                                 {/*add_rename($2,$4)*/;}
-               | Join NAME AS NAME ON Literal '=' Literal                          {add_join($6,getTable($4),getTable($6)); /*add_rename($2,$4);*/ }
-               | '{' SelectBlock '}'                                               { ; }
-               | '{' SelectBlock '}' AS NAME                                       { ; }
+subfromList    : NAME                                        { mainGraph.newRoot(*$1); }
+               | Join NAME                                   { ; }
+               | Join NAME ON Literal '=' Literal            {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
+               | Join NAME AS NAME                           {/*add_rename($2,types[$4])*/;}
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); /*add_rename($2,types[$4]);*/ }
+               | '{' SelectBlock '}'                         { ; }
+               | '{' SelectBlock '}' AS NAME                 { ; }
                ;
 
-Join           : JOIN                                                              { ; }
-               | INNER JOIN                                                        { ; }
-               | LEFT JOIN                                                         { ; }
-               | RIGHT JOIN                                                        { ; }
-               | FULL JOIN                                                         { ; }
+Join           : JOIN                                        {/*$$ = "Normal"*/;}
+               | INNER JOIN                                  {/*$$ = "Inner"*/;}
+               | LEFT JOIN                                   {/*$$ = "Left"*/;}
+               | RIGHT JOIN                                  {/*$$ = "Rigth"*/;}
+               | FULL JOIN                                   {/*$$ = "Full"*/;}
                ;
 
-whereList      : whereListSub                                                      { l.ltree[current] = current_expression; }
-               | whereList OL whereList                                            { ; }
-               | '(' whereList ')'                                                 { ; }
+whereList      : Exp                                         { ; }
                ;
 
-whereListSub   : Expr                                                              {aux($1,current_expression,current_expression2); cleanexp();}
-               | NAME IN Inlist                                                    { ; }
-               | NAME BETWEEN Literal AND Literal                                  { ; }
-               | EXISTS '(' SelectBlock ')' ';'                                    { ; }
-               | Literal LIKE Literal                                              { ; }// expressao regular
+ExpR           : Exp AND Exp                                {$$ = $1;trees[ $1 ] = join_trees(trees[$1],trees[$3],"AND"); }
+               | Exp OR  Exp                                {$$ = $1;trees[ $1 ] = join_trees( trees[$1],trees[$3],"OR"); }//delete $3
                ;
 
-groupbyList    : groupbyListSub                                                    {$$ =$1  ; }
-               | groupbyList ',' groupbyListSub                                    { ; }
+Exp            : Term                                        {$$ = itr;trees[ itr++ ] =  create_tree(types[$1].expr,types[$1].type) ; }
+               | ExpR                                        {$$ = $1 ; }
+               | '(' ExpR ')'                                {$$ = $2 ; }
                ;
 
-groupbyListSub : HAVING NAME '(' Literal ')' BOP Literal                           { ; }
-               | Literal                                                           {string Table = getTable($1); add_groupby(Table,$1);}
+Term           : Factor                                      {$$ = $1;}
+               | Term BBOP Term                              {$$ = $1;
+                                                              types[$1].expr.append(*$2);
+                                                              types[$1].expr.append(types[$3].expr);
+                                                                        if((types[$1].type.size()!=0)&&(types[$3].type.size()!=0)){
+                                                                              mainGraph.add_join(types[$3].type,getTable(types[$1].type),getTable(types[$3].type));
+                                                                              types[$1].type = "JOIN";
+                                                                        }else{
+                                                                              mainGraph.add_map_filter(types[$1].type,types[$1].expr);
+                                                                              types[$1].type = "NOT JOIN";
+                                                                        }}
+
+               | Term IBOP Term                              {$$ = $1; types[$1].expr.append(*$2);
+                                                            types[$1].expr.append(types[$3].expr) ;
+                                                            types[$1].type.append(types[$3].type); }
+/*             | Term '/' Factor                             { ; }
+               | Term '+' Factor                             { ; }
+               | Term '-' Factor                             { ; }
+               | Term '*' Factor                             { ; }
+*/
                ;
 
-orderbyList    : orderbyListSub                                                    { ; }
-               | orderbyList ',' orderbyListSub                                    { ; }
+Factor         : Literal                                     {$$ = $1;}
+               | NAME '(' Args ')'                           {$$ = $3;
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append("(");
+                                                              s.append(types[$3].expr);
+                                                              s.append(")");
+                                                              types[$3].expr = s;}
+               | NOT Factor                                  {$$ = $2;
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append(" ");
+                                                              s.append(types[$2].expr);
+                                                              types[$2].expr = s;}
+               ;
+
+Args           : Args1                                       {$$ = $1;}
+               |                                             { ; }
+               ;
+
+Args1          : Term                                        {$$ = $1 ; }
+               | Args1 ',' Term                              {$$ = $1;
+                                                            types[$1].expr.append( ",");
+                                                            types[$1].expr.append(types[$3].expr) ;
+                                                            types[$1].type.append(types[$3].type); }
+               | Args1 ' ' Term                              {$$ = $1;
+                                                            types[$1].expr.append( " ");
+                                                            types[$1].expr.append(types[$3].expr) ;
+                                                            types[$1].type.append(types[$3].type); }
+               ;
+/*
+               | NAME IN Inlist                              { ; }
+               | NAME BETWEEN Literal AND Literal            { ; }
+               | EXISTS '(' SelectBlock ')' ';'              { ; }
+               | Literal LIKE REGEX                          { ; }// expressao regular
+               ;
+*/
+
+groupbyList    : groupbyListSub                              { ; }
+               | groupbyList ',' groupbyListSub              { ; }
+               ;
+
+groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
+               | Literal                                     {string Table = getTable(types[$1].expr);
+                                                              string s = Table;
+                                                              s.append(".");
+                                                              s.append(types[$1].expr);
+                                                              mainGraph.add_groupby(Table,s);}
+               ;
+
+orderbyList    : orderbyListSub                              { ; }
+               | orderbyList ',' orderbyListSub              { ; }
 
                ;
 
-orderbyListSub : NAME                                                              { ; }
-               | NAME order                                                        { ; }
+orderbyListSub : NAME                                        { ; }
+               | NAME order                                  { ; }
                ;
 
-order          : ASC                                                               { $$ = $1; }
-               | DESC                                                              { $$ = $1; }
+order          : ASC                                         { ; }
+               | DESC                                        { ; }
+/*               ;
+
+OL             : AND                                         {$$ = $1 ; }
+               | ANDOP                                       {$$ = $1 ; }
+               | OR                                          {$$ = $1 ; }
+               ;
+*/
+Literal        : NAME                                        {string s = getTable(*$1);
+                                                               s.append(".");
+                                                              $$ = itr2;
+                                                              if(!s.compare(".")){
+                                                                  types[itr2].type = "";
+                                                                  types[itr2++].expr = *$1;
+                                                              }else{
+                                                                  s.append(*$1);
+                                                                  types[itr2].type = s;
+                                                                  types[itr2++].expr = s;
+                                                              }}
+
+
+               | NAME '.' NAME                               {$$ = itr2;
+                                                              string s = "";
+                                                              s.append(*$1);
+                                                              s.append(".");
+                                                              s.append(*$3);
+                                                              types[itr2++].type = s;
+                                                              types[itr2++].expr = s;}
+
+               | DATE                                        {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
+
+               | CONSTANT                                    {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
+
+               | BOOL                                        {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
+
+               | ANY                                         {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
+
+               | ALL                                         {$$ = itr2;
+                                                              types[itr2].expr = *$1 ;
+                                                              types[itr2++].type = "";}
                ;
 
-OL             : AND                                                               {$$ = $1 ; }
-               | ANDOP                                                             {$$ = $1 ; }
-               | OR                                                                {$$ = $1 ; }
+
+/*
+Expr           : Literal                                     {$$ = $1 ; }
+               | NOT Expr                                    {$$ = $1 + $2 ; }
+               | Expr BOP Expr                               {$$ = $1+$2+$3 ; }
+               | Expr '=' Expr                               {$$ = $1+$2+$3 ; }
+               | NAME '(' Expr ')'                           {$$ = $1+$2+$3+$4 ; }
+               | '('SelectBlock')'                           { ; }
                ;
 
-Literal        : NAME                                                              {$$ = $1 ; }
-               | NAME'.'NAME                                                       {$$ = $3 ; addexp($3);}
-               /* | NAME'_'NAME                                                       {$$ = $3 ; addexp($3);}*/
-               | DATE                                                              {$$ = $1 ; }
-               | CONSTANT                                                          {$$ = $1 ; }
-               | BOOL                                                              {$$ = $1 ; }
-               | ANY                                                               {$$ = $1 ; }
-               | ALL                                                               {$$ = $1 ; }
+*/
+/*
+Inlist         : Literal                                     {$$ = $1;}
+               | Inlist ',' Literal                          {$$ = $3;}
                ;
-
-
-Expr           : Literal                                                           {$$ = $1 ; }
-               | NOT Expr                                                          {$$ = $1 + $2 ; }
-               | Expr BOP Expr                                                     {$$ = $1+$2+$3 ; }
-               | Expr '=' Expr                                                     {$$ = $1+$2+$3 ; }
-               | NAME '(' Expr ')'                                                 {$$ = $1+$2+$3+$4 ; }
-               | '('SelectBlock')'                                                 { ; }
-               ;
-
-
-Inlist         : Literal                                                           {$$ = $1 ; }
-               | Literal  ','  Inlist                                              {$$ = $1 ; }
-               ;
+*/
 
 %%
+
 int main(int argc, char **argv){
 
-    out = fopen("name.vm", "w");
+    FILE *  out = fopen("name.vm", "w");
     if (out == NULL){
         printf("Error opening file!\n");
         exit(1);
     }
-    char codigo[1023*1024];
+//    char codigo[1023*1024];
     fprintf(out, "start\n");
     yyparse();
     fprintf(out, "stop\n");

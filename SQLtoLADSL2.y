@@ -4,6 +4,9 @@
  #include <strings.h>
  #include "SQLtoLADSL.hpp"
 
+ void yyerror(char *s);
+ int yylex(void);
+
 %}
 
 %union{
@@ -11,6 +14,9 @@
     int integer;
 
 }
+
+
+
 
 %token SELECT WHERE GROUPBY ORDERBY HAVING AS
 %token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP
@@ -145,7 +151,7 @@ Exp            : Term                                        {$$ = itr;trees[ it
 
 Term           : Factor                                      {$$ = $1;}
                | Term BBOP Term                              {$$ = $1;
-                                                              types[$1].expr.append(*$2); 
+                                                              types[$1].expr.append(*$2);
                                                               types[$1].expr.append(types[$3].expr);
                                                                         if((types[$1].type.size()!=0)&&(types[$3].type.size()!=0)){
                                                                               mainGraph.add_join(types[$3].type,getTable(types[$1].type),getTable(types[$3].type));
@@ -156,7 +162,7 @@ Term           : Factor                                      {$$ = $1;}
                                                                         }}
 
                | Term IBOP Term                              {$$ = $1; types[$1].expr.append(*$2);
-                                                            types[$1].expr.append(types[$3].expr) ; 
+                                                            types[$1].expr.append(types[$3].expr) ;
                                                             types[$1].type.append(types[$3].type); }
 /*             | Term '/' Factor                             { ; }
                | Term '+' Factor                             { ; }
@@ -166,14 +172,14 @@ Term           : Factor                                      {$$ = $1;}
                ;
 
 Factor         : Literal                                     {$$ = $1;}
-               | NAME '(' Args ')'                           {$$ = $3; 
+               | NAME '(' Args ')'                           {$$ = $3;
                                                               string s = "";
                                                               s.append(*$1);
                                                               s.append("(");
                                                               s.append(types[$3].expr);
                                                               s.append(")");
                                                               types[$3].expr = s;}
-               | NOT Factor                                  {$$ = $2; 
+               | NOT Factor                                  {$$ = $2;
                                                               string s = "";
                                                               s.append(*$1);
                                                               s.append(" ");
@@ -244,9 +250,9 @@ Literal        : NAME                                        {string s = getTabl
                                                                   types[itr2].type = s;
                                                                   types[itr2++].expr = s;
                                                               }}
-                                                              
 
-               | NAME'.'NAME                                 {$$ = itr2;
+
+               | NAME '.' NAME                               {$$ = itr2;
                                                               string s = "";
                                                               s.append(*$1);
                                                               s.append(".");
@@ -293,6 +299,7 @@ Inlist         : Literal                                     {$$ = $1;}
 */
 
 %%
+
 int main(int argc, char **argv){
 
     FILE *  out = fopen("name.vm", "w");

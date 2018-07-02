@@ -79,13 +79,14 @@ DATE_SUB/"("                                            { yylval.strval = strdup
 
     /* NAMES */
 
-date \'.*\'                                             { yylval.strval = strdup(yytext);return NAME; }
+date \'.*\\'                                             { yylval.strval = strdup(yytext);return NAME; }
 [A - Za - z][A - Za - z0 - 9_]*                         { yylval.strval = strdup(yytext);return NAME; }
 "(.*?)"                                                 { yylval.strval = strdup(yytext);return REGEX; }
 
 
 
 %%
+
 
 int main(){
     yylex();
