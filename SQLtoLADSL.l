@@ -2,7 +2,7 @@
 /* Declaraçoes C diversas */
 
 #include "SQLtoLADSL.hpp"
-#include "y.tab.h"
+#include "SQLtoLADSL.tab.h"
 %}
 
 Abrev ER
