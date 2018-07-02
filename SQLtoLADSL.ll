@@ -1,4 +1,5 @@
- %{ /* -*- C++ -*- */
+%{ 
+
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
@@ -7,15 +8,15 @@
 #undef yywrap
 #define yywrap() 1
 
-#define yyterminate() return token::END
- %}
+#define yyterminate() return END
+%}
 
 %option noyywrap nounput batch debug
 
 as              [Aa][Ss]
 before          [Bb][Ee][Ff][Oo][Rr][Ee]
 join            [Jj][Oo][Ii][Nn]
-rigth           [Rr][Ii][Gg][Tt][Hh]
+right           [Rr][Ii][Gg][Hh][Tt]
 left            [Ll][Ee][Ff][Tt]
 full            [Ff][Uu][Ll][Ll]
 inner           [Ii][Nn][Nn][Ee][Rr]
@@ -37,135 +38,101 @@ any             [Aa][Nn][Yy]
 all             [Aa][Ll][Ll]
 substring       [Ss][Uu][Bb][Ss][Tt][Rr]([In][Nn][Gg])?
 
-or              ([oO][rR]|\|\|)
+Or              ([oO][rR]|\|\|)
 and             ([aA][nN][dD]|&&)
 eq              (=|==)
 ne              (!=|<>)
-le              <=
-ge              >=
-left            <<
-right           >>
-mais            +
-div             /
-mul             *
-men             -
+le              "<="
+ge              ">="
+mais            "+"
+div             "/"
+mul             "*"
+men             "-"
 
-not             ([nN][oO][tT]|!)
+Not             ([nN][oO][tT]|!)
 true            [Tt][Rr][Uu][Ee]
 false           [Ff][Aa][Ll][Ss][Ee]
 
 int             [0-9]+
 float           ([0-9]*\.[0-9]+|[0-9]+\.[0.9]*)
-date            [\"'][0-9]{4}-[0-9]{2}-[0-9]{2}[\"']
-
 name            [A-Za-z][A-Za-z0-9_]*
+Date            [\"'][0-9]{4}-[0-9]{2}-[0-9]{2}[\"']
+/*" */
 
-    %{
-#define YY_USER_ACTION yylloc->columns (yyleng);
-    %}
-
-%x MLCOMMENT REGEXPRESSION
 %%
-%{
-   yylloc->step ();
-     typedef yy::laq_parser::token token;
-       void toLower(std::string& str);
-%}
 
-<INITIAL>{and}                 { return token::AND; }
-<INITIAL>{as}                  { return token::AS; }
-<INITIAL>{before}              { return token::BEFORE; }
-<INITIAL>{rigth}               { return token::RIGTH; }
-<INITIAL>{left}                { return token::LEFT; }
-<INITIAL>{full}                { return token::FULL; }
-<INITIAL>{inner}               { return token::INNER; }
-<INITIAL>{on}                  { return token::ON; }
-<INITIAL>{between}             { return token::BETWEEN; }
-<INITIAL>{exists}              { return token::EXISTS; }
-<INITIAL>{from}                { return token::FROM; }
-<INITIAL>{groupby}             { return token::GROUPBY; }
-<INITIAL>{orderby}             { return token::ORDERBY; }
-<INITIAL>{having}              { return token::HAVING; }
-<INITIAL>{in}                  { return token::IN; }
-<INITIAL>{is}                  { return token::IS; }
-<INITIAL>{not}                 { return token::NOT; }
-<INITIAL>{or}                  { return token::OR; }
-<INITIAL>{select}              { return token::SELECT; }
-<INITIAL>{where}               { return token::WHERE; }
-<INITIAL>{asc}                 { return token::ASC; }
-<INITIAL>{desc}                { return token::DESC; }
-<INITIAL>{any}                 { return token::ANY; }
-<INITIAL>{all}                 { return token::ALL; }
-<INITIAL>{left}                { return token::LEFT; }
-<INITIAL>{right}               { return token::RIGTH; }
+<INITIAL>{as}                  { return AS; }
+<INITIAL>{before}              { return BEFORE; }
+<INITIAL>{full}                { return FULL; }
+<INITIAL>{inner}               { return INNER; }
+<INITIAL>{on}                  { return ON; }
+<INITIAL>{between}             { return BETWEEN; }
+<INITIAL>{exists}              { return EXISTS; }
+<INITIAL>{from}                { return FROM; }
+<INITIAL>{groupby}             { return GROUPBY; }
+<INITIAL>{orderby}             { return ORDERBY; }
+<INITIAL>{having}              { return HAVING; }
+<INITIAL>{in}                  { return IN; }
+<INITIAL>{is}                  { return IS; }
+<INITIAL>{Not}                 { return NOT; }
+<INITIAL>{select}              { return SELECT; }
+<INITIAL>{where}               { return WHERE; }
+<INITIAL>{asc}                 { return ASC; }
+<INITIAL>{desc}                { return DESC; }
+<INITIAL>{any}                 { return ANY; }
+<INITIAL>{all}                 { return ALL; }
+<INITIAL>{right}               { return RIGTH; }
 
-
-left            <<
-right           >>
 
 <INITIAL>{int}                 { yylval->sval = new std::string( yytext );
-                                     return token::INT;
+                                     return INT;
                                                                     }
 <INITIAL>{float}               { yylval->sval = new std::string( yytext );
-                                     return token::FLOAT;
+                                     return FLOAT;
                                                                     }
-<INITIAL>{date}                { yylval->sval = new std::string( yytext );
-                                     return token::DATE;
+<INITIAL>{Date}                { yylval->sval = new std::string( yytext );
+                                     return DATE;
                                                                     }
 
-<INITIAL>{or}                  { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+<INITIAL>{Or}                  { yyval->sval = new string(yytext);
+                                    return BBOP; }
 
 <INITIAL>{and}                 { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+                                    return BBOP; }
 
 <INITIAL>{le}                  { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+                                    return BBOP; }
 
 <INITIAL>{ge}                  { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+                                    return BBOP; }
 
 <INITIAL>{eq}                  { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+                                    return BBOP; }
 
 <INITIAL>{ne}                  { yyval->sval = new string(yytext);
-                                    return token::BBOP; }
+                                    return BBOP; }
 
 <INITIAL>{mul}                  { yyval->sval = new string(yytext);
-                                    return token::IBOP; }
+                                    return IBOP; }
 
 <INITIAL>{mais}                  { yyval->sval = new string(yytext);
-                                    return token::IBOP; }
+                                    return IBOP; }
 
 <INITIAL>{div}                  { yyval->sval = new string(yytext);
-                                    return token::IBOP; }
-                                    return token::IBOP; }
+                                    return IBOP; }
 
 <INITIAL>{men}                  { yyval->sval = new string(yytext);
-                                    return token::IBOP; }
+                                    return IBOP; }
+
+<INITIAL>{left}                  { yyval->sval = new string(yytext);
+                                    return IBOP; }
+
 
 %%
 
-
-void
-laq::driver::scan_begin() {
-      yy_flex_debug = trace_scanning;
-        if (file.empty() || file == "-") {
-                yyin = stdin;
-                  }
-          else if (!(yyin = fopen(file.c_str(), "r"))) {
-                  error("Cannot open " + file + ": " + strerror(errno));
-                      exit(EXIT_FAILURE);
-                        }
+int main(void)
+{
+    yylex();
+    return 0;
 }
-
-void
-laq::driver::scan_end() {
-      fclose(yyin);
-}
-
-void
-toLower(std::string& str) {
-      for (char& c : str)
-              c = (char) tolower(c);
-}
+    
