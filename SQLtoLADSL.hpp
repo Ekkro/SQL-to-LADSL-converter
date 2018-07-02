@@ -72,7 +72,7 @@ class Graph {
            structure to save the selects
            set attributes
          */
-    vector<string> select;
+    vector< pair<string,string> > select;
 
     /* ..................................................... */
 
@@ -159,12 +159,12 @@ class Graph {
 
             /* adds a table to the Selects */
             /* arguments : name of a table */
-        void add_select(string Table);
+        void add_select(string sel, string alias);
 
             /* remove a table to the Selects */
             /* arguments : name of a table */
-        void remove_select(string Table);
-
+/*        void remove_select(string sel);*/
+        
             /* whether it is measured or not */
             /* arguments : name of a table */
             /* arguments : filter name */
@@ -437,6 +437,7 @@ void resolveS(int indice, string type);
 
 void resolve(int indice);
 
+void returnf();
 
 
 

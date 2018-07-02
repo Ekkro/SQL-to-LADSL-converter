@@ -87,6 +87,9 @@ date \'.*\\'                                             { yylval.strval = strdu
 
 %%
 
+int yywrap(){
+  return(1);
+}
 
 int main(){
     yylex();

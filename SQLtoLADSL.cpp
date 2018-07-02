@@ -217,12 +217,13 @@ bool has(vector<string> v, string s){
 
             /* adds a table to the Selects */
             /* arguments : name of a table */
-        void Graph::add_select(string Table){
-            select.push_back(Table);
+        void Graph::add_select(string sel, string alias){
+            select.push_back(pair<string,string>(sel,alias));
         }
 
             /* remove a table to the Selects */
             /* arguments : name of a table */
+        /*
         void Graph::remove_select(string Table){
             for (int i = 0; i < select.size(); i++) {
                 if (select[i].compare(Table)==0) {
@@ -231,7 +232,7 @@ bool has(vector<string> v, string s){
                 }
             }
         }
-
+*/
             /* whether it is measured or not */
             /* arguments : name of a table */
             /* arguments : filter name */
@@ -1031,7 +1032,25 @@ void resolve(int indice){
   }
 }
 
+void returnf(){
+  vector<string> aux;
+  for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
+    if(it->secound.compare("")==0){
+      aux.push_back(it->first);
+    }else{
+      cout << it->secound << "=" << it->first;
+      aux.push_back(it->secound);
+    }
+  }
+  cout << "return(" << aux[0];
+  for(vector<string>::iterator it = aux.begin()+1; it != aux.end(); ++it) {
+    cout << ',' << *it;
+  }
+  cout << ")";
+}
+
+
+
 int main(){
   return 0;
 }
-

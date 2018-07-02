@@ -91,7 +91,7 @@ SelectBlock    : SELECT     selectList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 ';'                                         { l = trees[0];resolve(0); }
+                 ';'                                         { l = trees[0];resolve(0);returnf(); }
 
 WHERE_         : WHERE       whereList                       { ; }
                |                                             { ; }
@@ -113,8 +113,8 @@ selectListN    : selectListNSub                              { ; }
                | selectListN ',' selectListNSub              { ; }
                ;
 
-selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr); }
-               | Term AS NAME                                {mainGraph.add_select(types[$1].expr); /*add_rename(types[$1],$3,table); */}
+selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr,""); }
+               | Term AS NAME                                {mainGraph.add_select(types[$1].expr,*$3); }
                ;
 
 fromList       : subfromList                                 { ; }
@@ -124,8 +124,8 @@ fromList       : subfromList                                 { ; }
 subfromList    : NAME                                        { mainGraph.newRoot(*$1); }
                | Join NAME                                   { ; }
                | Join NAME ON Literal '=' Literal            {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
-               | Join NAME AS NAME                           {/*add_rename($2,types[$4])*/;}
-               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); /*add_rename($2,types[$4]);*/ }
+               | Join NAME AS NAME                           {mainGraph.tables[*$4]=mainGraph.tables[*$2];}
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); mainGraph.tables[*$4]=mainGraph.tables[*$2]; }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
