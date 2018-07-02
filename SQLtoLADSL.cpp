@@ -782,8 +782,8 @@ void next(){
 }
 
 void joinAtrD(vector<string> v, string type){
-  next();
-  if(v.size()>1){
+  if(v.size()>=1){
+    next();
     cout << a << " = filter(" << v[0];
     for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
       cout << " " << type << " " << *it;
@@ -802,7 +802,7 @@ void joinAtr(string start, string type){
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     //vector<string> v = g.filter[s];
-    if((it->second).compare("measure") == 0){ //se for medida
+    if((it->second).compare("measure") == 0 || s.find(".")==string::npos){ //se for medida
       new_elements.insert(pair<string,string>(it->first,it->second));
     }else{
       vector<string> v ( g.filter[s] );
@@ -886,14 +886,16 @@ void joinGroupby(string start){
 void removeTable(string start){
   vector<vector <string> > Keys;
   string alpha = a;
-  if (g.tables[start].size() == 1) {
+  if (g.tables[start].size() <= 1) {
     for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-      if((it->at(2)).compare(start)){
-        next();
-        cout << a << " = " << "dot(" << alpha << ", " << it->at(0)<< ")\n";
-        map<string,string> aux = g.tables[it->at(1)];
-        aux[a] = "dimension";
-        g.tables[it->at(1)] = aux;
+      if((it->at(2)).compare(start) == 0){
+        if(g.tables[start].size() > 0){
+          next();
+          cout << a << " = " << "dot(" << alpha << ", " << it->at(0)<< ")\n";
+          map<string,string> aux = g.tables[it->at(1)];
+          aux[a] = "dimension";
+          g.tables[it->at(1)] = aux;
+        }
       }else{
         Keys.push_back(*it);
       }
@@ -905,7 +907,8 @@ void removeTable(string start){
 string giveMeStart(string root){
   if(g.join.size() > 0){
     for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-      if((it->at(1)).compare(root)){
+      if((it->at(1)).compare(root) == 0){
+        //cout << it->at(1) << "\n";
         return giveMeStart(it->at(2));
       }
     }
@@ -1126,26 +1129,39 @@ void print_tables(){
   }
 }
 
+void print_joins(){
+  for(int x = 0; x < mainGraph.join.size();x++){
+    for(int y = 0; y < mainGraph.join[x].size();y++){
+      cout <<  mainGraph.join[x].at(y) << " ,";
+    }
+    cout << "\n";
+  }
+}
+
 
 
 int main(){
-  mainGraph.add_table("lineitem_l","lineitem_l.extendedprice","measure");
-  mainGraph.add_table("lineitem_l","lineitem_l.discount","measure");
-  mainGraph.add_table("lineitem_l","lineitem_l.shipdate","measure");
-  mainGraph.add_table("lineitem_l","lineitem_l.quantity","measure");
-  mainGraph.add_select("sum(lineitem_l.extendedprice * lineitem_l.discount)","revenue");
-  mainGraph.newRoot("lineitem_l");
-  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate >= '1994-01-01'");
-  trees.push_back(create_tree("lineitem_l.shipdate >= '1994-01-01'","lineitem_l.shipdate"));
-  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate < '1994-01-01' + interval '1' year");
-  trees.push_back(create_tree("lineitem_l.shipdate < '1994-01-01' + interval '1' year","lineitem_l.shipdate"));
+  mainGraph.add_select("n_name","");
+  mainGraph.add_select("sum(l_extendedprice * (1 - l_discount))","revenue");
+  mainGraph.add_table("region","region.r_name","dimension");
+  mainGraph.add_table("orders","orders.o_orderdate","measure");
+  mainGraph.newRoot("customer");
+  mainGraph.add_map_filter("region.r_name","region.r_name = ':1'");
+  trees.push_back(create_tree("region.r_name = ':1'","region.r_name"));
+  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate >= date ':2'");
+  trees.push_back(create_tree("orders.o_orderdate >= date ':2'","orders.o_orderdate"));
   change_trees(join_trees(trees[0],trees[1],"AND"),0);
-  mainGraph.add_map_filter("lineitem_l.discount","lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01");
-  trees.push_back(create_tree("lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01","lineitem_l.discount"));
+  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate < date ':2' + interval '1' year");
+  trees.push_back(create_tree("orders.o_orderdate < date ':2' + interval '1' year","orders.o_orderdate"));
   change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_map_filter("lineitem_l.quantity","lineitem_l.quantity < 24");
-  trees.push_back(create_tree("lineitem_l.quantity < 24","lineitem_l.quantity"));
-  change_trees(join_trees(trees[0],trees[3],"AND"),0);
+  mainGraph.add_groupby("nation","nation.n_name");
+  mainGraph.add_join("orders.o_custkey","customer","orders");
+  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
+  mainGraph.add_join("lineitem.l_suppkey","supplier","lineitem");
+  mainGraph.add_join("supplier.n_nationkey","customer","supplier");
+  mainGraph.add_join("nation.n_nationkey","supplier","nation");
+  mainGraph.add_join("region.r_regionkey","nation","region");
+  print_joins();
   copy_tree(trees[0]);
   print_tree();
   resolve(0);
