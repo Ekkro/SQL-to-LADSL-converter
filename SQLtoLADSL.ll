@@ -1,9 +1,10 @@
-%{ 
+%{
 
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
 #include <string>
+#include "SQLtoLADSL.tab.h"
 
 #undef yywrap
 #define yywrap() 1
@@ -56,8 +57,7 @@ false           [Ff][Aa][Ll][Ss][Ee]
 int             [0-9]+
 float           ([0-9]*\.[0-9]+|[0-9]+\.[0.9]*)
 name            [A-Za-z][A-Za-z0-9_]*
-Date            [\"'][0-9]{4}-[0-9]{2}-[0-9]{2}[\"']
-/*" */
+Date            (0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}
 
 %%
 
@@ -81,50 +81,57 @@ Date            [\"'][0-9]{4}-[0-9]{2}-[0-9]{2}[\"']
 <INITIAL>{desc}                { return DESC; }
 <INITIAL>{any}                 { return ANY; }
 <INITIAL>{all}                 { return ALL; }
-<INITIAL>{right}               { return RIGTH; }
+<INITIAL>{right}               { return RIGHT; }
 
 
-<INITIAL>{int}                 { yylval->sval = new std::string( yytext );
-                                     return INT;
-                                                                    }
-<INITIAL>{float}               { yylval->sval = new std::string( yytext );
-                                     return FLOAT;
-                                                                    }
-<INITIAL>{Date}                { yylval->sval = new std::string( yytext );
-                                     return DATE;
-                                                                    }
+<INITIAL>{int}                 { yylval->str = new std::string( yytext );
+                                     return CONSTANT; }
 
-<INITIAL>{Or}                  { yyval->sval = new string(yytext);
+<INITIAL>{float}               { yylval->str = new std::string( yytext );
+                                     return CONSTANT; }
+
+<INITIAL>{Date}                { yylval->str = new std::string( yytext );
+                                     return DATE; }
+
+<INITIAL>{true}                { yylval->str = new std::string( yytext );
+                                    return BOOL; }
+
+<INITIAL>{false}                { yylval->str = new std::string( yytext );
+                                    return BOOL; }
+
+
+
+<INITIAL>{Or}                  { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{and}                 { yyval->sval = new string(yytext);
+<INITIAL>{and}                 { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{le}                  { yyval->sval = new string(yytext);
+<INITIAL>{le}                  { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{ge}                  { yyval->sval = new string(yytext);
+<INITIAL>{ge}                  { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{eq}                  { yyval->sval = new string(yytext);
+<INITIAL>{eq}                  { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{ne}                  { yyval->sval = new string(yytext);
+<INITIAL>{ne}                  { yylval->str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{mul}                  { yyval->sval = new string(yytext);
+<INITIAL>{mul}                  { yylval->str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{mais}                  { yyval->sval = new string(yytext);
+<INITIAL>{mais}                  { yylval->str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{div}                  { yyval->sval = new string(yytext);
+<INITIAL>{div}                  { yylval->str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{men}                  { yyval->sval = new string(yytext);
+<INITIAL>{men}                  { yylval->str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{left}                  { yyval->sval = new string(yytext);
+<INITIAL>{left}                  { yylval->str = new string(yytext);
                                     return IBOP; }
 
 
@@ -135,4 +142,3 @@ int main(void)
     yylex();
     return 0;
 }
-    

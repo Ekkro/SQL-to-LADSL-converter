@@ -10,16 +10,15 @@
 %}
 
 %union{
-    string *str;
+    std::string *str;
     int integer;
-
 }
 
 
 
 
 %token SELECT WHERE GROUPBY ORDERBY HAVING AS
-%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP
+%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP BEFORE IS END
 %token LIKE REGEX
 /*%token REGEX*/
 
@@ -37,6 +36,7 @@
 %token <str> ANY
 %token <str> ALL
 %token <str> FROM
+
 
 %type <integer> Literal
 %type <str> Join
