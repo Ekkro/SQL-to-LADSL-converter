@@ -164,7 +164,7 @@ class Graph {
             /* remove a table to the Selects */
             /* arguments : name of a table */
 /*        void remove_select(string sel);*/
-        
+
             /* whether it is measured or not */
             /* arguments : name of a table */
             /* arguments : filter name */

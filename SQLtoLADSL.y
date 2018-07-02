@@ -106,7 +106,7 @@ ORDERBY_       : ORDERBY    orderbyList                      { ; }
                ;
 
 selectList     : selectListN                                 { ; }
-               | '*'                                         { ; }
+               | '*'                                         { mainGraph.add_select("*",""); ; }
                ;
 
 selectListN    : selectListNSub                              { ; }

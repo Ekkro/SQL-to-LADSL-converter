@@ -403,6 +403,7 @@ bool has(vector<string> v, string s){
            }
 
         void Ltree::erasechilds(int ind){
+            ltree.reserve(ind);
             if (ltree[ind].compare("NULL")) {
                 ltree[ind] = "NULL";
                 erasechilds(ind_left_child(ind));
@@ -414,7 +415,10 @@ bool has(vector<string> v, string s){
                 arguments : filter
                 arguments : index
             */
-        void Ltree::add(string value ,int indice ){ ltree[indice] = value; }
+        void Ltree::add(string value ,int indice ){
+          ltree.reserve(indice);
+          ltree[indice] = value;
+        }
 
             /*
                 computes the index of a filter
@@ -438,6 +442,7 @@ bool has(vector<string> v, string s){
             */
         void Ltree::swap(int indice1,int indice2 ){
             string aux;
+            ltree.reserve(max(indice1,indice2));
             aux = ltree[indice1];
             ltree[indice1] = ltree[indice2];
             ltree[indice2] = aux;
@@ -451,6 +456,7 @@ bool has(vector<string> v, string s){
                 return : father
             */
         string Ltree::common_ancestor( int indice1, int indice2 ){
+            ltree.reserve(max(indice1,indice2));
             vector<int> parent_1 = parents(indice1);
             vector<int> parent_2 = parents(indice2);
             for ( int i = 0;i < parent_1.size(); i++) {
@@ -498,6 +504,7 @@ bool has(vector<string> v, string s){
             */
         vector<string> Ltree::split(int indice1, int indice2){
             vector<string> res;
+            ltree.reserve(max(indice1,indice2));
             return  Ltree::split_aux(res,indice1,indice2);
         }
 
@@ -510,6 +517,7 @@ bool has(vector<string> v, string s){
         void Ltree::add_tree(vector<string> v, int ind, int n){
                 vector<string>::iterator it_ind = v.begin() + ind;
                 if (v[n] != "NULL") {
+                    ltree.reserve(ind);
                     ltree.insert(it_ind,v[n]);
                     add_tree(v,ind_left_child(ind),ind_left_child(n));
                     add_tree(v,ind_right_child(ind),ind_right_child(n));
@@ -521,6 +529,7 @@ bool has(vector<string> v, string s){
                 arguments : parent index
                 arguments : favourite child
             */
+            /*
         void Ltree::search_nextOR_aux(int parent, int favourite_child){
             if (favourite_child) {
                swap(parent,ind_right_child(parent));
@@ -532,11 +541,11 @@ bool has(vector<string> v, string s){
                add("NULL",ind_right_child(parent));
                 }
         }
+*/
 
 
 
-
-
+/*
      string Ltree::relacao_entre(vector<string> v, int s){
          vector<int> aux = parents(s);
          int i = 0;
@@ -549,7 +558,7 @@ bool has(vector<string> v, string s){
          }else {return "NULL";}//nunca acontece em teoria mas quem sabe
      }
 
-
+*/
         /*
             search for the closest node that is an or
             arguments : parent index
@@ -578,6 +587,7 @@ bool has(vector<string> v, string s){
     }
 
     string Ltree::all_same_table_aux(int indice){
+      ltree.reserve(indice);
       if(ltree[indice].compare("AND")==0 || ltree[indice].compare("OR")==0){
         return all_same_table_aux(ind_left_child(indice));
       }else{
@@ -589,6 +599,7 @@ bool has(vector<string> v, string s){
       }
     }
     bool Ltree::all_same_table(int indice){
+      ltree.reserve(indice);
       string s =all_same_table_aux(indice);
       vector<string> aux = childs(indice);
       smatch m;
@@ -607,15 +618,16 @@ bool has(vector<string> v, string s){
     }
 
     bool Ltree::dependencies(int indice){
-      if(ltree[indice].compare("NULL") == 0){
-        return true;
+      ltree.reserve(indice);
+      if(ltree[indice].compare("AND") == 0){
+        return dependencies(ind_left_child(indice)) && dependencies(ind_right_child(indice));
       }
       if(ltree[indice].compare("OR") == 0){
         return all_same_table(indice);
       }
-      return dependencies(ind_left_child(indice)) && dependencies(ind_right_child(indice));
+      return true;
     }
-
+/*
     void Ltree::search_nextOR(Graph g ,int ind){
       if (left_child(ind_left_child(ind)) == "OR" && (g.isThe_same_Table_array(childs(ind))==0)){
             search_nextOR_aux(ind_left_child(ind_left_child(ind)),0);
@@ -645,8 +657,9 @@ bool has(vector<string> v, string s){
         }
       }
     }
-
+*/
      int Ltree::push_aux(int ind){
+        ltree.reserve(ind);
          if (left_child(ind)!= "NULL"){
              int child = ind_left_child(ind);
              swap(child,ind);
@@ -661,13 +674,15 @@ bool has(vector<string> v, string s){
      }
 
     void Ltree::pushLT(int ind){
-     swap(ind,ind_Parent(ind));
-     int last = push_aux(ind);
-     ltree.erase(ltree.begin() + last);
-     }
+      ltree.reserve(ind);
+      swap(ind,ind_Parent(ind));
+      int last = push_aux(ind);
+      ltree.erase(ltree.begin() + last);
+    }
 
 
      void Ltree::rewrite(int ind){
+       ltree.reserve(ind);
        if((ltree[ind]=="AND" || ltree[ind]=="OR")){
          if (left_child(ind)== "NULL"){
            pushLT(ind_right_child(ind));
@@ -687,6 +702,8 @@ bool has(vector<string> v, string s){
             res.add("NULL",0);
         }else{
             res.add(term,0);
+            res.add("NULL",1);
+            res.add("NULL",2);
         }
         return res;
     }
@@ -729,6 +746,7 @@ bool has(vector<string> v, string s){
 
         if (aux.size()) {
             int x = aux[0];
+            l.ltree.reserve(x);
             return l.ltree[x];
         }else {return "NULL";}
     }
@@ -770,7 +788,7 @@ void joinAtr(string start, string type){
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
     //vector<string> v = g.filter[s];
-    if(it->second.compare("measure") == 0){ //se for medida
+    if((it->second).compare("measure") == 0){ //se for medida
       new_elements.insert(pair<string,string>(it->first,it->second));
     }else{
       vector<string> v ( g.filter[s] );
@@ -807,7 +825,7 @@ void joinFilters(string start, string type){
   vector<string> dimensoes;
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
     string s = it->first;
-    if(it->second.compare("measure") == 0){ //se for medida
+    if((it->second).compare("measure") == 0){ //se for medida
       vector<string> filters= g.filter[s];
       for(vector<string>::iterator it = filters.begin(); it != filters.end(); ++it){
         medidas.push_back(*it);
@@ -819,7 +837,7 @@ void joinFilters(string start, string type){
   joinAtrD(medidas,type);
   aux = a;
   if( dimensoes.size() == 1){
-    aux2 = medidas[0];
+    aux2 = dimensoes[0];
   }else{
     joinFiltersD(dimensoes,type);
     aux2 = a;
@@ -843,7 +861,7 @@ void joinGroupbyAux(string gb){
 
 void joinGroupby(string start){
   for(vector<pair<string,string> >::iterator it = g.groupby.begin(); it != g.groupby.end(); ++it) {
-    if(it->first.compare(start)){
+    if((it->first).compare(start)){
       joinGroupbyAux(it->second);
     }
   }
@@ -854,7 +872,7 @@ void removeTable(string start){
   string alpha = a;
   if (g.tables[start].size() == 1) {
     for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-      if(it->at(2).compare(start)){
+      if((it->at(2)).compare(start)){
         next();
         cout << a << "=" << "dot(" << alpha << "," << it->at(0)<< ")\n";
         map<string,string> aux = g.tables[it->at(1)];
@@ -870,7 +888,7 @@ void removeTable(string start){
 
 string giveMeStart(string root){
   for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
-    if(it->at(1).compare(root)){
+    if((it->at(1)).compare(root)){
       return giveMeStart(it->at(2));
     }
   }
@@ -936,20 +954,20 @@ if (current_expression2.empty()){
 void merge(vector<string> v){
 // g
 // mainGraph
-pair<string,string> aux;
-string table;
-for(map<string,map<string, string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
-  if (!(it->second.empty())) {
-      for(map<string, string> ::iterator i = it->second.begin(); i != it->second.end(); ++it) {
-          aux = pair<string,string>(i->first,i->second);
-          table = it->first;
-          break;
+  pair<string,string> aux;
+  string table;
+  for(map<string,map<string, string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
+    if (!((it->second).empty())) {
+        for(map<string, string> ::iterator i = (it->second).begin(); i != (it->second).end(); ++it) {
+            aux = pair<string,string>(i->first,i->second);
+            table = it->first;
+            break;
+        }
+        break;
       }
-      break;
-}
-}
+  }
 
-mainGraph.tables[table].insert(aux);
+  mainGraph.tables[table].insert(aux);
   //empty table
   vector<string> emptytable;
 
@@ -1003,6 +1021,7 @@ void resolveS(int indice, string type){
   vector<string> v =  l.childs(indice);
   g = mainGraph.clone(v);
   graphWork(type);
+  l.ltree.reserve(indice);
   l.ltree[indice] = a;
   l.erasechilds(indice);
   merge(v); //between mainGraph and g...
@@ -1011,6 +1030,7 @@ void resolveS(int indice, string type){
 
 
 void resolve(int indice){
+  l.ltree.reserve(indice);
   if(l.ltree[indice].compare("OR") == 0){
     resolve(l.ind_left_child(indice));
     resolve(l.ind_right_child(indice));
@@ -1034,23 +1054,42 @@ void resolve(int indice){
 
 void returnf(){
   vector<string> aux;
-  for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
-    if(it->secound.compare("")==0){
-      aux.push_back(it->first);
-    }else{
-      cout << it->secound << "=" << it->first;
-      aux.push_back(it->secound);
+  if(mainGraph.select[0].first.compare("*")!=0){
+    for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
+      if((it->second).compare("")==0){
+        aux.push_back(it->first);
+      }else{
+        cout << it->second << "=" << it->first;
+        aux.push_back(it->second);
+      }
     }
+    cout << "return(" << aux[0];
+    for(vector<string>::iterator it = aux.begin()+1; it != aux.end(); ++it) {
+      cout << ',' << *it;
+    }
+    cout << ")";
+  }else{
+    cout << "return(" << a << ")";
   }
-  cout << "return(" << aux[0];
-  for(vector<string>::iterator it = aux.begin()+1; it != aux.end(); ++it) {
-    cout << ',' << *it;
-  }
-  cout << ")";
 }
 
 
-
 int main(){
+  mainGraph.add_select("sum(lineitem_l.extendedprice * lineitem_l.discount)","revenue");
+  mainGraph.newRoot("lineitem_1");
+  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate >= '1994-01-01'");
+  trees.push_back(create_tree("lineitem_l.shipdate >= '1994-01-01'","lineitem_l.shipdate"));
+  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate < '1994-01-01' + interval '1' year");
+  trees.push_back(create_tree("lineitem_l.shipdate < '1994-01-01' + interval '1' year","lineitem_l.shipdate"));
+  trees[0] = join_trees(trees[0],trees[1],"AND");
+  mainGraph.add_map_filter("lineitem_l.discount","lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01");
+  trees.push_back(create_tree("lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01","lineitem_l.discount"));
+  trees[0] = join_trees(trees[0],trees[2],"AND");
+  mainGraph.add_map_filter("lineitem_l.quantity","lineitem_l.quantity < 24");
+  trees.push_back(create_tree("lineitem_l.quantity < 24","lineitem_l.quantity"));
+  trees[0] = join_trees(trees[0],trees[3],"AND");
+  l = trees[0];
+  resolve(0);
+  returnf();
   return 0;
 }
