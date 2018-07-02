@@ -140,8 +140,8 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
 whereList      : Exp                                         { ; }
                ;
 
-ExpR           : Exp AND Exp                                {$$ = $1;trees[ $1 ] = join_trees(trees[$1],trees[$3],"AND"); }
-               | Exp OR  Exp                                {$$ = $1;trees[ $1 ] = join_trees( trees[$1],trees[$3],"OR"); }//delete $3
+ExpR           : Exp AND Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"AND"),$1); }
+               | Exp OR  Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"OR"),$1); }//delete $3 
                ;
 
 Exp            : Term                                        {$$ = itr;trees[ itr++ ] =  create_tree(types[$1].expr,types[$1].type) ; }

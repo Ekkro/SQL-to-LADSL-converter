@@ -122,7 +122,7 @@ class Graph {
             /* add a table */
             /* arguments : name of a table */
             /* arguments : filter name */
-        void add_table(string Table, string filter, int type);
+        void add_table(string Table, string filter, string type);
 
             /* remove a table */
             /* arguments : name of a table */
@@ -227,6 +227,7 @@ class Ltree {
 
 
         Ltree();
+
         Ltree(string s);
 
             /*
@@ -265,6 +266,9 @@ class Ltree {
                 retuens : return the rigth child index
             */
         int ind_right_child(int indice);
+
+
+        vector<string> childs_aux(vector<string> v1, vector<string> v2);
 
             /*
                 computes the list of all children
@@ -327,6 +331,8 @@ class Ltree {
             */
         vector<string> split(int indice1, int indice2);
 
+
+        void insere(vector<string>::iterator it_ind, string s);
             /*
                 add a tree to the current tree
                 arguments : vector

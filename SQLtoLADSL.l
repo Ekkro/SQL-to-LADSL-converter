@@ -3,6 +3,8 @@
 
 #include "SQLtoLADSL.hpp"
 #include "SQLtoLADSL.tab.h"
+#include <iostream>
+using namespace std;
 %}
 
 Abrev ER
@@ -18,9 +20,9 @@ FULL|full		        			{ return FULL; }
 INNER|inner		        			{ return INNER; }
 ON|on		        		        	{ return ON; }
 BETWEEN|between			        		{ return BETWEEN; }
-EXISTS|exists 				        	{ yylval.subtok = 0; return EXISTS; }
+EXISTS|exists 				        	{ return EXISTS; }
 FROM|from   						{ return FROM; }
-GROUP[ \t]*BY|group[ \t]*by		        	{ return GROUP; }
+GROUP[ \t]*BY|group[ \t]*by		        	{ return GROUPBY; }
 ORDER[ \t]*BY|order[ \t]*by		        	{ return ORDERBY; }
 HAVING|having 						{ return HAVING; }
 IN|in     						{ return IN; }
@@ -66,10 +68,10 @@ FALSE   						{ yylval.intval = 0; return BOOL; }
 ">>"                                                    { yylval.strval = strdup(yytext);return IBOP; }
 ":="                                                    { yylval.strval = strdup(yytext);return ASSIGN; }
 
-"*"                                                     { yylval.strval = strdup(yytext); return IBOP: }
-"/"                                                     { yylval.strval = strdup(yytext); return IBOP: }
-"+"                                                     { yylval.strval = strdup(yytext); return IBOP: }
-"-"                                                     { yylval.strval = strdup(yytext); return IBOP: }
+"*"                                                     { yylval.strval = strdup(yytext); return IBOP; }
+"/"                                                     { yylval.strval = strdup(yytext); return IBOP; }
+"+"                                                     { yylval.strval = strdup(yytext); return IBOP; }
+"-"                                                     { yylval.strval = strdup(yytext); return IBOP; }
     /* functions */
 
 SUBSTR(ING)?/"("                                        { yylval.strval = strdup(yytext);return FSUBSTRING; }
@@ -79,7 +81,7 @@ DATE_SUB/"("                                            { yylval.strval = strdup
 
     /* NAMES */
 
-date \'.*\\'                                             { yylval.strval = strdup(yytext);return NAME; }
+(0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}   { yylval.strval = strdup(yytext);return DATE; }
 [A - Za - z][A - Za - z0 - 9_]*                         { yylval.strval = strdup(yytext);return NAME; }
 "(.*?)"                                                 { yylval.strval = strdup(yytext);return REGEX; }
 
