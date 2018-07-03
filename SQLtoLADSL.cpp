@@ -57,9 +57,9 @@ bool has(vector<string> v, string s){
             newgraph.tables= t;
 
             for(vector<pair<string, string> >::iterator it = groupby.begin(); it != groupby.end(); ++it) {
-                if (has(notEmpty,it->second)) {
+                //if (has(notEmpty,it->second)) {
                     g.push_back(*it);
-                }
+                //}
             }
 
             newgraph.groupby = g;
@@ -888,29 +888,34 @@ void joinFilters(string start, string type){
     }
   }
   if(dimensoes.size()>0){
-    work.clear();
-    work[a]="dimension";
-    g.tables[start] = work;
+    map<string,string> t;
+    t[a]="dimension";
+    g.tables[start] = t;
   }else{
     if(medidas.size()>0){
-      work.clear();
-      work[a]="measure";
-      g.tables[start] = work;
+      map<string,string> t;
+      t[a]="measure";
+      g.tables[start] = t;
     }
   }
 }
 
 
-void joinGroupbyAux(string gb){
+void joinGroupbyAux(string gb, string start){
   string alpha = a;
   next();
   cout << a << " = krao(" << alpha << "," << gb << ")\n";
+  map<string,string> work;
+  work[a]="dimension";
+  g.tables[start]=work;
 }
 
 void joinGroupby(string start){
-  for(vector<pair<string,string> >::iterator it = g.groupby.begin(); it != g.groupby.end(); ++it) {
-    if((it->first).compare(start)){
-      joinGroupbyAux(it->second);
+  if(g.groupby.size()>0 && g.tables[start].size()>0){
+    for(vector<pair<string,string> >::iterator it = g.groupby.begin(); it != g.groupby.end(); ++it) {
+      if((it->first).compare(start) == 0){
+        joinGroupbyAux(it->second,start);
+      }
     }
   }
 }
@@ -957,6 +962,17 @@ string giveMeFinish(string root, vector<string> v){
     }
   }
   return root;
+}
+
+void print_tables3(){
+  cout << "======================" << "\n";
+  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
+    cout << it->first << ":\n";
+    for(map<string,string>::iterator it2 = g.tables[it->first].begin(); it2 != g.tables[it->first].end(); ++it2) {
+      cout << it2->first <<"\n";
+    }
+  }
+  cout << "--------------------" << "\n";
 }
 
 
@@ -1016,6 +1032,19 @@ if (current_expression2.empty()){
 }
 }
 */
+
+
+void print_tables2(){
+  cout << "======================" << "\n";
+  for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+    cout << it->first << ":\n";
+    for(map<string,string>::iterator it2 = mainGraph.tables[it->first].begin(); it2 != mainGraph.tables[it->first].end(); ++it2) {
+      cout << it2->first <<"\n";
+    }
+  }
+  cout << "--------------------" << "\n";
+}
+
 void merge(vector<string> v){
 // g
 // mainGraph
@@ -1034,7 +1063,7 @@ void merge(vector<string> v){
 
   mainGraph.tables[table].insert(aux);
   //empty table
-  vector<string> emptytable;
+  vector<string> emptyfilter;
 
   map<string, vector<string> > newfilter;
   for(map<string,vector<string> >::iterator it = mainGraph.filter.begin(); it != mainGraph.filter.end(); ++it) {
@@ -1046,7 +1075,7 @@ void merge(vector<string> v){
       }
       if (!aux.empty()) {
           newfilter.insert(pair<string,vector<string> >(it->first,aux));
-      }else{ emptytable.push_back(it->first);}
+      }else{ emptyfilter.push_back(it->first);}
       //acrescenta no empty
       }
       mainGraph.filter = newfilter;
@@ -1055,7 +1084,7 @@ void merge(vector<string> v){
   for(map<string,map<string, string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
      // se it->second->first in empty elimina map<string,string>
       for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
-          if (has(emptytable, i->first)) {
+          if (has(emptyfilter, i->first) || has(v,i->first)) {
               eraseIt.push_back(make_pair(it->first, i->first));
           }
       }
@@ -1063,7 +1092,6 @@ void merge(vector<string> v){
   for(vector<pair<string,string> >::iterator it = eraseIt.begin(); it != eraseIt.end(); ++it) {
       mainGraph.tables[it->first].erase(it->second);
   }
-
 }
 /*
 void dot_all(){
@@ -1080,16 +1108,17 @@ void dot_all(){
     mainGraph.tables[table] = aux;
   }
 }*/
-void print_tables2(){
+void print_tables(){
   cout << "======================" << "\n";
-  for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
     cout << it->first << ":\n";
-    for(map<string,string>::iterator it2 = mainGraph.tables[it->first].begin(); it2 != mainGraph.tables[it->first].end(); ++it2) {
+    for(map<string,string>::iterator it2 = g.tables[it->first].begin(); it2 != g.tables[it->first].end(); ++it2) {
       cout << it2->first <<"\n";
     }
   }
   cout << "--------------------" << "\n";
 }
+
 
 void print_tree(){
   for(int x = 0; x<l.ltree.size(); x++){
@@ -1222,15 +1251,7 @@ void print_trees(){
   }
   cout << "\n";
 }
-/*
-void print_tables(){
-  for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
-    cout << *it << ":\n";
-    for(map<string,string>::iterator it2 = mainGraph.tables[it].begin(); it2 != mainGraph.tables[it].end(); ++it2) {
-      cout << *it2 <<"\n";
-  }
-}
-*/
+
 void print_joins(){
   for(int x = 0; x < mainGraph.join.size();x++){
     for(int y = 0; y < mainGraph.join[x].size();y++){
@@ -1260,9 +1281,9 @@ int main(){
   mainGraph.add_join("orders.o_custkey","customer","orders");
   mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
   mainGraph.add_join("lineitem.l_suppkey","supplier","lineitem");
-  mainGraph.add_join("supplier.n_nationkey","customer","supplier");
-  mainGraph.add_join("nation.n_nationkey","supplier","nation");
-  mainGraph.add_join("region.r_regionkey","nation","region");
+  mainGraph.add_join("supplier.s_custkey","customer","supplier");
+  mainGraph.add_join("nation.n_suppkey","supplier","nation");
+  mainGraph.add_join("region.r_nationkey","nation","region");
   //print_joins();
   copy_tree(trees[0]);
   //print_tree();
