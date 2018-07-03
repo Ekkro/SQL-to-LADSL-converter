@@ -5,6 +5,7 @@
 #include <climits>
 #include <string>
 #include "SQLtoLADSL.tab.h"
+using namespace std;
 
 #undef yywrap
 #define yywrap() 1
@@ -84,54 +85,54 @@ Date            (0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}
 <INITIAL>{right}               { return RIGHT; }
 
 
-<INITIAL>{int}                 { yylval->str = new std::string( yytext );
+<INITIAL>{int}                 { yylval.str = new std::string( yytext );
                                      return CONSTANT; }
 
-<INITIAL>{float}               { yylval->str = new std::string( yytext );
+<INITIAL>{float}               { yylval.str = new std::string( yytext );
                                      return CONSTANT; }
 
-<INITIAL>{Date}                { yylval->str = new std::string( yytext );
+<INITIAL>{Date}                { yylval.str = new std::string( yytext );
                                      return DATE; }
 
-<INITIAL>{true}                { yylval->str = new std::string( yytext );
+<INITIAL>{true}                { yylval.str = new std::string( yytext );
                                     return BOOL; }
 
-<INITIAL>{false}                { yylval->str = new std::string( yytext );
+<INITIAL>{false}                { yylval.str = new std::string( yytext );
                                     return BOOL; }
 
 
 
-<INITIAL>{Or}                  { yylval->str = new string(yytext);
+<INITIAL>{Or}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{and}                 { yylval->str = new string(yytext);
+<INITIAL>{and}                 { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{le}                  { yylval->str = new string(yytext);
+<INITIAL>{le}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{ge}                  { yylval->str = new string(yytext);
+<INITIAL>{ge}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{eq}                  { yylval->str = new string(yytext);
+<INITIAL>{eq}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{ne}                  { yylval->str = new string(yytext);
+<INITIAL>{ne}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
-<INITIAL>{mul}                  { yylval->str = new string(yytext);
+<INITIAL>{mul}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{mais}                  { yylval->str = new string(yytext);
+<INITIAL>{mais}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{div}                  { yylval->str = new string(yytext);
+<INITIAL>{div}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{men}                  { yylval->str = new string(yytext);
+<INITIAL>{men}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
-<INITIAL>{left}                  { yylval->str = new string(yytext);
+<INITIAL>{left}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
 

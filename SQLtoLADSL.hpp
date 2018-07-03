@@ -392,9 +392,6 @@ Ltree create_tree(string term, string type);
 
 Ltree join_trees(Ltree l1, Ltree l2, string type);
 
-
-void dot_all(int ind);
-
 string getTable(string attribute);
 
 vector<int> subvector (vector<int> v1, vector<int> v2);
@@ -403,29 +400,56 @@ string relacao_entre(vector<string> v, string s);
 
 string relacao_entre_arrays(vector<string> v, vector<string> s);
 
-void graphWork();
-
-void graphWorkAux(int x);
-
-void joinAtr(string start);
+void next();
 
 void joinAtrD(string s, vector<string> v);
 
-void joinFilters(string start);
-
-void joinFiltersM(vector<string> v);
+void joinAtr(string start);
 
 void joinFiltersD(vector<string> v);
 
-void joinGroupby(string start);
+void joinFilters(string start);
 
 void joinGroupbyAux(string gb);
+
+void joinGroupby(string start);
 
 void removeTable(string start);
 
 string giveMeStart(string root);
 
-void next();
+void graphWorkAux(int x);
+
+void graphWork();
+
+void merge(vector<string> v);
+
+void dot_all(int ind);
+
+void resolveS(int indice, string type);
+
+void resolve(int indice);
+
+void returnf();
+
+void change_trees(Ltree t2, int ind);
+
+void copy_tree(Ltree t);
+
+void joinFiltersM(vector<string> v);
+
+void print_tree();
+
+void print_trees();
+
+void print_tables();
+
+void print_joins();
+
+
+
+
+/*
 
 void trabalha(int ind);
 
@@ -436,14 +460,14 @@ void cleanexp();
 void addexp(string exp);
 
 void aux(string exp);
+*/
 
-void merge(vector<string> v);
 
-void resolveS(int indice, string type);
 
-void resolve(int indice);
 
-void returnf();
+
+
+
 
 
 
