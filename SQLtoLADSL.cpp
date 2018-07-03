@@ -795,10 +795,14 @@ bool has(vector<string> v, string s){
 
 
 void next(){
-  if(a[a.length()-1] == 'Z'){
-    a.append("A");
+  if(a.compare("")==0){
+    a = "A";
   }else{
-    a[a.length()-1]++;
+    if(a[a.length()-1] == 'Z'){
+      a.append("A");
+    }else{
+      a[a.length()-1]++;
+    }
   }
 }
 
@@ -1168,11 +1172,21 @@ void dot_all(){
     aux.push_back(start);
   }
 }
+vector<string> resolveS_aux(vector<string> v){
+  vector<string> aux;
+  for(int x = 0; x< v.size(); x++){
+    if(!(v[x].compare("AND")==0) || !(v[x].compare("OR"))==0){
+      aux.push_back(v[x]);
+    }
+  }
+  return aux;
+}
+
 
 
 void resolveS(int indice, string type){
   vector<string> v =  l.childs(indice);
-  g = mainGraph.clone(v);
+  g = mainGraph.clone(resolveS_aux(v));
   graphWork(type);
   l.ltree.reserve(1+indice);
   l.ltree[indice] = a;
@@ -1213,12 +1227,12 @@ void returnf(){
   if(mainGraph.select[0].first.compare("*")!=0){
     for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
       if((it->second).compare("")==0){
-        next();
+        /*next();
         cout << a << "= filter(" << it->first << ")\n";
         string alpha2 = a;
         next();
-        cout << a << " = krao(" << alpha << "," << alpha <<")\n";
-        aux.push_back(a);
+        cout << a << " = krao(" << alpha << "," << alpha2 <<")\n";*/
+        aux.push_back(it->first);
       }else{
         string s = it->first;
         size_t found = s.find("(");
@@ -1282,24 +1296,30 @@ void print_joins(){
 
 
 int main(){
-  mainGraph.add_table("lineitem_l","lineitem_l.extendedprice","measure");
-  mainGraph.add_table("lineitem_l","lineitem_l.discount","measure");
-  mainGraph.add_table("lineitem_l","lineitem_l.shipdate","dimension");
-  mainGraph.add_table("lineitem_l","lineitem_l.quantity","measure");
-  mainGraph.add_select("sum(lineitem_l.extendedprice * lineitem_l.discount)","revenue");
-  //mainGraph.add_select("lineitem_l.quantity","");
-  mainGraph.newRoot("lineitem_l");
-  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate >= '1994-01-01'");
-  trees.push_back(create_tree("lineitem_l.shipdate >= '1994-01-01'","lineitem_l.shipdate"));
-  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate < '1994-01-01' + interval '1' year");
-  trees.push_back(create_tree("lineitem_l.shipdate < '1994-01-01' + interval '1' year","lineitem_l.shipdate"));
+  mainGraph.add_select("lineitem.orderkey","");
+  mainGraph.add_select("sum(extendedprice * (1 - discount))","revenue");
+  mainGraph.add_select("orderdate","");
+  mainGraph.add_select("shippriority","");
+
+  mainGraph.add_table("lineitem","shippriority","dimension");
+  mainGraph.add_table("orders","orderdate","dimension");
+  mainGraph.add_table("customer","mksegment","dimension");
+  mainGraph.add_table("lineitem","shipdate","dimension");
+
+  mainGraph.newRoot("customer");
+  mainGraph.add_map_filter("mksegment","mktsegment = 'BUILDING'");
+  trees.push_back(create_tree("mktsegment = 'BUILDING'","mksegment"));
+  mainGraph.add_map_filter("orderdate","orderdate < date '1995-03-15'");
+  trees.push_back(create_tree("orderdate < date '1995-03-15'","o_orderdate"));
   change_trees(join_trees(trees[0],trees[1],"AND"),0);
-  mainGraph.add_map_filter("lineitem_l.discount","lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01");
-  trees.push_back(create_tree("lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01","lineitem_l.discount"));
+  mainGraph.add_map_filter("shipdate","shipdate > date '1995-03-15'");
+  trees.push_back(create_tree("shipdate > date '1995-03-15'","shipdate"));
   change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_map_filter("lineitem_l.quantity","lineitem_l.quantity < 24");
-  trees.push_back(create_tree("lineitem_l.quantity < 24","lineitem_l.quantity"));
-  change_trees(join_trees(trees[0],trees[3],"AND"),0);
+  mainGraph.add_groupby("lineitem","lineitem.orderkey");
+  mainGraph.add_groupby("orders","orderdate");
+  mainGraph.add_groupby("lineitem","shippriority");
+  mainGraph.add_join("orders.o_custkey","customer","orders");
+  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
   copy_tree(trees[0]);
   print_tree();
   resolve(0);

@@ -476,7 +476,7 @@ void aux(string exp);
 
 
 
-string a = "A";
+string a = "";
 Graph mainGraph;
 Graph g;
 Ltree l;
