@@ -1208,12 +1208,30 @@ void resolve(int indice){
 
 void returnf(){
   vector<string> aux;
+  vector<string> aux2;
+  string alpha = a;
   if(mainGraph.select[0].first.compare("*")!=0){
     for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
       if((it->second).compare("")==0){
-        aux.push_back(it->first);
+        next();
+        cout << a << "= filter(" << it->first << ")\n";
+        string alpha2 = a;
+        next();
+        cout << a << " = krao(" << alpha << "," << alpha <<")\n";
+        aux.push_back(a);
       }else{
-        cout << it->second << " = " << it->first << "\n";
+        string s = it->first;
+        size_t found = s.find("(");
+        s.erase (0,found);
+        s.pop_back();
+        next();
+        cout << a << " =map" << s << ")\n";
+        string alpha2 = a;
+        next();
+        cout << a << " = krao(" << alpha2 << "," << alpha <<")\n";
+        s = it->first;
+        s.erase (found,s.size()-found);
+        cout << it->second << " = " << s << "(" << a << ")\n";
         aux.push_back(it->second);
       }
     }
@@ -1264,29 +1282,26 @@ void print_joins(){
 
 
 int main(){
-  mainGraph.add_select("n_name","");
-  mainGraph.add_select("sum(l_extendedprice * (1 - l_discount))","revenue");
-  mainGraph.add_table("region","region.r_name","dimension");
-  mainGraph.add_table("orders","orders.o_orderdate","measure");
-  mainGraph.newRoot("customer");
-  mainGraph.add_map_filter("region.r_name","region.r_name = ':1'");
-  trees.push_back(create_tree("region.r_name = ':1'","region.r_name"));
-  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate >= date ':2'");
-  trees.push_back(create_tree("orders.o_orderdate >= date ':2'","orders.o_orderdate"));
-  change_trees(join_trees(trees[0],trees[1],"OR"),0);
-  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate < date ':2' + interval '1' year");
-  trees.push_back(create_tree("orders.o_orderdate < date ':2' + interval '1' year","orders.o_orderdate"));
-  change_trees(join_trees(trees[0],trees[2],"OR"),0);
-  mainGraph.add_groupby("nation","nation.n_name");
-  mainGraph.add_join("orders.o_custkey","customer","orders");
-  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
-  mainGraph.add_join("lineitem.l_suppkey","supplier","lineitem");
-  mainGraph.add_join("supplier.s_custkey","customer","supplier");
-  mainGraph.add_join("nation.n_suppkey","supplier","nation");
-  mainGraph.add_join("region.r_nationkey","nation","region");
-  //print_joins();
+  mainGraph.add_table("lineitem_l","lineitem_l.extendedprice","measure");
+  mainGraph.add_table("lineitem_l","lineitem_l.discount","measure");
+  mainGraph.add_table("lineitem_l","lineitem_l.shipdate","dimension");
+  mainGraph.add_table("lineitem_l","lineitem_l.quantity","measure");
+  mainGraph.add_select("sum(lineitem_l.extendedprice * lineitem_l.discount)","revenue");
+  //mainGraph.add_select("lineitem_l.quantity","");
+  mainGraph.newRoot("lineitem_l");
+  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate >= '1994-01-01'");
+  trees.push_back(create_tree("lineitem_l.shipdate >= '1994-01-01'","lineitem_l.shipdate"));
+  mainGraph.add_map_filter("lineitem_l.shipdate","lineitem_l.shipdate < '1994-01-01' + interval '1' year");
+  trees.push_back(create_tree("lineitem_l.shipdate < '1994-01-01' + interval '1' year","lineitem_l.shipdate"));
+  change_trees(join_trees(trees[0],trees[1],"AND"),0);
+  mainGraph.add_map_filter("lineitem_l.discount","lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01");
+  trees.push_back(create_tree("lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01","lineitem_l.discount"));
+  change_trees(join_trees(trees[0],trees[2],"AND"),0);
+  mainGraph.add_map_filter("lineitem_l.quantity","lineitem_l.quantity < 24");
+  trees.push_back(create_tree("lineitem_l.quantity < 24","lineitem_l.quantity"));
+  change_trees(join_trees(trees[0],trees[3],"AND"),0);
   copy_tree(trees[0]);
-  //print_tree();
+  print_tree();
   resolve(0);
   returnf();
   return 0;

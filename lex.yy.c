@@ -608,10 +608,10 @@ int yy_flex_debug = 1;
 
 static const flex_int16_t yy_rule_linenum[38] =
     {   0,
-       64,   65,   66,   67,   68,   69,   70,   71,   72,   73,
-       74,   75,   76,   77,   78,   79,   80,   81,   82,   83,
-       84,   87,   90,   93,   96,   99,  104,  107,  110,  113,
-      116,  119,  122,  125,  128,  131,  134
+       65,   66,   67,   68,   69,   70,   71,   72,   73,   74,
+       75,   76,   77,   78,   79,   80,   81,   82,   83,   84,
+       85,   88,   91,   94,   97,  100,  105,  108,  111,  114,
+      117,  120,  123,  126,  129,  132,  135
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -630,13 +630,14 @@ char *yytext;
 #include <climits>
 #include <string>
 #include "SQLtoLADSL.tab.h"
+using namespace std;
 
 #undef yywrap
 #define yywrap() 1
 
 #define yyterminate() return END
-#line 639 "lex.yy.c"
 #line 640 "lex.yy.c"
+#line 641 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -914,10 +915,10 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 62 "SQLtoLADSL.ll"
+#line 63 "SQLtoLADSL.ll"
 
 
-#line 921 "lex.yy.c"
+#line 922 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -995,211 +996,211 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 64 "SQLtoLADSL.ll"
+#line 65 "SQLtoLADSL.ll"
 { return AS; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 65 "SQLtoLADSL.ll"
+#line 66 "SQLtoLADSL.ll"
 { return BEFORE; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 66 "SQLtoLADSL.ll"
+#line 67 "SQLtoLADSL.ll"
 { return FULL; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 67 "SQLtoLADSL.ll"
+#line 68 "SQLtoLADSL.ll"
 { return INNER; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 68 "SQLtoLADSL.ll"
+#line 69 "SQLtoLADSL.ll"
 { return ON; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "SQLtoLADSL.ll"
+#line 70 "SQLtoLADSL.ll"
 { return BETWEEN; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 70 "SQLtoLADSL.ll"
+#line 71 "SQLtoLADSL.ll"
 { return EXISTS; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 71 "SQLtoLADSL.ll"
+#line 72 "SQLtoLADSL.ll"
 { return FROM; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 72 "SQLtoLADSL.ll"
+#line 73 "SQLtoLADSL.ll"
 { return GROUPBY; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 73 "SQLtoLADSL.ll"
+#line 74 "SQLtoLADSL.ll"
 { return ORDERBY; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 74 "SQLtoLADSL.ll"
+#line 75 "SQLtoLADSL.ll"
 { return HAVING; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 75 "SQLtoLADSL.ll"
+#line 76 "SQLtoLADSL.ll"
 { return IN; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 76 "SQLtoLADSL.ll"
+#line 77 "SQLtoLADSL.ll"
 { return IS; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 77 "SQLtoLADSL.ll"
+#line 78 "SQLtoLADSL.ll"
 { return NOT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 78 "SQLtoLADSL.ll"
+#line 79 "SQLtoLADSL.ll"
 { return SELECT; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 79 "SQLtoLADSL.ll"
+#line 80 "SQLtoLADSL.ll"
 { return WHERE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 80 "SQLtoLADSL.ll"
+#line 81 "SQLtoLADSL.ll"
 { return ASC; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 81 "SQLtoLADSL.ll"
+#line 82 "SQLtoLADSL.ll"
 { return DESC; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 82 "SQLtoLADSL.ll"
+#line 83 "SQLtoLADSL.ll"
 { return ANY; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 83 "SQLtoLADSL.ll"
+#line 84 "SQLtoLADSL.ll"
 { return ALL; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 84 "SQLtoLADSL.ll"
+#line 85 "SQLtoLADSL.ll"
 { return RIGHT; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 87 "SQLtoLADSL.ll"
-{ yylval->str = new std::string( yytext );
+#line 88 "SQLtoLADSL.ll"
+{ yylval.str = new std::string( yytext );
                                      return CONSTANT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 90 "SQLtoLADSL.ll"
-{ yylval->str = new std::string( yytext );
+#line 91 "SQLtoLADSL.ll"
+{ yylval.str = new std::string( yytext );
                                      return CONSTANT; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 93 "SQLtoLADSL.ll"
-{ yylval->str = new std::string( yytext );
+#line 94 "SQLtoLADSL.ll"
+{ yylval.str = new std::string( yytext );
                                      return DATE; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 96 "SQLtoLADSL.ll"
-{ yylval->str = new std::string( yytext );
+#line 97 "SQLtoLADSL.ll"
+{ yylval.str = new std::string( yytext );
                                     return BOOL; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 99 "SQLtoLADSL.ll"
-{ yylval->str = new std::string( yytext );
+#line 100 "SQLtoLADSL.ll"
+{ yylval.str = new std::string( yytext );
                                     return BOOL; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 104 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 105 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 107 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 108 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 110 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 111 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 113 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 114 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 116 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 117 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 119 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 120 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return BBOP; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 122 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 123 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return IBOP; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 125 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 126 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return IBOP; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 128 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 129 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return IBOP; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 131 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 132 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return IBOP; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 134 "SQLtoLADSL.ll"
-{ yylval->str = new string(yytext);
+#line 135 "SQLtoLADSL.ll"
+{ yylval.str = new string(yytext);
                                     return IBOP; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 138 "SQLtoLADSL.ll"
+#line 139 "SQLtoLADSL.ll"
 ECHO;
 	YY_BREAK
-#line 1203 "lex.yy.c"
+#line 1204 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2306,7 +2307,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 138 "SQLtoLADSL.ll"
+#line 139 "SQLtoLADSL.ll"
 
 
 int main(void)
