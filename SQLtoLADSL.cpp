@@ -47,7 +47,7 @@ bool has(vector<string> v, string s){
             for(map<string,map<string, string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 map<string, string> aux;
                 for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
-                    if (has(notEmpty, i->first)) {
+                    if (has(notEmpty, i->first) || has(v,i->first)) {
                         aux.insert(pair<string, string> (i->first, i->second));
                     }
                 }
@@ -194,6 +194,32 @@ bool has(vector<string> v, string s){
             /* arguments : expression */
         void Graph::add_map_filter(string Filter, string expression){
             filter[ Filter ].push_back(expression);
+        }
+
+        bool Graph::search_map_filter(string s){
+            for(map<string,vector<string> >:: iterator it = filter.begin(); it != filter.end() ; ++it){
+              if(it->first.compare(s) == 0){
+                return true;
+              }
+            }
+            return false;
+        }
+
+        string Graph::search_map_filter2(string s){
+          for(map<string,vector<string> >:: iterator it = filter.begin(); it != filter.end() ; ++it){
+            for(vector<string>:: iterator it2 = it->second.begin(); it2 != it->second.end() ; ++it2){
+              if(it2->compare(s) == 0){
+                return it->first;
+              }
+            }
+          }
+          return s;
+        }
+
+        string Graph::search_table_filter(string s){
+          string aux = search_map_filter2(s);
+          vector<string> aux2 = search_filter(aux);
+          return aux2[0];
         }
 
             /* remove a filter to map filters */
@@ -409,9 +435,11 @@ bool has(vector<string> v, string s){
                return res;
            }
 
+
+
         void Ltree::erasechilds(int ind){
             ltree.reserve(1+ind);
-            if (ltree[ind].compare("NULL")) {
+            if (ltree[ind].compare("NULL") != 0) {
                 ltree[ind] = "NULL";
                 erasechilds(ind_left_child(ind));
                 erasechilds(ind_right_child(ind));
@@ -605,24 +633,17 @@ bool has(vector<string> v, string s){
       if(ltree[indice].compare("AND")==0 || ltree[indice].compare("OR")==0){
         return all_same_table_aux(ind_left_child(indice));
       }else{
-        smatch m;
-        regex e ("\\.([^ ]+)\\ ");
-        regex_search (ltree[indice],m,e);
-        string s = m[1];
-        return getTable(s);
+        return mainGraph.search_table_filter(ltree[indice]);
       }
     }
     bool Ltree::all_same_table(int indice){
       ltree.reserve(1+indice);
       string s =all_same_table_aux(indice);
       vector<string> aux = childs(indice);
-      smatch m;
-      regex e ("\\.([^ ]+)\\ ");
       string s2;
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
-        if(it->compare("AND")!=0 && it->compare("OR")!=0){
-          regex_search (*it,m,e);
-          s2 = getTable(m[1]);
+        if(it->compare("AND")!=0 && it->compare("OR")!=0 && it->compare("NULL")!=0){
+          s2 = mainGraph.search_table_filter(*it);
           if(s2.compare(s) != 0){
             return false;
           }
@@ -823,7 +844,7 @@ void joinFiltersD(vector<string> v, string type){
     s = "kraoOR";
   }
   cout << a << " = "<< s <<"(" << v[0] << ", " << v[1] << ")\n";
-  for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
+  for(vector<string>::iterator it = v.begin()+2; it != v.end(); ++it) {
     string aux = a;
     next();
     cout << a << " = " << s <<"(" << aux << ", " << *it << ")\n";
@@ -834,7 +855,7 @@ void joinFilters(string start, string type){
   //pega nos filtros da mesma tabela
   string aux;
   string aux2;
-  map<string,string> work = g.tables[start];
+  map<string,string> work (g.tables[start]);
   vector<string> medidas;
   vector<string> dimensoes;
   for(map<string,string>::iterator it = work.begin(); it != work.end(); ++it) {
@@ -864,6 +885,17 @@ void joinFilters(string start, string type){
       cout << a << " = " << "krao" << "(" << aux << ", " << aux2 << ")\n";
     }else{
       cout << a << " = " << "kraoOR" << "(" << aux << ", " << aux2 << ")\n";
+    }
+  }
+  if(dimensoes.size()>0){
+    work.clear();
+    work[a]="dimension";
+    g.tables[start] = work;
+  }else{
+    if(medidas.size()>0){
+      work.clear();
+      work[a]="measure";
+      g.tables[start] = work;
     }
   }
 }
@@ -915,6 +947,18 @@ string giveMeStart(string root){
   }
   return root;
 }
+
+string giveMeFinish(string root, vector<string> v){
+  if(mainGraph.join.size() > 0){
+    for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
+      if(has(v,it->at(1)) && !(has(v,it->at(2)))){
+        return it->at(2);
+      }
+    }
+  }
+  return root;
+}
+
 
 void graphWorkAux(int x,string type){
   //pega nas pontas
@@ -1021,7 +1065,7 @@ void merge(vector<string> v){
   }
 
 }
-
+/*
 void dot_all(){
   for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
     string key = it->at(0);
@@ -1035,6 +1079,65 @@ void dot_all(){
     }
     mainGraph.tables[table] = aux;
   }
+}*/
+void print_tables2(){
+  cout << "======================" << "\n";
+  for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+    cout << it->first << ":\n";
+    for(map<string,string>::iterator it2 = mainGraph.tables[it->first].begin(); it2 != mainGraph.tables[it->first].end(); ++it2) {
+      cout << it2->first <<"\n";
+    }
+  }
+  cout << "--------------------" << "\n";
+}
+
+void print_tree(){
+  for(int x = 0; x<l.ltree.size(); x++){
+    cout << l.ltree[x] << "\n";
+  }
+  cout << "\n";
+}
+
+void dot_all_aux(string start){
+  string alpha = a;
+  if (mainGraph.tables[start].size() <= 1) {
+    for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
+      if((it->at(2)).compare(start) == 0){
+        if(mainGraph.tables[start].size() > 0){
+          map<string,string> aux = mainGraph.tables[it->at(1)];
+          for(map<string,string>::iterator it2 = mainGraph.tables[start].begin(); it2 != mainGraph.tables[start].end(); ++it2){
+            if(!mainGraph.search_map_filter(it2->first)){
+              next();
+              cout << a << " = " << "dot(" << it2->first << ", " << it->at(0) << ")\n";
+              aux[a] = "dimension";
+              l.ltree[l.indice(it2->first)] = a;
+            }else{
+              for(vector<string>::iterator it3 = mainGraph.filter[it2->first].begin(); it3 != mainGraph.filter[it2->first].end(); ++it3){
+                next();
+                cout << a << " = " << "dot(" << *it3 << ", " << it->at(0) << ")\n";
+                aux[a] = "dimension";
+                l.ltree[l.indice(*it3)] = a;
+              }
+            }
+          }
+          mainGraph.tables[it->at(1)] = aux;
+          mainGraph.tables[it->at(2)].clear();
+        }
+      }
+    }
+  }
+}
+
+
+void dot_all(){
+  vector<string> aux;
+  aux.push_back(mainGraph.root);
+  string start;
+  for(int x = 0; x < mainGraph.tables.size(); x++){
+    start = giveMeFinish(mainGraph.root,aux);
+    dot_all_aux(start);
+    aux.push_back(start);
+  }
 }
 
 
@@ -1044,7 +1147,8 @@ void resolveS(int indice, string type){
   graphWork(type);
   l.ltree.reserve(1+indice);
   l.ltree[indice] = a;
-  l.erasechilds(indice);
+  l.erasechilds(l.ind_left_child(indice));
+  l.erasechilds(l.ind_right_child(indice));
   merge(v); //between mainGraph and g...
 //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
@@ -1055,7 +1159,7 @@ void resolve(int indice){
   if(l.ltree[indice].compare("OR") == 0){
     resolve(l.ind_left_child(indice));
     resolve(l.ind_right_child(indice));
-    if(l.dependencies(indice) != true){
+    if(l.dependencies(indice) == true){
       resolveS(indice,"OR");
     }else{
       dot_all();
@@ -1107,12 +1211,7 @@ void copy_tree(Ltree t){
   }
 }
 
-void print_tree(){
-  for(int x = 0; x<l.ltree.size(); x++){
-    cout << l.ltree[x] << "\n";
-  }
-  cout << "\n";
-}
+
 
 void print_trees(){
   for(int x = 0; x<trees.size(); x++){
@@ -1123,12 +1222,15 @@ void print_trees(){
   }
   cout << "\n";
 }
+/*
 void print_tables(){
-  for(int x = 0; x < mainGraph.tables["lineitem_l"].size();x++){
-      cout << x <<"\n";
+  for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+    cout << *it << ":\n";
+    for(map<string,string>::iterator it2 = mainGraph.tables[it].begin(); it2 != mainGraph.tables[it].end(); ++it2) {
+      cout << *it2 <<"\n";
   }
 }
-
+*/
 void print_joins(){
   for(int x = 0; x < mainGraph.join.size();x++){
     for(int y = 0; y < mainGraph.join[x].size();y++){
@@ -1150,10 +1252,10 @@ int main(){
   trees.push_back(create_tree("region.r_name = ':1'","region.r_name"));
   mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate >= date ':2'");
   trees.push_back(create_tree("orders.o_orderdate >= date ':2'","orders.o_orderdate"));
-  change_trees(join_trees(trees[0],trees[1],"AND"),0);
+  change_trees(join_trees(trees[0],trees[1],"OR"),0);
   mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate < date ':2' + interval '1' year");
   trees.push_back(create_tree("orders.o_orderdate < date ':2' + interval '1' year","orders.o_orderdate"));
-  change_trees(join_trees(trees[0],trees[2],"AND"),0);
+  change_trees(join_trees(trees[0],trees[2],"OR"),0);
   mainGraph.add_groupby("nation","nation.n_name");
   mainGraph.add_join("orders.o_custkey","customer","orders");
   mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
@@ -1161,9 +1263,9 @@ int main(){
   mainGraph.add_join("supplier.n_nationkey","customer","supplier");
   mainGraph.add_join("nation.n_nationkey","supplier","nation");
   mainGraph.add_join("region.r_regionkey","nation","region");
-  print_joins();
+  //print_joins();
   copy_tree(trees[0]);
-  print_tree();
+  //print_tree();
   resolve(0);
   returnf();
   return 0;

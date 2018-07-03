@@ -152,6 +152,11 @@ class Graph {
             /* arguments : name of a table */
         void remove_map_Table_filter(string Table);
 
+        bool search_map_filter(string s);
+
+        string search_map_filter2(string s);
+
+        string search_table_filter(string s);
             /* remove a filter to map filters */
             /* arguments : name of a table */
             /* arguments : filter name */
