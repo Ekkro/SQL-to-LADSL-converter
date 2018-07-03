@@ -1,0 +1,73 @@
+
+select
+	n_name,
+	sum(l_extendedprice * (1 - l_discount)) as revenue
+from
+	customer,
+	orders,
+	lineitem,
+	supplier,
+	nation,
+	region
+where
+	c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and l_suppkey = s_suppkey
+	and c_nationkey = s_nationkey
+	and s_nationkey = n_nationkey
+	and n_regionkey = r_regionkey
+	and r_name = ':1'
+	and o_orderdate >= date ':2'
+	and o_orderdate < date ':2' + interval '1' year
+group by
+	n_name
+order by
+	revenue desc;
+
+---------------------------------------------------------
+
+  mainGraph.add_select("n_name","");
+  mainGraph.add_select("sum(l_extendedprice * (1 - l_discount))","revenue");
+  mainGraph.add_table("region","region.r_name","dimension");
+  mainGraph.add_table("orders","orders.o_orderdate","measure");
+  mainGraph.newRoot("customer");
+  mainGraph.add_map_filter("region.r_name","region.r_name = ':1'");
+  trees.push_back(create_tree("region.r_name = ':1'","region.r_name"));
+  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate >= date ':2'");
+  trees.push_back(create_tree("orders.o_orderdate >= date ':2'","orders.o_orderdate"));
+  change_trees(join_trees(trees[0],trees[1],"AND"),0);
+  mainGraph.add_map_filter("orders.o_orderdate","orders.o_orderdate < date ':2' + interval '1' year");
+  trees.push_back(create_tree("orders.o_orderdate < date ':2' + interval '1' year","orders.o_orderdate"));
+  change_trees(join_trees(trees[0],trees[2],"AND"),0);
+  mainGraph.add_groupby("nation","nation.n_name");
+  mainGraph.add_join("orders.o_custkey","customer","orders");
+  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
+  mainGraph.add_join("lineitem.l_suppkey","supplier","lineitem");
+  mainGraph.add_join("supplier.n_nationkey","customer","supplier");
+  mainGraph.add_join("nation.n_nationkey","supplier","nation");
+  mainGraph.add_join("region.r_regionkey","nation","region");
+  print_joins();
+  copy_tree(trees[0]);
+  print_tree();
+  resolve(0);
+  returnf();
+
+---------------------------------------------------------
+customer -> orders
+orders -> lineitem
+supplier -> lineitem
+customer -> supplier
+supplier -> nation
+nation -> region
+---------------------------------------------------------
+
+B = filter(orders.o_orderdate >= date ':2' AND orders.o_orderdate < date ':2' + interval '1' year)
+C = dot(B, orders.o_custkey)
+D = filter(region.r_name = ':1')
+E = dot(D, region.r_regionkey)
+F = dot(E, nation.n_nationkey)
+G = dot(F, supplier.n_nationkey)
+H = krao(C, G)
+I = krao(H, G)
+revenue = sum(l_extendedprice * (1 - l_discount))
+return(n_name, revenue)
