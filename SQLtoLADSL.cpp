@@ -942,6 +942,8 @@ void removeTable(string start){
       }
     }
     g.join = Keys;
+    map<string,string> t;
+    g.tables[start] = t;
   }
 }
 
@@ -978,9 +980,17 @@ void print_tables3(){
   }
   cout << "--------------------" << "\n";
 }
+int full_num_attributes(){
+  int res = 0;
+  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
+    res += g.num_attributes(it->first);
+  }
+  return res;
+}
 
 
-void graphWorkAux(int x,string type){
+
+void graphWorkAux(string type){
   //pega nas pontas
   string start = giveMeStart(g.root);
   //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
@@ -991,14 +1001,14 @@ void graphWorkAux(int x,string type){
   //joinGroupby(start, type);
   joinGroupby(start);
   //remover tabela e adicionar como atributo às seguintes
-  if(x == 1)removeTable(start);
+  if(start.compare(g.root)!=0)removeTable(start);
 }
 
 void graphWork(string type){
-  while (!g.join.empty()) {// parar quando só houver uma tabela com atributos
-    graphWorkAux(1,type);
+  while(full_num_attributes() > 1){
+    graphWorkAux(type);
   }
-  graphWorkAux(0,type);
+
 }
 
 
@@ -1220,22 +1230,31 @@ void resolve(int indice){
   }
 }
 
+void dot_if_needed(){
+  while(mainGraph.num_attributes(mainGraph.root)!= 1){
+    print_tables2();
+    dot_all();
+  }
+}
+
+
 void returnf(){
   vector<string> aux;
   vector<string> aux2;
   string alpha = a;
   if(mainGraph.select[0].first.compare("*")!=0){
     for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
-      if((it->second).compare("")==0){
-        /*next();
-        cout << a << "= filter(" << it->first << ")\n";
-        string alpha2 = a;
-        next();
-        cout << a << " = krao(" << alpha << "," << alpha2 <<")\n";*/
-        aux.push_back(it->first);
+      string s = it->first;
+      size_t found = s.find("(");
+      if(found==string::npos){
+        if((it->second).compare("")==0){
+          aux.push_back(s);
+        }else{
+          next();
+          cout << a << " = " << s <<"\n";
+          aux.push_back(a);
+        }
       }else{
-        string s = it->first;
-        size_t found = s.find("(");
         s.erase (0,found);
         s.pop_back();
         next();
@@ -1321,8 +1340,9 @@ int main(){
   mainGraph.add_join("orders.o_custkey","customer","orders");
   mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
   copy_tree(trees[0]);
-  print_tree();
+  //print_tree();
   resolve(0);
+  dot_if_needed();
   returnf();
   return 0;
 }
