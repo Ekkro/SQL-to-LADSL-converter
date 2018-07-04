@@ -942,6 +942,8 @@ void removeTable(string start){
       }
     }
     g.join = Keys;
+    map<string,string> t;
+    g.tables[start] = t;
   }
 }
 
@@ -978,9 +980,17 @@ void print_tables3(){
   }
   cout << "--------------------" << "\n";
 }
+int full_num_attributes(){
+  int res = 0;
+  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
+    res += g.num_attributes(it->first);
+  }
+  return res;
+}
 
 
-void graphWorkAux(int x,string type){
+
+void graphWorkAux(string type){
   //pega nas pontas
   string start = giveMeStart(g.root);
   //juntar filtros do mesmo atributo dessa tabela, no final a tabela terá aoenas letras.
@@ -991,14 +1001,14 @@ void graphWorkAux(int x,string type){
   //joinGroupby(start, type);
   joinGroupby(start);
   //remover tabela e adicionar como atributo às seguintes
-  if(x == 1)removeTable(start);
+  if(start.compare(g.root)!=0)removeTable(start);
 }
 
 void graphWork(string type){
-  while (!g.join.empty()) {// parar quando só houver uma tabela com atributos
-    graphWorkAux(1,type);
+  while(full_num_attributes() > 1){
+    graphWorkAux(type);
   }
-  graphWorkAux(0,type);
+
 }
 
 
@@ -1195,6 +1205,15 @@ void resolveS(int indice, string type){
   merge(v); //between mainGraph and g...
 //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
+void print_trees(){
+  for(int x = 0; x<trees.size(); x++){
+    for(int y = 0; y<trees[x].ltree.size(); y++){
+      cout << trees[x].ltree[y] << "\n";
+    }
+    cout << "\n";
+  }
+  cout << "\n";
+}
 
 
 void resolve(int indice){
@@ -1220,22 +1239,31 @@ void resolve(int indice){
   }
 }
 
+void dot_if_needed(){
+  while(mainGraph.num_attributes(mainGraph.root)!= 1){
+    print_tables2();
+    dot_all();
+  }
+}
+
+
 void returnf(){
   vector<string> aux;
   vector<string> aux2;
   string alpha = a;
   if(mainGraph.select[0].first.compare("*")!=0){
     for(vector<pair<string,string> >::iterator it = mainGraph.select.begin(); it != mainGraph.select.end(); ++it) {
-      if((it->second).compare("")==0){
-        /*next();
-        cout << a << "= filter(" << it->first << ")\n";
-        string alpha2 = a;
-        next();
-        cout << a << " = krao(" << alpha << "," << alpha2 <<")\n";*/
-        aux.push_back(it->first);
+      string s = it->first;
+      size_t found = s.find("(");
+      if(found==string::npos){
+        if((it->second).compare("")==0){
+          aux.push_back(s);
+        }else{
+          next();
+          cout << a << " = " << s <<"\n";
+          aux.push_back(a);
+        }
       }else{
-        string s = it->first;
-        size_t found = s.find("(");
         s.erase (0,found);
         s.pop_back();
         next();
@@ -1274,15 +1302,6 @@ void copy_tree(Ltree t){
 
 
 
-void print_trees(){
-  for(int x = 0; x<trees.size(); x++){
-    for(int y = 0; y<trees[x].ltree.size(); y++){
-      cout << trees[x].ltree[y] << "\n";
-    }
-    cout << "\n";
-  }
-  cout << "\n";
-}
 
 void print_joins(){
   for(int x = 0; x < mainGraph.join.size();x++){
@@ -1297,32 +1316,33 @@ void print_joins(){
 
 int main(){
   mainGraph.add_select("lineitem.orderkey","");
-  mainGraph.add_select("sum(extendedprice * (1 - discount))","revenue");
-  mainGraph.add_select("orderdate","");
-  mainGraph.add_select("shippriority","");
+  mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
+  mainGraph.add_select("orders.orderdate","");
+  mainGraph.add_select("lineitem.shippriority","");
 
-  mainGraph.add_table("lineitem","shippriority","dimension");
-  mainGraph.add_table("orders","orderdate","dimension");
-  mainGraph.add_table("customer","mksegment","dimension");
-  mainGraph.add_table("lineitem","shipdate","dimension");
+  mainGraph.add_table("lineitem","lineitem.shippriority","dimension");
+  mainGraph.add_table("orders","orders.orderdate","dimension");
+  mainGraph.add_table("customer","customer.mksegment","dimension");
+  mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
 
   mainGraph.newRoot("customer");
-  mainGraph.add_map_filter("mksegment","mktsegment = 'BUILDING'");
-  trees.push_back(create_tree("mktsegment = 'BUILDING'","mksegment"));
-  mainGraph.add_map_filter("orderdate","orderdate < date '1995-03-15'");
-  trees.push_back(create_tree("orderdate < date '1995-03-15'","o_orderdate"));
+  mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
+  trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
+  mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
+  trees.push_back(create_tree("orders.orderdate < date '1995-03-15'","orders.orderdate"));
   change_trees(join_trees(trees[0],trees[1],"AND"),0);
-  mainGraph.add_map_filter("shipdate","shipdate > date '1995-03-15'");
-  trees.push_back(create_tree("shipdate > date '1995-03-15'","shipdate"));
+  mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
+  trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
   change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_groupby("lineitem","lineitem.orderkey");
-  mainGraph.add_groupby("orders","orderdate");
-  mainGraph.add_groupby("lineitem","shippriority");
+  mainGraph.add_groupby("lineitem","lineitem.l_orderkey");
+  mainGraph.add_groupby("orders","orders.orderdate");
+  mainGraph.add_groupby("lineitem","lineitem.shippriority");
   mainGraph.add_join("orders.o_custkey","customer","orders");
   mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
   copy_tree(trees[0]);
-  print_tree();
+  //print_tree();
   resolve(0);
+  dot_if_needed();
   returnf();
   return 0;
 }
