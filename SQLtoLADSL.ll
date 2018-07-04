@@ -1,19 +1,22 @@
 %{
 
-#include <cstdlib>
-#include <cerrno>
-#include <climits>
-#include <string>
-#include "SQLtoLADSL.tab.h"
+//#include <cstdlib>
+//#include <cerrno>
+//#include <climits>
+//#include <string>
 using namespace std;
 
-#undef yywrap
-#define yywrap() 1
+//#undef yywrap
+//#define yywrap() 1
 
+//%option noyywrap nounput batch debug
 #define yyterminate() return END
 %}
 
-%option noyywrap nounput batch debug
+%option noyywrap
+%option nounput
+%option noinput
+%option yylineno
 
 as              [Aa][Ss]
 before          [Bb][Ee][Ff][Oo][Rr][Ee]
@@ -40,16 +43,20 @@ any             [Aa][Nn][Yy]
 all             [Aa][Ll][Ll]
 substring       [Ss][Uu][Bb][Ss][Tt][Rr]([In][Nn][Gg])?
 
-Or              ([oO][rR]|\|\|)
-and             ([aA][nN][dD]|&&)
+Or              ([ \t\n]+[oO][rR][ \t\n]+|\|\|)
+and             ([ \t\n]+[aA][nN][dD][ \t\n]|&&)
 eq              (=|==)
 ne              (!=|<>)
-le              "<="
-ge              ">="
-mais            "+"
-div             "/"
-mul             "*"
-men             "-"
+le              [ \t\n]*[<][=][ \t\n]*
+l              [ \t\n]*[<][ \t\n]*
+g              [ \t\n]*[>][ \t\n]*
+ge              [ \t\n]*[>][=][ \t\n]*
+mais            [ \t\n]*[+][ \t\n]*
+div             [ \t\n]*[/][ \t\n]*
+mul             [ \t\n]*[*][ \t\n]*
+men             [ \t\n]*[-][ \t\n]*
+virg            [ \t\n]*[,][ \t\n]*
+pvirg           [ \t\n]*[;]
 
 Not             ([nN][oO][tT]|!)
 true            [Tt][Rr][Uu][Ee]
@@ -57,11 +64,15 @@ false           [Ff][Aa][Ll][Ss][Ee]
 
 int             [0-9]+
 float           ([0-9]*\.[0-9]+|[0-9]+\.[0.9]*)
-name            [A-Za-z][A-Za-z0-9_]*
-Date            (0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}
+attribute       [A-Za-z][A-Za-z0-9_]*[.][A-Za-z][A-Za-z0-9_]*
+name            [A-Za-z':][:'A-Za-z0-9_]*
+Date            [ \t\n]*[dD][aA][tT][eE][ \t\n]+['][:0-9]*[']
+
 
 %%
 
+<INITIAL>{virg}                { return VIRGULA; }
+<INITIAL>{pvirg}                { return PVIRGULA; }
 <INITIAL>{as}                  { return AS; }
 <INITIAL>{before}              { return BEFORE; }
 <INITIAL>{full}                { return FULL; }
@@ -111,6 +122,12 @@ Date            (0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}
 <INITIAL>{le}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
+<INITIAL>{l}                  { yylval.str = new string(yytext);
+                                    return BBOP; }
+
+<INITIAL>{g}                  { yylval.str = new string(yytext);
+                                    return BBOP; }
+
 <INITIAL>{ge}                  { yylval.str = new string(yytext);
                                     return BBOP; }
 
@@ -135,11 +152,12 @@ Date            (0?[1-9]|1[0-2])[\/](0?[1-9]|[12]\d|3[01])[\/](19|20)\d{2}
 <INITIAL>{left}                  { yylval.str = new string(yytext);
                                     return IBOP; }
 
+<INITIAL>{attribute}                 { yylval.str = new std::string( yytext );
+                                     return ATTRIBUTE; }
+
+<INITIAL>{name}                 { yylval.str = new std::string( yytext );
+                                     return NAME; }
+
 
 %%
 
-int main(void)
-{
-    yylex();
-    return 0;
-}

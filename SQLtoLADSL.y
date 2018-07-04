@@ -1,11 +1,18 @@
 %{
 
- #include <stdio.h>
- #include <strings.h>
  #include "SQLtoLADSL.hpp"
 
- void yyerror(char *s);
  int yylex(void);
+ void yyerror(const char* s);
+
+string a = "";
+Graph mainGraph;
+Graph g;
+Ltree l;
+vector<Ltree> trees;
+int itr = 0;
+vector<par> types;
+int itr2 = 0;
 
 %}
 
@@ -14,16 +21,14 @@
     int integer;
 }
 
-
-
-
 %token SELECT WHERE GROUPBY ORDERBY HAVING AS
 %token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP BEFORE IS END
-%token LIKE REGEX
+%token LIKE REGEX VIRGULA PVIRGULA
 /*%token REGEX*/
 
 
 %token <str> NAME
+%token <str> ATTRIBUTE
 %token <str> BBOP
 %token <str> BOP
 %token <str> IBOP
@@ -85,32 +90,33 @@ type para nao terminais
 */
 
 %%
-
+Final : SelectBlock 
 SelectBlock    : SELECT     selectList
                  FROM       fromList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 ';'                                         { l = trees[0];resolve(0);returnf(); }
+                 PVIRGULA                                         { l = trees[0];resolve(0);returnf(); }
 
 WHERE_         : WHERE       whereList                       { ; }
-               |                                             { ; }
+               |                                              {;}
                ;
 
 GROUPBY_       : GROUPBY    groupbyList                      { ; }
-               |                                             { ; }
+               |                                              {;}
                ;
 
+
 ORDERBY_       : ORDERBY    orderbyList                      { ; }
-               |                                             { ; }
+               |                                              {;}
                ;
 
 selectList     : selectListN                                 { ; }
-               | '*'                                         { mainGraph.add_select("*",""); ; }
+               | IBOP                                         { mainGraph.add_select("*",""); ; }
                ;
 
-selectListN    : selectListNSub                              { ; }
-               | selectListN ',' selectListNSub              { ; }
+selectListN    : selectListNSub                              {;}
+               | selectListN VIRGULA  selectListNSub          {;} 
                ;
 
 selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr,""); }
@@ -118,14 +124,13 @@ selectListNSub : Term                                        {mainGraph.add_sele
                ;
 
 fromList       : subfromList                                 { ; }
-               | fromList ',' subfromList                    { ; }
+               | fromList VIRGULA subfromList                    { ; }
                ;
 
 subfromList    : NAME                                        { mainGraph.newRoot(*$1); }
                | Join NAME                                   { ; }
-               | Join NAME ON Literal '=' Literal            {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
                | Join NAME AS NAME                           {mainGraph.tables[*$4]=mainGraph.tables[*$2];}
-               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); mainGraph.tables[*$4]=mainGraph.tables[*$2]; }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
@@ -138,18 +143,20 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
                ;
 
 whereList      : Exp                                         { ; }
+               
                ;
 
-ExpR           : Exp AND Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"AND"),$1); }
-               | Exp OR  Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"OR"),$1); }//delete $3 
+ExpR           : Exp AND Exp                                 {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"AND"),$1); }
+               | Exp OR  Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"OR"),$1); }
                ;
 
-Exp            : Term                                        {$$ = itr;trees[ itr++ ] =  create_tree(types[$1].expr,types[$1].type) ; }
+Exp            : Term                                        {$$ = itr;trees[ itr++ ] = create_tree(types[$1].expr,types[$1].type) ; }
                | ExpR                                        {$$ = $1 ; }
                | '(' ExpR ')'                                {$$ = $2 ; }
                ;
 
 Term           : Factor                                      {$$ = $1;}
+               | '(' Term ')'                                {$$ = $2;}
                | Term BBOP Term                              {$$ = $1;
                                                               types[$1].expr.append(*$2);
                                                               types[$1].expr.append(types[$3].expr);
@@ -159,17 +166,14 @@ Term           : Factor                                      {$$ = $1;}
                                                                         }else{
                                                                               mainGraph.add_map_filter(types[$1].type,types[$1].expr);
                                                                               types[$1].type = "NOT JOIN";
-                                                                        }}
+                                                                        }
+                                                                }
 
                | Term IBOP Term                              {$$ = $1; types[$1].expr.append(*$2);
                                                             types[$1].expr.append(types[$3].expr) ;
                                                             types[$1].type.append(types[$3].type); }
-/*             | Term '/' Factor                             { ; }
-               | Term '+' Factor                             { ; }
-               | Term '-' Factor                             { ; }
-               | Term '*' Factor                             { ; }
-*/
                ;
+
 
 Factor         : Literal                                     {$$ = $1;}
                | NAME '(' Args ')'                           {$$ = $3;
@@ -189,10 +193,10 @@ Factor         : Literal                                     {$$ = $1;}
 
 Args           : Args1                                       {$$ = $1;}
                |                                             { ; }
-               ;
+;
 
 Args1          : Term                                        {$$ = $1 ; }
-               | Args1 ',' Term                              {$$ = $1;
+               | Args1 VIRGULA  Term                              {$$ = $1;
                                                             types[$1].expr.append( ",");
                                                             types[$1].expr.append(types[$3].expr) ;
                                                             types[$1].type.append(types[$3].type); }
@@ -200,7 +204,7 @@ Args1          : Term                                        {$$ = $1 ; }
                                                             types[$1].expr.append( " ");
                                                             types[$1].expr.append(types[$3].expr) ;
                                                             types[$1].type.append(types[$3].type); }
-               ;
+;
 /*
                | NAME IN Inlist                              { ; }
                | NAME BETWEEN Literal AND Literal            { ; }
@@ -210,7 +214,7 @@ Args1          : Term                                        {$$ = $1 ; }
 */
 
 groupbyList    : groupbyListSub                              { ; }
-               | groupbyList ',' groupbyListSub              { ; }
+               | groupbyList VIRGULA groupbyListSub              { ; }
                ;
 
 groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
@@ -219,26 +223,28 @@ groupbyListSub : HAVING NAME '(' Literal ')' BBOP Literal    { ; }
                                                               s.append(".");
                                                               s.append(types[$1].expr);
                                                               mainGraph.add_groupby(Table,s);}
-               ;
+;
 
 orderbyList    : orderbyListSub                              { ; }
-               | orderbyList ',' orderbyListSub              { ; }
+               | orderbyList VIRGULA orderbyListSub              { ; }
 
                ;
 
-orderbyListSub : NAME                                        { ; }
-               | NAME order                                  { ; }
+orderbyListSub : Literal                                     { ; }
+               | Literal order                                  { ; }
                ;
 
 order          : ASC                                         { ; }
                | DESC                                        { ; }
+                ;
 /*               ;
-
 OL             : AND                                         {$$ = $1 ; }
                | ANDOP                                       {$$ = $1 ; }
                | OR                                          {$$ = $1 ; }
                ;
 */
+
+
 Literal        : NAME                                        {string s = getTable(*$1);
                                                                s.append(".");
                                                               $$ = itr2;
@@ -252,13 +258,10 @@ Literal        : NAME                                        {string s = getTabl
                                                               }}
 
 
-               | NAME '.' NAME                               {$$ = itr2;
-                                                              string s = "";
-                                                              s.append(*$1);
-                                                              s.append(".");
-                                                              s.append(*$3);
-                                                              types[itr2++].type = s;
-                                                              types[itr2++].expr = s;}
+               | ATTRIBUTE                                    {$$ = itr2;
+                                                              string s = getTable(*$1);
+                                                              types[itr2].type = s;
+                                                              types[itr2++].expr = *$1;}
 
                | DATE                                        {$$ = itr2;
                                                               types[itr2].expr = *$1 ;
@@ -279,7 +282,7 @@ Literal        : NAME                                        {string s = getTabl
                | ALL                                         {$$ = itr2;
                                                               types[itr2].expr = *$1 ;
                                                               types[itr2++].type = "";}
-               ;
+;
 
 
 /*
@@ -299,6 +302,12 @@ Inlist         : Literal                                     {$$ = $1;}
 */
 
 %%
+#include "lex.yy.c"
+#include "SQLtoLADSL.cpp"
+ void yyerror(const char*s){
+    printf("parsing aborted: %s\n",s);    
+ }
+
 
 int main(int argc, char **argv){
 
