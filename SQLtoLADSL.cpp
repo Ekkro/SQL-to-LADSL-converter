@@ -908,7 +908,7 @@ void joinFilters(string start, string type){
 void joinGroupbyAux(string gb, string start){
   string alpha = a;
   next();
-  cout << a << " = krao(" << alpha << "," << gb << ")\n";
+  cout << a << " = krao(" << gb << "," << alpha << ")\n";
   map<string,string> work;
   work[a]="dimension";
   g.tables[start]=work;
@@ -1241,7 +1241,6 @@ void resolve(int indice){
 
 void dot_if_needed(){
   while(mainGraph.num_attributes(mainGraph.root)!= 1){
-    print_tables2();
     dot_all();
   }
 }
@@ -1318,14 +1317,14 @@ int main(){
   mainGraph.add_select("lineitem.orderkey","");
   mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
   mainGraph.add_select("orders.orderdate","");
-  mainGraph.add_select("lineitem.shippriority","");
+  mainGraph.add_select("orders.shippriority","");
 
-  mainGraph.add_table("lineitem","lineitem.shippriority","dimension");
+  mainGraph.add_table("orders","orders.shippriority","dimension");
   mainGraph.add_table("orders","orders.orderdate","dimension");
   mainGraph.add_table("customer","customer.mksegment","dimension");
   mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
 
-  mainGraph.newRoot("customer");
+  mainGraph.newRoot("lineitem");
   mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
   trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
   mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
@@ -1334,15 +1333,15 @@ int main(){
   mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
   trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
   change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_groupby("lineitem","lineitem.l_orderkey");
+  mainGraph.add_groupby("lineitem","lineitem.orderkey");
   mainGraph.add_groupby("orders","orders.orderdate");
-  mainGraph.add_groupby("lineitem","lineitem.shippriority");
-  mainGraph.add_join("orders.o_custkey","customer","orders");
-  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
+  mainGraph.add_groupby("orders","orders.shippriority");
+  mainGraph.add_join("orders.o_custkey","orders","customer");
+  mainGraph.add_join("lineitem.orderkey","lineitem","orders");
   copy_tree(trees[0]);
   //print_tree();
   resolve(0);
-  dot_if_needed();
+  //dot_if_needed();
   returnf();
   return 0;
 }
