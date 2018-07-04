@@ -1205,6 +1205,15 @@ void resolveS(int indice, string type){
   merge(v); //between mainGraph and g...
 //^^cuidado com vários filters no memso atributo, retirar de table e filter apenas se g.filter(atributo)==mainGraph.filter(atributo), caso contrário apenas retira as entradas iguais
 }
+void print_trees(){
+  for(int x = 0; x<trees.size(); x++){
+    for(int y = 0; y<trees[x].ltree.size(); y++){
+      cout << trees[x].ltree[y] << "\n";
+    }
+    cout << "\n";
+  }
+  cout << "\n";
+}
 
 
 void resolve(int indice){
@@ -1293,15 +1302,6 @@ void copy_tree(Ltree t){
 
 
 
-void print_trees(){
-  for(int x = 0; x<trees.size(); x++){
-    for(int y = 0; y<trees[x].ltree.size(); y++){
-      cout << trees[x].ltree[y] << "\n";
-    }
-    cout << "\n";
-  }
-  cout << "\n";
-}
 
 void print_joins(){
   for(int x = 0; x < mainGraph.join.size();x++){
@@ -1316,27 +1316,27 @@ void print_joins(){
 
 int main(){
   mainGraph.add_select("lineitem.orderkey","");
-  mainGraph.add_select("sum(extendedprice * (1 - discount))","revenue");
-  mainGraph.add_select("orderdate","");
-  mainGraph.add_select("shippriority","");
+  mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
+  mainGraph.add_select("orders.orderdate","");
+  mainGraph.add_select("lineitem.shippriority","");
 
-  mainGraph.add_table("lineitem","shippriority","dimension");
-  mainGraph.add_table("orders","orderdate","dimension");
-  mainGraph.add_table("customer","mksegment","dimension");
-  mainGraph.add_table("lineitem","shipdate","dimension");
+  mainGraph.add_table("lineitem","lineitem.shippriority","dimension");
+  mainGraph.add_table("orders","orders.orderdate","dimension");
+  mainGraph.add_table("customer","customer.mksegment","dimension");
+  mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
 
   mainGraph.newRoot("customer");
-  mainGraph.add_map_filter("mksegment","mktsegment = 'BUILDING'");
-  trees.push_back(create_tree("mktsegment = 'BUILDING'","mksegment"));
-  mainGraph.add_map_filter("orderdate","orderdate < date '1995-03-15'");
-  trees.push_back(create_tree("orderdate < date '1995-03-15'","o_orderdate"));
+  mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
+  trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
+  mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
+  trees.push_back(create_tree("orders.orderdate < date '1995-03-15'","orders.orderdate"));
   change_trees(join_trees(trees[0],trees[1],"AND"),0);
-  mainGraph.add_map_filter("shipdate","shipdate > date '1995-03-15'");
-  trees.push_back(create_tree("shipdate > date '1995-03-15'","shipdate"));
+  mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
+  trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
   change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_groupby("lineitem","lineitem.orderkey");
-  mainGraph.add_groupby("orders","orderdate");
-  mainGraph.add_groupby("lineitem","shippriority");
+  mainGraph.add_groupby("lineitem","lineitem.l_orderkey");
+  mainGraph.add_groupby("orders","orders.orderdate");
+  mainGraph.add_groupby("lineitem","lineitem.shippriority");
   mainGraph.add_join("orders.o_custkey","customer","orders");
   mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
   copy_tree(trees[0]);
