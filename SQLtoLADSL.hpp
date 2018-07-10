@@ -388,6 +388,7 @@ class Ltree {
 };
 
 
+string giveMeRoot(string root);
 
     /* ..................................................... */
     /* .....................DECLARATIONS.......................... */
@@ -451,7 +452,55 @@ void print_tables();
 
 void print_joins();
 
+  void final();
 
+        void select_asterisco();
+
+        void select_term(int s1);
+
+        void select_term_name(int s1,const string& dolar3);
+
+        void subfromlist_name(const string& dolar1);
+
+        void subfromlist_join_literal_literal(int  dolar6, int dolar4);
+
+        void subfromlist_join_nameAS(const string& dolar4, const string& dolar2);
+
+        void subfromlist_join_as_literal_literal(const string& dolar2,const string& dolar4,int dolar6, int dolar8);
+
+        void expr_and(int s1, int  s3);
+
+        void expr_or(int s1, int s3);
+
+        void exp_term(int s1);
+
+        void term_bbop_term(int s1, const string& dolar2, int s3);
+
+        void term_ibop_term(int s1, const string& dolar2, int s3);
+
+        void factor_name_arg(const string& dolar1,int s3);
+
+        void factor_not_factor(const string& dolar1, int s2);
+
+        void args1_virgula(int s1, int s3);
+
+        void args1_espaco(int  dolar1, int  dolar3);
+
+        void groupbyListSub_literal(int dolar1);
+
+        void literal_name(const string& dolar1);
+
+        void literal_name_name(const string& dolar1, const string& dolar3);
+
+        void literal_date(const string& dolar1);
+
+        void literal_constant(const string& dolar1);
+
+        void literal_bool(const string& dolar1);
+
+        void literal_any(const string& dolar1);
+
+        void literal_all(const string& dolar1);
 
 
 /*
@@ -466,21 +515,3 @@ void addexp(string exp);
 
 void aux(string exp);
 */
-
-
-
-
-
-
-
-
-
-
-string a = "";
-Graph mainGraph;
-Graph g;
-Ltree l;
-vector<Ltree> trees;
-int itr = 0;
-vector<par> types;
-int itr2 = 0;

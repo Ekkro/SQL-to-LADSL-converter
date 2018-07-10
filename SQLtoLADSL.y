@@ -14,6 +14,7 @@ int itr = 0;
 vector<par> types;
 int itr2 = 0;
 
+
 %}
 
 %union{
@@ -90,13 +91,14 @@ type para nao terminais
 */
 
 %%
-Final : SelectBlock 
+Final : SelectBlock
 SelectBlock    : SELECT     selectList
                  FROM       fromList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 PVIRGULA                                         { l = trees[0];resolve(0);returnf(); }
+                 PVIRGULA                                         {
+                                                                   l = trees[0];mainGraph.newRoot(giveMeRoot(mainGraph.root));print_tree();l.rewrite(0);print_tree();resolve(0);returnf(); }
 
 WHERE_         : WHERE       whereList                       { ; }
                |                                              {;}
@@ -111,26 +113,32 @@ ORDERBY_       : ORDERBY    orderbyList                      { ; }
                |                                              {;}
                ;
 
-selectList     : selectListN                                 { ; }
-               | IBOP                                         { mainGraph.add_select("*",""); ; }
+selectList     : selectListN                                 {
+                                    mainGraph.add_table("lineitem","shipdate","dimension");
+                                    mainGraph.add_table("lineitem","extendedprice","measure");
+                                    mainGraph.add_table("lineitem","discount","measure");
+                                    mainGraph.add_table("lineitem","quantity","measure");
+                                  }
+               | IBOP                                         { mainGraph.add_select("*","") ; }
                ;
 
 selectListN    : selectListNSub                              {;}
-               | selectListN VIRGULA  selectListNSub          {;} 
+               | selectListN VIRGULA  selectListNSub          {;}
                ;
 
-selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr,""); }
-               | Term AS NAME                                {mainGraph.add_select(types[$1].expr,*$3); }
+selectListNSub : Term                                        {mainGraph.add_select(types[$1].expr,""); /*cout << types[$1].expr << "\n"*/;}
+               | Term AS NAME                                {mainGraph.add_select(types[$1].expr,*$3);}
                ;
 
 fromList       : subfromList                                 { ; }
-               | fromList VIRGULA subfromList                    { ; }
+               | fromList VIRGULA subfromList                { ; }
                ;
 
-subfromList    : NAME                                        { mainGraph.newRoot(*$1); }
+subfromList    : NAME                                        {mainGraph.newRoot(*$1); }
                | Join NAME                                   { ; }
-               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
+               | Join NAME ON Literal '=' Literal            {mainGraph.add_join(types[$6].type,getTable(types[$4].type),getTable(types[$6].type));}
                | Join NAME AS NAME                           {mainGraph.tables[*$4]=mainGraph.tables[*$2];}
+               | Join NAME AS NAME ON Literal '=' Literal    {mainGraph.add_join(types[$8].type,getTable(types[$6].type),getTable(types[$8].type)); mainGraph.tables[*$4]=mainGraph.tables[*$2]; }
                | '{' SelectBlock '}'                         { ; }
                | '{' SelectBlock '}' AS NAME                 { ; }
                ;
@@ -142,22 +150,33 @@ Join           : JOIN                                        {/*$$ = "Normal"*/;
                | FULL JOIN                                   {/*$$ = "Full"*/;}
                ;
 
-whereList      : Exp                                         { ; }
-               
+whereList      : Exp                                         { cout << "where\n"; }
                ;
 
-ExpR           : Exp AND Exp                                 {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"AND"),$1); }
+ExpR           : Exp AND Exp                                 {$$ = $1; cout << "3\n";change_trees(join_trees(trees[$1],trees[$3],"AND"),$1); }
                | Exp OR  Exp                                {$$ = $1; change_trees(join_trees(trees[$1],trees[$3],"OR"),$1); }
                ;
 
-Exp            : Term                                        {$$ = itr;trees[ itr++ ] = create_tree(types[$1].expr,types[$1].type) ; }
+Exp            : Term                                        {$$ = itr;trees.push_back( create_tree(types[$1].expr,types[$1].type));itr++ ; }
                | ExpR                                        {$$ = $1 ; }
                | '(' ExpR ')'                                {$$ = $2 ; }
+               | Literal BETWEEN Term AND Term                {$$ = itr;
+                                                             string s = types[$1].expr;
+                                                             string s2 = types[$1].expr;
+                                                              s.append("<=");
+                                                              s2.append(">=");
+                                                              s.append(types[$3].expr);
+                                                              s2.append(types[$5].expr);
+                                                                trees.push_back( create_tree(s,types[$1].type));itr++ ;
+                                                              trees.push_back( create_tree(s2,types[$1].type));itr++ ;
+                                                                change_trees(join_trees(trees[$1],trees[$3],"AND"),$1);
+                                                                }
                ;
 
 Term           : Factor                                      {$$ = $1;}
                | '(' Term ')'                                {$$ = $2;}
                | Term BBOP Term                              {$$ = $1;
+                                                                cout << "1\n";
                                                               types[$1].expr.append(*$2);
                                                               types[$1].expr.append(types[$3].expr);
                                                                         if((types[$1].type.size()!=0)&&(types[$3].type.size()!=0)){
@@ -167,6 +186,7 @@ Term           : Factor                                      {$$ = $1;}
                                                                               mainGraph.add_map_filter(types[$1].type,types[$1].expr);
                                                                               types[$1].type = "NOT JOIN";
                                                                         }
+                                                                cout << "2\n";
                                                                 }
 
                | Term IBOP Term                              {$$ = $1; types[$1].expr.append(*$2);
@@ -193,7 +213,7 @@ Factor         : Literal                                     {$$ = $1;}
 
 Args           : Args1                                       {$$ = $1;}
                |                                             { ; }
-;
+               ;
 
 Args1          : Term                                        {$$ = $1 ; }
                | Args1 VIRGULA  Term                              {$$ = $1;
@@ -204,7 +224,7 @@ Args1          : Term                                        {$$ = $1 ; }
                                                             types[$1].expr.append( " ");
                                                             types[$1].expr.append(types[$3].expr) ;
                                                             types[$1].type.append(types[$3].type); }
-;
+                ;
 /*
                | NAME IN Inlist                              { ; }
                | NAME BETWEEN Literal AND Literal            { ; }
@@ -213,7 +233,7 @@ Args1          : Term                                        {$$ = $1 ; }
                ;
 */
 
-groupbyList    : groupbyListSub                              { ; }
+groupbyList    : groupbyListSub                              { cout << "gb\n"; }
                | groupbyList VIRGULA groupbyListSub              { ; }
                ;
 
@@ -249,39 +269,64 @@ Literal        : NAME                                        {string s = getTabl
                                                                s.append(".");
                                                               $$ = itr2;
                                                               if(!s.compare(".")){
-                                                                  types[itr2].type = "";
-                                                                  types[itr2++].expr = *$1;
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;
                                                               }else{
                                                                   s.append(*$1);
-                                                                  types[itr2].type = s;
-                                                                  types[itr2++].expr = s;
+                                                                par novo;
+                                                                novo.type = s;
+                                                                novo.expr = s;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;
                                                               }}
 
 
                | ATTRIBUTE                                    {$$ = itr2;
+                                                              cout << *$1 << "\n";
                                                               string s = getTable(*$1);
-                                                              types[itr2].type = s;
-                                                              types[itr2++].expr = *$1;}
+                                                                par novo;
+                                                                novo.type = s;
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 
                | DATE                                        {$$ = itr2;
-                                                              types[itr2].expr = *$1 ;
-                                                              types[itr2++].type = "";}
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 
                | CONSTANT                                    {$$ = itr2;
-                                                              types[itr2].expr = *$1 ;
-                                                              types[itr2++].type = "";}
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 
                | BOOL                                        {$$ = itr2;
-                                                              types[itr2].expr = *$1 ;
-                                                              types[itr2++].type = "";}
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 
                | ANY                                         {$$ = itr2;
-                                                              types[itr2].expr = *$1 ;
-                                                              types[itr2++].type = "";}
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 
                | ALL                                         {$$ = itr2;
-                                                              types[itr2].expr = *$1 ;
-                                                              types[itr2++].type = "";}
+                                                                par novo;
+                                                                novo.type = "";
+                                                                novo.expr = *$1;
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
 ;
 
 
@@ -305,7 +350,7 @@ Inlist         : Literal                                     {$$ = $1;}
 #include "lex.yy.c"
 #include "SQLtoLADSL.cpp"
  void yyerror(const char*s){
-    printf("parsing aborted: %s\n",s);    
+    printf("parsing aborted: %s\n",s);
  }
 
 

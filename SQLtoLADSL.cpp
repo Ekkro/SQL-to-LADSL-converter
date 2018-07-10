@@ -1,5 +1,5 @@
 #include <regex>
-#include "SQLtoLADSL.hpp"
+//#include "SQLtoLADSL.hpp"
 using namespace std;
 
 
@@ -118,6 +118,7 @@ bool has(vector<string> v, string s){
             vector<string> aux;
             for(map<string, map<string,string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (search_filter_in_table(it->first,filter)) {
+                    cout << "iguais\n";
                     aux.push_back(it->first);
                 }
             }
@@ -712,7 +713,9 @@ bool has(vector<string> v, string s){
       ltree.reserve(1+ind);
       swap(ind,ind_Parent(ind));
       int last = push_aux(ind);
+       if((ltree[last] =="AND" || ltree[last] =="OR")){
       ltree.erase(ltree.begin() + last);
+       }
     }
 
 
@@ -734,6 +737,7 @@ bool has(vector<string> v, string s){
     Ltree create_tree(string term, string type){
         Ltree res ;
         if (type.compare("JOIN") == 0) {
+            cout << "join\n";
             res.add("NULL",0);
         }else{
             res.add(term,0);
@@ -753,13 +757,14 @@ bool has(vector<string> v, string s){
 
     string getTable(string attribute) {
         int ind = attribute.find(".");
-        if (ind != (-1)) {
-            attribute = attribute.substr(ind);
-        }
-        vector<string> v = mainGraph.search_filter(attribute);
-        if (v.size() < 1 || v.size() > 2) {
+        //if (ind != (-1)) {
+        //    attribute = attribute.substr(ind);
+        //}
+        vector<string> v ( mainGraph.search_filter(attribute));
+        if (v.size() < 1) {
             return "";
         }else{
+            cout << v[0] << "aqui" << "\n";
             return v[0];
         }
     }
@@ -1185,7 +1190,7 @@ void dot_all(){
 vector<string> resolveS_aux(vector<string> v){
   vector<string> aux;
   for(int x = 0; x< v.size(); x++){
-    if(!(v[x].compare("AND")==0) || !(v[x].compare("OR"))==0){
+    if((v[x].compare("AND")!=0) || (v[x].compare("OR")!=0)){
       aux.push_back(v[x]);
     }
   }
@@ -1311,37 +1316,207 @@ void print_joins(){
   }
 }
 
+    /*se o grafo for em circulo não funciona*/
+string giveMeRoot(string root){
+    if(mainGraph.join.size() > 0){
+        for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
+            if((it->at(2)).compare(root) == 0){
+              //cout << it->at(1) << "\n";
+              return giveMeRoot(it->at(1));
+            }
+          }
+        }
+        return root;
+      }
+//---------------------------------------
+//              YACC
+//---------------------------------------
 
-
-int main(){
-  mainGraph.add_select("lineitem.orderkey","");
-  mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
-  mainGraph.add_select("orders.orderdate","");
-  mainGraph.add_select("orders.shippriority","");
-
-  mainGraph.add_table("orders","orders.shippriority","dimension");
-  mainGraph.add_table("orders","orders.orderdate","dimension");
-  mainGraph.add_table("customer","customer.mksegment","dimension");
-  mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
-
-  mainGraph.newRoot("lineitem");
-  mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
-  trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
-  mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
-  trees.push_back(create_tree("orders.orderdate < date '1995-03-15'","orders.orderdate"));
-  change_trees(join_trees(trees[0],trees[1],"AND"),0);
-  mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
-  trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
-  change_trees(join_trees(trees[0],trees[2],"AND"),0);
-  mainGraph.add_groupby("lineitem","lineitem.orderkey");
-  mainGraph.add_groupby("orders","orders.orderdate");
-  mainGraph.add_groupby("orders","orders.shippriority");
-  mainGraph.add_join("orders.o_custkey","orders","customer");
-  mainGraph.add_join("lineitem.orderkey","lineitem","orders");
-  copy_tree(trees[0]);
-  //print_tree();
-  resolve(0);
-  //dot_if_needed();
-  returnf();
-  return 0;
+void final(){
+    l = trees[0];
+    resolve(0);
+    returnf();
 }
+
+void select_asterisco(){
+    mainGraph.add_select("*","");
+}
+
+void select_term(int s1){
+    mainGraph.add_select(types[s1].expr,"");
+}
+
+void select_term_name(int s1, const string& s3){
+  mainGraph.add_select(types[s1].expr,s3);
+}
+
+void subfromlist_name(const string& s1){
+  mainGraph.newRoot(s1);
+}
+
+void subfromlist_join_literal_literal(int dolar6, int  dolar4){
+    mainGraph.add_join(types[dolar6].type,getTable(types[dolar4].type),getTable(types[dolar6].type));
+}
+
+void subfromlist_join_nameAS(const string& s4,const string& s2 ){
+    mainGraph.tables[s4]=mainGraph.tables[s2];
+}
+
+void subfromlist_join_as_literal_literal(const string& s2, const string& s4,int dolar6, int dolar8){
+        int s6 = dolar6;
+        int s8 = dolar8;
+        mainGraph.add_join(types[s8].type,getTable(types[s6].type),getTable(types[s8].type));
+        mainGraph.tables[s4]=mainGraph.tables[s2];
+    }
+
+void expr_and(int  s1, int s3){
+   change_trees(join_trees(trees[s1],trees[s3],"AND"),s1);
+}
+
+void expr_or(int s1, int s3){
+    change_trees(join_trees(trees[s1],trees[s3],"OR"),s1);
+}
+
+void exp_term(int s1){
+    trees[ itr++ ] =  create_tree(types[s1].expr,types[s1].type) ;
+}
+
+
+void term_bbop_term(int s1, const string& s2, int s3){
+      types[s1].expr.append(s2);
+      types[s1].expr.append(types[s3].expr);
+                if((types[s1].type.size()!=0)&&(types[s3].type.size()!=0)){
+                      mainGraph.add_join(types[s3].type,getTable(types[s1].type),getTable(types[s3].type));
+                      types[s1].type = "JOIN";
+                }else{
+                      mainGraph.add_map_filter(types[s1].type,types[s1].expr);
+                      types[s1].type = "NOT JOIN";
+                }
+}
+
+void term_ibop_term(int s1, const string& s2, int s3){
+    types[s1].expr.append(s2);
+    types[s1].expr.append(types[s3].expr) ;
+    types[s1].type.append(types[s3].type);
+}
+
+void factor_name_arg(const string& s1,int s3){
+      string s = "";
+      s.append(s1);
+      s.append("(");
+      s.append(types[s3].expr);
+      s.append(")");
+      types[s3].expr = s;
+}
+
+void factor_not_factor(const string& s1, int s2){
+      string s = "";
+      s.append(s1);
+      s.append(" ");
+      s.append(types[s2].expr);
+      types[s2].expr = s;
+}
+
+void args1_virgula(int s1, int s3){
+    types[s1].expr.append( ",");
+    types[s1].expr.append(types[s3].expr) ;
+    types[s1].type.append(types[s3].type);
+}
+
+void args1_espaco(int s1, int s3){
+    types[s1].expr.append( " ");
+    types[s1].expr.append(types[s3].expr) ;
+    types[s1].type.append(types[s3].type);
+}
+
+void groupbyListSub_literal(int dolar1 ){
+   string Table = getTable(types[dolar1].expr);
+   string s = Table;
+   s.append(".");
+   s.append(types[dolar1].expr);
+   mainGraph.add_groupby(Table,s);
+}
+
+
+void literal_name(const string& s1){
+    string s = getTable(s1);
+    s.append(".");
+      if(s.compare(".")!=0){
+          types[itr2].type = "";
+          types[itr2++].expr = s1;
+      }else{
+          s.append(s1);
+          par novo;
+          novo.type = s;
+          novo.expr= s;
+          types.push_back( novo);
+          //types[itr2++].expr = s;
+      }
+}
+
+void literal_name_name(const string& s1, const string& s3){
+      string s = "";
+      s.append(s1);
+      s.append(".");
+      s.append(s3);
+      types[itr2++].type = s;
+      types[itr2++].expr = s;
+}
+
+void literal_date(const string& s1){
+      types[itr2].expr = s1 ;
+      types[itr2++].type = "";
+}
+
+void literal_constant(const string& s1){
+      types[itr2].expr = s1 ;
+      types[itr2++].type = "";
+}
+
+void literal_bool(const string& s1){
+      types[itr2].expr = s1 ;
+      types[itr2++].type = "";
+    }
+
+void literal_any(const string& s1){
+      types[itr2].expr = s1 ;
+      types[itr2++].type = "";
+}
+
+void literal_all(const string& s1){
+      types[itr2].expr = s1 ;
+      types[itr2++].type = "";
+}
+
+//int main(){
+//  mainGraph.add_select("lineitem.orderkey","");
+//  mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
+//  mainGraph.add_select("orders.orderdate","");
+//  mainGraph.add_select("lineitem.shippriority","");
+//
+//  mainGraph.add_table("lineitem","lineitem.shippriority","dimension");
+//  mainGraph.add_table("orders","orders.orderdate","dimension");
+//  mainGraph.add_table("customer","customer.mksegment","dimension");
+//  mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
+//
+//  mainGraph.newRoot("customer");
+//  mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
+//  trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
+//  mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
+//  trees.push_back(create_tree("orders.orderdate < date '1995-03-15'","orders.orderdate"));
+//  change_trees(join_trees(trees[0],trees[1],"AND"),0);
+//  mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
+//  trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
+//  change_trees(join_trees(trees[0],trees[2],"AND"),0);
+//  mainGraph.add_groupby("lineitem","lineitem.l_orderkey");
+//  mainGraph.add_groupby("orders","orders.orderdate");
+//  mainGraph.add_groupby("lineitem","lineitem.shippriority");
+//  mainGraph.add_join("orders.o_custkey","customer","orders");
+//  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
+//  copy_tree(trees[0]);
+//  //print_tree();
+//  resolve(0);
+//  dot_if_needed();
+//  returnf();
+//  return 0;
+//}
