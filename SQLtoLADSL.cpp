@@ -32,17 +32,17 @@ bool has(vector<string> v, string s){
             for(map<string,vector<string> >::iterator it = filter.begin(); it != filter.end(); ++it) {
                 vector<string> aux;
                 for(vector<string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
-                    if (has(v, *i)) {
-                        aux.push_back(*i);
-                    }
+                  if (has(v, *i)) {
+                     aux.push_back(*i);
+                  }
                 }
                 if (!aux.empty()) {
                     notEmpty.push_back(it->first);
                     f.insert(pair<string, vector<string> >((it->first), aux));
                 }
             }
-
             newgraph.filter = f;
+
 
             for(map<string,map<string, string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 map<string, string> aux;
@@ -53,7 +53,6 @@ bool has(vector<string> v, string s){
                 }
                 t.insert(pair<string, map<string, string> > ((it->first), aux));
             }
-
             newgraph.tables= t;
 
             for(vector<pair<string, string> >::iterator it = groupby.begin(); it != groupby.end(); ++it) {
@@ -118,7 +117,6 @@ bool has(vector<string> v, string s){
             vector<string> aux;
             for(map<string, map<string,string> >::iterator it = tables.begin(); it != tables.end(); ++it) {
                 if (search_filter_in_table(it->first,filter)) {
-                    cout << "iguais\n";
                     aux.push_back(it->first);
                 }
             }
@@ -642,14 +640,25 @@ bool has(vector<string> v, string s){
       string s =all_same_table_aux(indice);
       vector<string> aux = childs(indice);
       string s2;
+      for(int x = 0; x < aux.size() ; x++){
+        if(aux[x].size()>0){
+          if(aux[x].compare("AND")!=0 && aux[x].compare("OR")!=0 && aux[x].compare("NULL")!=0){
+            s2 = mainGraph.search_table_filter(aux[x]);
+            if(s2.compare(s) != 0){
+              return false;
+            }
+          }
+        }
+      }
+      /*
       for(vector<string>::iterator it = aux.begin(); it != aux.end(); ++it) {
-        if(it->compare("AND")!=0 && it->compare("OR")!=0 && it->compare("NULL")!=0){
+        if(*it.compare("AND")!=0 && *it.compare("OR")!=0 && *it.compare("NULL")!=0){
           s2 = mainGraph.search_table_filter(*it);
           if(s2.compare(s) != 0){
             return false;
           }
         }
-      }
+      }*/
       return true;
     }
 
@@ -720,7 +729,7 @@ bool has(vector<string> v, string s){
 
 
      void Ltree::rewrite(int ind){
-       ltree.reserve(1+ind);
+       //ltree.reserve(1+ind);
        if((ltree[ind]=="AND" || ltree[ind]=="OR")){
          if (left_child(ind)== "NULL"){
            pushLT(ind_right_child(ind));
@@ -728,16 +737,22 @@ bool has(vector<string> v, string s){
          if(right_child(ind) == "NULL"){
            pushLT(ind_left_child(ind));
          }
-       }
-       if(ltree[ind]!="NULL"){
          rewrite(ind_left_child(ind));
          rewrite(ind_right_child(ind));
+       }else{
+         if(left_child(ind)=="AND" || left_child(ind)=="OR"){
+           ltree[ind_left_child(ind)]="NULL";
+           rewrite(ind_left_child(ind));
          }
+         if(right_child(ind)=="AND" || right_child(ind)=="OR"){
+           ltree[ind_right_child(ind)]="NULL";
+           rewrite(ind_left_child(ind));
+         }
+       }
     }
     Ltree create_tree(string term, string type){
         Ltree res ;
         if (type.compare("JOIN") == 0) {
-            cout << "join\n";
             res.add("NULL",0);
         }else{
             res.add(term,0);
@@ -757,15 +772,17 @@ bool has(vector<string> v, string s){
 
     string getTable(string attribute) {
         int ind = attribute.find(".");
-        //if (ind != (-1)) {
-        //    attribute = attribute.substr(ind);
-        //}
-        vector<string> v ( mainGraph.search_filter(attribute));
-        if (v.size() < 1) {
-            return "";
+        if (ind != (-1)) {
+           string s = attribute.substr(0,ind);
+           return s; //alterar urgente
+
         }else{
-            cout << v[0] << "aqui" << "\n";
-            return v[0];
+          vector<string> v ( mainGraph.search_filter(attribute));
+          if (v.size() < 1) {
+              return "";
+          }else{
+              return v[0];
+          }
         }
     }
 
@@ -987,8 +1004,10 @@ void print_tables3(){
 }
 int full_num_attributes(){
   int res = 0;
-  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
-    res += g.num_attributes(it->first);
+  for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it){
+    for(map<string,string> ::iterator i = (it->second).begin(); i != (it->second).end(); ++i){
+      res += g.filter[i->first].size();
+    }
   }
   return res;
 }
@@ -1013,7 +1032,6 @@ void graphWork(string type){
   while(full_num_attributes() > 1){
     graphWorkAux(type);
   }
-
 }
 
 
@@ -1079,7 +1097,6 @@ void merge(vector<string> v){
         break;
       }
   }
-
   mainGraph.tables[table].insert(aux);
   //empty table
   vector<string> emptyfilter;
@@ -1200,7 +1217,13 @@ vector<string> resolveS_aux(vector<string> v){
 
 
 void resolveS(int indice, string type){
-  vector<string> v =  l.childs(indice);
+  vector<string> v2 =  l.childs(indice);
+  vector<string> v;
+  for(int x = 0; x < v2.size(); x++){
+    if(v2[x] != "AND" && v2[x] != "OR"){
+      v.push_back(v2[x]);
+    }
+  }
   g = mainGraph.clone(resolveS_aux(v));
   graphWork(type);
   l.ltree.reserve(1+indice);
@@ -1212,6 +1235,7 @@ void resolveS(int indice, string type){
 }
 void print_trees(){
   for(int x = 0; x<trees.size(); x++){
+    cout << "Tree " << x << "\n";
     for(int y = 0; y<trees[x].ltree.size(); y++){
       cout << trees[x].ltree[y] << "\n";
     }
@@ -1271,7 +1295,7 @@ void returnf(){
         s.erase (0,found);
         s.pop_back();
         next();
-        cout << a << " =map" << s << ")\n";
+        cout << a << " = map" << s << ")\n";
         string alpha2 = a;
         next();
         cout << a << " = krao(" << alpha2 << "," << alpha <<")\n";
@@ -1488,35 +1512,23 @@ void literal_all(const string& s1){
       types[itr2++].type = "";
 }
 
-//int main(){
-//  mainGraph.add_select("lineitem.orderkey","");
-//  mainGraph.add_select("sum(lineitem.extendedprice * (1 - lineitem.discount))","revenue");
-//  mainGraph.add_select("orders.orderdate","");
-//  mainGraph.add_select("lineitem.shippriority","");
-//
-//  mainGraph.add_table("lineitem","lineitem.shippriority","dimension");
-//  mainGraph.add_table("orders","orders.orderdate","dimension");
-//  mainGraph.add_table("customer","customer.mksegment","dimension");
-//  mainGraph.add_table("lineitem","lineitem.shipdate","dimension");
-//
-//  mainGraph.newRoot("customer");
-//  mainGraph.add_map_filter("customer.mksegment","mktsegment = 'BUILDING'");
-//  trees.push_back(create_tree("mktsegment = 'BUILDING'","customer.mksegment"));
-//  mainGraph.add_map_filter("orders.orderdate","orders.orderdate < date '1995-03-15'");
-//  trees.push_back(create_tree("orders.orderdate < date '1995-03-15'","orders.orderdate"));
-//  change_trees(join_trees(trees[0],trees[1],"AND"),0);
-//  mainGraph.add_map_filter("lineitem.shipdate","lineitem.shipdate > date '1995-03-15'");
-//  trees.push_back(create_tree("lineitem.shipdate > date '1995-03-15'","lineitem.shipdate"));
-//  change_trees(join_trees(trees[0],trees[2],"AND"),0);
-//  mainGraph.add_groupby("lineitem","lineitem.l_orderkey");
-//  mainGraph.add_groupby("orders","orders.orderdate");
-//  mainGraph.add_groupby("lineitem","lineitem.shippriority");
-//  mainGraph.add_join("orders.o_custkey","customer","orders");
-//  mainGraph.add_join("lineitem.l_orderkey","orders","lineitem");
-//  copy_tree(trees[0]);
-//  //print_tree();
-//  resolve(0);
-//  dot_if_needed();
-//  returnf();
-//  return 0;
-//}
+
+
+void mainfun(){
+  l = trees[0];
+  mainGraph.newRoot(giveMeRoot(mainGraph.root));
+  map<string,map<string, string> > aux2;
+  for(map<string,map<string, string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
+      map<string, string> aux;
+      for(map<string, string>::iterator i = (it->second).begin(); i != (it->second).end(); ++i) {
+          string s = it->first;
+          s.append(".");
+          s.append(i->first);
+          aux[s]=i->second;
+      }
+      aux2[it->first]=aux;
+  }
+  mainGraph.tables=aux2;
+  resolve(0);
+  returnf();
+}

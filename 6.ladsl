@@ -4,11 +4,13 @@ select
 from
 	lineitem_1
 where
-	l_shipdate >= '1994-01-01'
-	and l_shipdate < '1994-01-01' + interval '1' year
+	l_shipdate >= 1994
+	and l_shipdate < 1994 + interval 1 year
 	and l_discount between 0.06 - 0.01 and 0.06 + 0.01
 	and l_quantity < 24;
 
+
+/*
 ---------------------------------------------------------
 
   mainGraph.add_table("lineitem_l","lineitem_l.extendedprice","measure");
@@ -39,3 +41,5 @@ where
 B = filter(lineitem_l.discount between 0.06 - 0.01 and 0.06 + 0.01 AND lineitem_l.quantity < 24 AND lineitem_l.shipdate >= '1994-01-01' AND lineitem_l.shipdate < '1994-01-01' + interval '1' year)
 revenue = sum(lineitem_l.extendedprice * lineitem_l.discount)
 return(revenue)
+
+*/

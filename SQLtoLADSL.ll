@@ -29,8 +29,8 @@ on              [Oo][Nn]
 between         [Bb][Ee][Tt][Ww][Ee][Ee][Nn]
 exists          [Ee][Xx][Ii][Ss][Tt][Ss]
 from            [Ff][Rr][Oo][Mm]
-groupby         [Gg][Rr][Oo][Uu][Pp][ ]*[Bb][Yy]
-orderby         [Oo][Rr][Dd][Ee][Rr][ ]*[Bb][Yy]
+groupby         [ \t\n]*[Gg][Rr][Oo][Uu][Pp][ ]*[Bb][Yy][ \t\n]*
+orderby         [ \t\n]*[Oo][Rr][Dd][Ee][Rr][ ]*[Bb][Yy][ \t\n]*
 having          [Hh][Aa][Vv][Ii][Nn][Gg]
 in              [Ii][Nn]
 is              [Ii][Ss]
@@ -42,11 +42,12 @@ desc            [Dd][Ee][Ss][Cc]
 any             [Aa][Nn][Yy]
 all             [Aa][Ll][Ll]
 substring       [Ss][Uu][Bb][Ss][Tt][Rr]([In][Nn][Gg])?
+interval        [Ii][Nn][Tt][Ee][Rr][Vv][Aa][Ll]
 
-Or              ([ \t\n]+[oO][rR][ \t\n]+|\|\|)
-and             ([ \t\n]+[aA][nN][dD][ \t\n]|&&)
-eq              (=|==)
-ne              (!=|<>)
+Or              ([ \t\n]*+[oO][rR][ \t\n]*+|\|\|)
+and             ([ \t\n]*+[aA][nN][dD][ \t\n]*|&&)
+eq              [ \t\n]*[(=|==)][ \t\n]*
+ne              [ \t\n]*[(!=|<>)][ \t\n]*
 le              [ \t\n]*[<][=][ \t\n]*
 l              [ \t\n]*[<][ \t\n]*
 g              [ \t\n]*[>][ \t\n]*
@@ -56,7 +57,9 @@ div             [ \t\n]*[/][ \t\n]*
 mul             [ \t\n]*[*][ \t\n]*
 men             [ \t\n]*[-][ \t\n]*
 virg            [ \t\n]*[,][ \t\n]*
-pvirg           [ \t\n]*[;]
+pa            [ \t\n]*[(][ \t\n]*
+pf            [ \t\n]*[)][ \t\n]*
+pvirg           [ \t\n]*[;][ \t\n]*
 
 Not             ([nN][oO][tT]|!)
 true            [Tt][Rr][Uu][Ee]
@@ -66,12 +69,22 @@ int             [0-9]+
 float           ([0-9]*\.[0-9]+|[0-9]+\.[0.9]*)
 attribute       [A-Za-z][A-Za-z0-9_]*[.][A-Za-z][A-Za-z0-9_]*
 name            [A-Za-z':][:'A-Za-z0-9_]*
+
+
+
+string          \"[^"\n]*["\n]
+
+stringp          \'[^'\n]*['\n]
+
+
 Date            [ \t\n]*[dD][aA][tT][eE][ \t\n]+['][:0-9]*[']
 
 
 %%
 
 <INITIAL>{virg}                { return VIRGULA; }
+<INITIAL>{pa}                { return PA; }
+<INITIAL>{pf}                { return PF; }
 <INITIAL>{pvirg}                { return PVIRGULA; }
 <INITIAL>{as}                  { return AS; }
 <INITIAL>{before}              { return BEFORE; }
@@ -94,6 +107,8 @@ Date            [ \t\n]*[dD][aA][tT][eE][ \t\n]+['][:0-9]*[']
 <INITIAL>{any}                 { return ANY; }
 <INITIAL>{all}                 { return ALL; }
 <INITIAL>{right}               { return RIGHT; }
+<INITIAL>{interval}            { return INTERVAL; }
+
 
 
 <INITIAL>{int}                 { yylval.str = new std::string( yytext );
@@ -114,10 +129,10 @@ Date            [ \t\n]*[dD][aA][tT][eE][ \t\n]+['][:0-9]*[']
 
 
 <INITIAL>{Or}                  { yylval.str = new string(yytext);
-                                    return BBOP; }
+                                    return OR; }
 
 <INITIAL>{and}                 { yylval.str = new string(yytext);
-                                    return BBOP; }
+                                    return AND; }
 
 <INITIAL>{le}                  { yylval.str = new string(yytext);
                                     return BBOP; }
@@ -157,6 +172,12 @@ Date            [ \t\n]*[dD][aA][tT][eE][ \t\n]+['][:0-9]*[']
 
 <INITIAL>{name}                 { yylval.str = new std::string( yytext );
                                      return NAME; }
+
+<INITIAL>{string}                 { yylval.str = new std::string( yytext );
+                                    return CONSTANT; }
+
+<INITIAL>{stringp}                 { yylval.str = new std::string( yytext );
+                                    return CONSTANT; }
 
 
 %%

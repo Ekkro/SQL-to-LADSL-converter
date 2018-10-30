@@ -385,6 +385,7 @@ class Ltree {
     void pushLT(int ind);
 
     void rewrite(int ind);
+
 };
 
 
@@ -501,6 +502,9 @@ void print_joins();
         void literal_any(const string& dolar1);
 
         void literal_all(const string& dolar1);
+
+        void mainfun();
+
 
 
 /*
