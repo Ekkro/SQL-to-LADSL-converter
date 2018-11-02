@@ -531,12 +531,12 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   103,   103,   104,   112,   113,   116,   117,   121,   122,
-     125,   131,   134,   135,   138,   139,   142,   143,   146,   147,
-     148,   149,   150,   151,   152,   155,   156,   157,   158,   159,
-     162,   165,   179,   194,   197,   198,   199,   214,   215,   216,
-     228,   237,   238,   245,   252,   260,   261,   264,   265,   269,
-     282,   283,   286,   287,   291,   292,   295,   296,   299,   300,
-     310,   330,   338,   345,   353,   360,   367
+     125,   126,   129,   130,   133,   134,   137,   138,   141,   142,
+     143,   144,   145,   146,   147,   150,   151,   152,   153,   154,
+     157,   160,   174,   189,   195,   196,   197,   211,   212,   213,
+     221,   228,   230,   238,   245,   253,   254,   257,   259,   264,
+     271,   272,   275,   276,   280,   281,   284,   285,   288,   289,
+     293,   311,   318,   325,   332,   339,   346
 };
 #endif
 
@@ -1398,7 +1398,7 @@ yyreduce:
     {
         case 3:
 #line 110 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {mainfun(); }
+    { mainfun(); }
 #line 1403 "y.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1410,7 +1410,7 @@ yyreduce:
 
   case 5:
 #line 113 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {;}
+    { ; }
 #line 1415 "y.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1422,7 +1422,7 @@ yyreduce:
 
   case 7:
 #line 117 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {;}
+    { ; }
 #line 1427 "y.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1440,477 +1440,466 @@ yyreduce:
 
   case 10:
 #line 125 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {
-  mainGraph.add_table("lineitem","extendedprice","measure");
-  mainGraph.add_table("lineitem","discount","measure");
-  mainGraph.add_table("lineitem","shipdate","measure");
-  mainGraph.add_table("lineitem","quantity","measure");
-                                  }
-#line 1450 "y.tab.c" /* yacc.c:1646  */
+    { ; }
+#line 1445 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 131 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 126 "SQLtoLADSL.y" /* yacc.c:1646  */
     { mainGraph.add_select("*","") ; }
-#line 1456 "y.tab.c" /* yacc.c:1646  */
+#line 1451 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 134 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {;}
-#line 1462 "y.tab.c" /* yacc.c:1646  */
+#line 129 "SQLtoLADSL.y" /* yacc.c:1646  */
+    { ; }
+#line 1457 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 135 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {;}
-#line 1468 "y.tab.c" /* yacc.c:1646  */
+#line 130 "SQLtoLADSL.y" /* yacc.c:1646  */
+    { ; }
+#line 1463 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 138 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 133 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.add_select(types[(yyvsp[0].integer)].expr,"");}
-#line 1474 "y.tab.c" /* yacc.c:1646  */
+#line 1469 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 139 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 134 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.add_select(types[(yyvsp[-2].integer)].expr,*(yyvsp[0].str));}
-#line 1480 "y.tab.c" /* yacc.c:1646  */
+#line 1475 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 142 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 137 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1486 "y.tab.c" /* yacc.c:1646  */
+#line 1481 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 143 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 138 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1492 "y.tab.c" /* yacc.c:1646  */
+#line 1487 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 146 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 141 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.newRoot(*(yyvsp[0].str));}
-#line 1498 "y.tab.c" /* yacc.c:1646  */
+#line 1493 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 147 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 142 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1504 "y.tab.c" /* yacc.c:1646  */
+#line 1499 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 148 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 143 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.add_join(types[(yyvsp[0].integer)].type,getTable(types[(yyvsp[-2].integer)].type),getTable(types[(yyvsp[0].integer)].type));}
-#line 1510 "y.tab.c" /* yacc.c:1646  */
+#line 1505 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 149 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 144 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.tables[*(yyvsp[0].str)]=mainGraph.tables[*(yyvsp[-2].str)];}
-#line 1516 "y.tab.c" /* yacc.c:1646  */
+#line 1511 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 150 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 145 "SQLtoLADSL.y" /* yacc.c:1646  */
     {mainGraph.add_join(types[(yyvsp[0].integer)].type,getTable(types[(yyvsp[-2].integer)].type),getTable(types[(yyvsp[0].integer)].type)); mainGraph.tables[*(yyvsp[-4].str)]=mainGraph.tables[*(yyvsp[-6].str)]; }
-#line 1522 "y.tab.c" /* yacc.c:1646  */
+#line 1517 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 151 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 146 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1528 "y.tab.c" /* yacc.c:1646  */
+#line 1523 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 152 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 147 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1534 "y.tab.c" /* yacc.c:1646  */
+#line 1529 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 155 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 150 "SQLtoLADSL.y" /* yacc.c:1646  */
     {/*$$ = "Normal"*/;}
-#line 1540 "y.tab.c" /* yacc.c:1646  */
+#line 1535 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 156 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 151 "SQLtoLADSL.y" /* yacc.c:1646  */
     {/*$$ = "Inner"*/;}
-#line 1546 "y.tab.c" /* yacc.c:1646  */
+#line 1541 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 157 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 152 "SQLtoLADSL.y" /* yacc.c:1646  */
     {/*$$ = "Left"*/;}
-#line 1552 "y.tab.c" /* yacc.c:1646  */
+#line 1547 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 158 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 153 "SQLtoLADSL.y" /* yacc.c:1646  */
     {/*$$ = "Rigth"*/;}
-#line 1558 "y.tab.c" /* yacc.c:1646  */
+#line 1553 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 159 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 154 "SQLtoLADSL.y" /* yacc.c:1646  */
     {/*$$ = "Full"*/;}
-#line 1564 "y.tab.c" /* yacc.c:1646  */
+#line 1559 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 162 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 157 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1570 "y.tab.c" /* yacc.c:1646  */
+#line 1565 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 165 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 160 "SQLtoLADSL.y" /* yacc.c:1646  */
     {if((yyvsp[-2].integer) != -1){
-                                                                if((yyvsp[0].integer) != -1){
-                                                                  change_trees(join_trees(trees[(yyvsp[-2].integer)],trees[(yyvsp[0].integer)],"AND"),(yyvsp[-2].integer));
-                                                                }
-                                                                (yyval.integer) = (yyvsp[-2].integer);
-                                                            }else{
-                                                                if((yyvsp[0].integer) != -1){
-                                                                  (yyval.integer) = (yyvsp[0].integer);
-                                                                }else{
-                                                                  (yyval.integer) = -1;
-                                                                }
-                                                            }
-                                                          }
-#line 1588 "y.tab.c" /* yacc.c:1646  */
+                                                                          if((yyvsp[0].integer) != -1){
+                                                                            change_trees(join_trees(trees[(yyvsp[-2].integer)],trees[(yyvsp[0].integer)],"AND"),(yyvsp[-2].integer));
+                                                                          }
+                                                                          (yyval.integer) = (yyvsp[-2].integer);
+                                                                      }else{
+                                                                          if((yyvsp[0].integer) != -1){
+                                                                            (yyval.integer) = (yyvsp[0].integer);
+                                                                          }else{
+                                                                            (yyval.integer) = -1;
+                                                                          }
+                                                                        }
+                                                                      }
+#line 1583 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 179 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 174 "SQLtoLADSL.y" /* yacc.c:1646  */
     {if((yyvsp[-2].integer) != -1){
-                                                               if((yyvsp[0].integer) != -1){
-                                                                 change_trees(join_trees(trees[(yyvsp[-2].integer)],trees[(yyvsp[0].integer)],"OR"),(yyvsp[-2].integer));
-                                                               }
-                                                               (yyval.integer) = (yyvsp[-2].integer);
-                                                           }else{
-                                                               if((yyvsp[0].integer) != -1){
-                                                                 (yyval.integer) = (yyvsp[0].integer);
-                                                               }else{
-                                                                 (yyval.integer) = -1;
-                                                               }
-                                                           }
-                                                         }
-#line 1606 "y.tab.c" /* yacc.c:1646  */
+                                                                         if((yyvsp[0].integer) != -1){
+                                                                           change_trees(join_trees(trees[(yyvsp[-2].integer)],trees[(yyvsp[0].integer)],"OR"),(yyvsp[-2].integer));
+                                                                         }
+                                                                         (yyval.integer) = (yyvsp[-2].integer);
+                                                                     }else{
+                                                                         if((yyvsp[0].integer) != -1){
+                                                                           (yyval.integer) = (yyvsp[0].integer);
+                                                                         }else{
+                                                                           (yyval.integer) = -1;
+                                                                         }
+                                                                       }
+                                                                     }
+#line 1601 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 194 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {if(types[(yyvsp[0].integer)].type!="JOIN"){mainGraph.add_map_filter(types[(yyvsp[0].integer)].type,types[(yyvsp[0].integer)].expr);(yyval.integer) = itr;
-                                                                                          trees.push_back( create_tree(types[(yyvsp[0].integer)].expr,types[(yyvsp[0].integer)].type));itr++;}
-                                                              else((yyval.integer) = -1);}
-#line 1614 "y.tab.c" /* yacc.c:1646  */
+#line 189 "SQLtoLADSL.y" /* yacc.c:1646  */
+    {if(types[(yyvsp[0].integer)].type!="JOIN"){
+                                                                      mainGraph.add_map_filter(types[(yyvsp[0].integer)].type,types[(yyvsp[0].integer)].expr);
+                                                                      (yyval.integer) = itr;
+                                                                      trees.push_back( create_tree(types[(yyvsp[0].integer)].expr,types[(yyvsp[0].integer)].type));
+                                                                      itr++;
+                                                                    }else((yyval.integer) = -1);}
+#line 1612 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 197 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {(yyval.integer) = (yyvsp[0].integer) ; }
-#line 1620 "y.tab.c" /* yacc.c:1646  */
+#line 195 "SQLtoLADSL.y" /* yacc.c:1646  */
+    {(yyval.integer) = (yyvsp[0].integer) ;}
+#line 1618 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 198 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 196 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-1].integer) ;}
-#line 1626 "y.tab.c" /* yacc.c:1646  */
+#line 1624 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 199 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 197 "SQLtoLADSL.y" /* yacc.c:1646  */
     {string s = types[(yyvsp[-4].integer)].expr;
-                                                            string s2 = types[(yyvsp[-4].integer)].expr;
-                                                             s.append(" <= ");
-                                                             s2.append(" >= ");
-                                                             s.append(types[(yyvsp[-2].integer)].expr);
-                                                             s2.append(types[(yyvsp[0].integer)].expr);
-                                                             mainGraph.add_map_filter(types[(yyvsp[-4].integer)].type,s);
-                                                             mainGraph.add_map_filter(types[(yyvsp[-4].integer)].type,s2);
-                                                             trees.push_back( create_tree(s,types[(yyvsp[-4].integer)].type));itr+=1 ;
-                                                             trees.push_back( create_tree(s2,types[(yyvsp[-4].integer)].type));itr+=1 ;
-                                                             change_trees(join_trees(trees[itr-2],trees[itr-1],"AND"),itr-2);
-                                                             (yyval.integer) = itr-2;
-                                                           }
-#line 1644 "y.tab.c" /* yacc.c:1646  */
+                                                                     string s2 = types[(yyvsp[-4].integer)].expr;
+                                                                     s.append(" <= ");
+                                                                     s2.append(" >= ");
+                                                                     s.append(types[(yyvsp[-2].integer)].expr);
+                                                                     s2.append(types[(yyvsp[0].integer)].expr);
+                                                                     mainGraph.add_map_filter(types[(yyvsp[-4].integer)].type,s);
+                                                                     mainGraph.add_map_filter(types[(yyvsp[-4].integer)].type,s2);
+                                                                     trees.push_back( create_tree(s,types[(yyvsp[-4].integer)].type));itr+=1 ;
+                                                                     trees.push_back( create_tree(s2,types[(yyvsp[-4].integer)].type));itr+=1 ;
+                                                                     change_trees(join_trees(trees[itr-2],trees[itr-1],"AND"),itr-2);
+                                                                     (yyval.integer) = itr-2;}
+#line 1641 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 214 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 211 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[0].integer);}
-#line 1650 "y.tab.c" /* yacc.c:1646  */
+#line 1647 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 215 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 212 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-1].integer);}
-#line 1656 "y.tab.c" /* yacc.c:1646  */
+#line 1653 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 216 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 213 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-2].integer);
-                                                              //cout << "1\n";
-                                                              types[(yyvsp[-2].integer)].expr.append(*(yyvsp[-1].str));
-                                                              types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr);
-                                                                        if((types[(yyvsp[-2].integer)].type.size()!=0)&&(types[(yyvsp[0].integer)].type.size()!=0)){
-                                                                              mainGraph.add_join(types[(yyvsp[0].integer)].type,getTable(types[(yyvsp[-2].integer)].type),getTable(types[(yyvsp[0].integer)].type));
-                                                                              types[(yyvsp[-2].integer)].type = "JOIN";
-                                                                    /*    }else{
-                                                                              types[$1].type = "NOT JOIN";*/
-                                                                        }
-                                                                }
-#line 1672 "y.tab.c" /* yacc.c:1646  */
+                                                                  types[(yyvsp[-2].integer)].expr.append(*(yyvsp[-1].str));
+                                                                  types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr);
+                                                                  if((types[(yyvsp[-2].integer)].type.size()!=0)&&(types[(yyvsp[0].integer)].type.size()!=0)){
+                                                                        mainGraph.add_join(types[(yyvsp[0].integer)].type,getTable(types[(yyvsp[-2].integer)].type),getTable(types[(yyvsp[0].integer)].type));
+                                                                        types[(yyvsp[-2].integer)].type = "JOIN";
+                                                                  }}
+#line 1665 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 228 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 221 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-2].integer);
-                                                            types[(yyvsp[-2].integer)].expr.append(*(yyvsp[-1].str));
-                                                            types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr) ;
-                                                            types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type);
-                                                            //cout << types[$1].expr;
-                                                            }
-#line 1683 "y.tab.c" /* yacc.c:1646  */
+                                                                  types[(yyvsp[-2].integer)].expr.append(*(yyvsp[-1].str));
+                                                                  types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr) ;
+                                                                  types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type);}
+#line 1674 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 237 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 228 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[0].integer);}
-#line 1689 "y.tab.c" /* yacc.c:1646  */
+#line 1680 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 238 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 230 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-1].integer);
-                                                              string s = "";
-                                                              s.append(*(yyvsp[-3].str));
-                                                              s.append("(");
-                                                              s.append(types[(yyvsp[-1].integer)].expr);
-                                                              s.append(")");
-                                                              types[(yyvsp[-1].integer)].expr = s;}
-#line 1701 "y.tab.c" /* yacc.c:1646  */
+                                                                  string s = "";
+                                                                  s.append(*(yyvsp[-3].str));
+                                                                  s.append("(");
+                                                                  s.append(types[(yyvsp[-1].integer)].expr);
+                                                                  s.append(")");
+                                                                  types[(yyvsp[-1].integer)].expr = s;}
+#line 1692 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 245 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 238 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-1].integer);
-                                                              string s = "INTERVAL ";
-                                                              s.append(types[(yyvsp[-1].integer)].expr);
-                                                              s.append(" ");
-                                                              s.append(types[(yyvsp[0].integer)].expr);
-                                                              types[(yyvsp[-1].integer)].expr = s;}
-#line 1712 "y.tab.c" /* yacc.c:1646  */
+                                                                  string s = "INTERVAL ";
+                                                                  s.append(types[(yyvsp[-1].integer)].expr);
+                                                                  s.append(" ");
+                                                                  s.append(types[(yyvsp[0].integer)].expr);
+                                                                  types[(yyvsp[-1].integer)].expr = s;}
+#line 1703 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 252 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 245 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[0].integer);
-                                                              string s = "";
-                                                              s.append(*(yyvsp[-1].str));
-                                                              s.append(" ");
-                                                              s.append(types[(yyvsp[0].integer)].expr);
-                                                              types[(yyvsp[0].integer)].expr = s;}
-#line 1723 "y.tab.c" /* yacc.c:1646  */
+                                                                  string s = "";
+                                                                  s.append(*(yyvsp[-1].str));
+                                                                  s.append(" ");
+                                                                  s.append(types[(yyvsp[0].integer)].expr);
+                                                                  types[(yyvsp[0].integer)].expr = s;}
+#line 1714 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 260 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 253 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[0].integer);}
-#line 1729 "y.tab.c" /* yacc.c:1646  */
+#line 1720 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 261 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 254 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1735 "y.tab.c" /* yacc.c:1646  */
+#line 1726 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 264 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {(yyval.integer) = (yyvsp[0].integer) ; }
-#line 1741 "y.tab.c" /* yacc.c:1646  */
+#line 257 "SQLtoLADSL.y" /* yacc.c:1646  */
+    {(yyval.integer) = (yyvsp[0].integer);}
+#line 1732 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 265 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 259 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-2].integer);
-                                                            types[(yyvsp[-2].integer)].expr.append( ",");
-                                                            types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr) ;
-                                                            types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type); }
-#line 1750 "y.tab.c" /* yacc.c:1646  */
+                                                                  types[(yyvsp[-2].integer)].expr.append( ",");
+                                                                  types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr);
+                                                                  types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type);}
+#line 1741 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 269 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 264 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = (yyvsp[-2].integer);
-                                                            types[(yyvsp[-2].integer)].expr.append( " ");
-                                                            types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr) ;
-                                                            types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type); }
-#line 1759 "y.tab.c" /* yacc.c:1646  */
+                                                                  types[(yyvsp[-2].integer)].expr.append( " ");
+                                                                  types[(yyvsp[-2].integer)].expr.append(types[(yyvsp[0].integer)].expr);
+                                                                  types[(yyvsp[-2].integer)].type.append(types[(yyvsp[0].integer)].type);}
+#line 1750 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 282 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 271 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1765 "y.tab.c" /* yacc.c:1646  */
+#line 1756 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 283 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 272 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1771 "y.tab.c" /* yacc.c:1646  */
+#line 1762 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 286 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 275 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1777 "y.tab.c" /* yacc.c:1646  */
+#line 1768 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 287 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 276 "SQLtoLADSL.y" /* yacc.c:1646  */
     {string Table = getTable(types[(yyvsp[0].integer)].expr);
-                                                              mainGraph.add_groupby(Table,types[(yyvsp[0].integer)].expr);}
-#line 1784 "y.tab.c" /* yacc.c:1646  */
+                                                                  mainGraph.add_groupby(Table,types[(yyvsp[0].integer)].expr);}
+#line 1775 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 291 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 280 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1790 "y.tab.c" /* yacc.c:1646  */
+#line 1781 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 292 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 281 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1796 "y.tab.c" /* yacc.c:1646  */
+#line 1787 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 295 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 284 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1802 "y.tab.c" /* yacc.c:1646  */
+#line 1793 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 296 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 285 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1808 "y.tab.c" /* yacc.c:1646  */
+#line 1799 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 299 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 288 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1814 "y.tab.c" /* yacc.c:1646  */
+#line 1805 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 300 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 289 "SQLtoLADSL.y" /* yacc.c:1646  */
     { ; }
-#line 1820 "y.tab.c" /* yacc.c:1646  */
+#line 1811 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 310 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 293 "SQLtoLADSL.y" /* yacc.c:1646  */
     {string s = getTable(*(yyvsp[0].str));
-                                                               s.append(".");
-                                                              (yyval.integer) = itr2;
-                                                              if(!s.compare(".")){
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
-                                                                  types.push_back(novo);
-                                                                  itr2 ++;
-                                                              }else{
-                                                                  s.append(*(yyvsp[0].str));
-                                                                par novo;
-                                                                novo.type = s;
-                                                                novo.expr = s;
-                                                                  types.push_back(novo);
-                                                                  itr2 ++;
-                                                              }}
-#line 1842 "y.tab.c" /* yacc.c:1646  */
+                                                                   s.append(".");
+                                                                   (yyval.integer) = itr2;
+                                                                   if(!s.compare(".")){
+                                                                     par novo;
+                                                                     novo.type = "";
+                                                                     novo.expr = *(yyvsp[0].str);
+                                                                     types.push_back(novo);
+                                                                     itr2 ++;
+                                                                  }else{
+                                                                     s.append(*(yyvsp[0].str));
+                                                                     par novo;
+                                                                     novo.type = s;
+                                                                     novo.expr = s;
+                                                                     types.push_back(novo);
+                                                                     itr2 ++;
+                                                                  }}
+#line 1833 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 330 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 311 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = itr2;
-                                                              //string s = getTable(*$1);
-                                                                par novo;
-                                                                novo.type = *(yyvsp[0].str);
-                                                                novo.expr = *(yyvsp[0].str);
-                                                                types.push_back(novo);
-                                                                itr2 ++;}
-#line 1854 "y.tab.c" /* yacc.c:1646  */
+                                                                  par novo;
+                                                                  novo.type = *(yyvsp[0].str);
+                                                                  novo.expr = *(yyvsp[0].str);
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
+#line 1844 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 338 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 318 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = itr2;
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
+                                                                  par novo;
+                                                                  novo.type = "";
+                                                                  novo.expr = *(yyvsp[0].str);
                                                                   types.push_back(novo);
                                                                   itr2 ++;}
-#line 1865 "y.tab.c" /* yacc.c:1646  */
+#line 1855 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 345 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 325 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = itr2;
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
+                                                                  par novo;
+                                                                  novo.type = "";
+                                                                  novo.expr = *(yyvsp[0].str);
                                                                   types.push_back(novo);
-                                                                  itr2 ++;
-                                                                }
-#line 1877 "y.tab.c" /* yacc.c:1646  */
+                                                                  itr2 ++;}
+#line 1866 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 353 "SQLtoLADSL.y" /* yacc.c:1646  */
+#line 332 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = itr2;
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
+                                                                  par novo;
+                                                                  novo.type = "";
+                                                                  novo.expr = *(yyvsp[0].str);
+                                                                  types.push_back(novo);
+                                                                  itr2 ++;}
+#line 1877 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 65:
+#line 339 "SQLtoLADSL.y" /* yacc.c:1646  */
+    {(yyval.integer) = itr2;
+                                                                  par novo;
+                                                                  novo.type = "";
+                                                                  novo.expr = *(yyvsp[0].str);
                                                                   types.push_back(novo);
                                                                   itr2 ++;}
 #line 1888 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 65:
-#line 360 "SQLtoLADSL.y" /* yacc.c:1646  */
+  case 66:
+#line 346 "SQLtoLADSL.y" /* yacc.c:1646  */
     {(yyval.integer) = itr2;
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
+                                                                  par novo;
+                                                                  novo.type = "";
+                                                                  novo.expr = *(yyvsp[0].str);
                                                                   types.push_back(novo);
                                                                   itr2 ++;}
 #line 1899 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 66:
-#line 367 "SQLtoLADSL.y" /* yacc.c:1646  */
-    {(yyval.integer) = itr2;
-                                                                par novo;
-                                                                novo.type = "";
-                                                                novo.expr = *(yyvsp[0].str);
-                                                                  types.push_back(novo);
-                                                                  itr2 ++;}
-#line 1910 "y.tab.c" /* yacc.c:1646  */
-    break;
 
-
-#line 1914 "y.tab.c" /* yacc.c:1646  */
+#line 1903 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2138,7 +2127,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 380 "SQLtoLADSL.y" /* yacc.c:1906  */
+#line 361 "SQLtoLADSL.y" /* yacc.c:1906  */
 
 #include "lex.yy.c"
 #include "SQLtoLADSL.cpp"
@@ -2149,6 +2138,11 @@ yyreturn:
 
 
 int main(int argc, char **argv){
+
+  mainGraph.add_table("lineitem","extendedprice","measure");
+  mainGraph.add_table("lineitem","discount","measure");
+  mainGraph.add_table("lineitem","shipdate","measure");
+  mainGraph.add_table("lineitem","quantity","measure");
 
     yyparse();
     string s = ss.str();
