@@ -831,11 +831,11 @@ void next(){
 void joinAtrD(vector<string> v, string type){
   if(v.size()>=1){
     next();
-    cout << a << " = filter(" << v[0];
+    ss << a << " = filter(" << v[0];
     for(vector<string>::iterator it = v.begin()+1; it != v.end(); ++it) {
-      cout << " " << type << " " << *it;
+      ss << " " << type << " " << *it;
     }
-    cout << ")\n";
+    ss << ")\n";
   }
 }
 
@@ -869,11 +869,11 @@ void joinFiltersD(vector<string> v, string type){
   }else{
     s = "kraoOR";
   }
-  cout << a << " = "<< s <<"(" << v[0] << ", " << v[1] << ")\n";
+  ss << a << " = "<< s <<"(" << v[0] << ", " << v[1] << ")\n";
   for(vector<string>::iterator it = v.begin()+2; it != v.end(); ++it) {
     string aux = a;
     next();
-    cout << a << " = " << s <<"(" << aux << ", " << *it << ")\n";
+    ss << a << " = " << s <<"(" << aux << ", " << *it << ")\n";
   }
 }
 
@@ -908,9 +908,9 @@ void joinFilters(string start, string type){
   if(dimensoes.size()>0 && medidas.size()>0){
     next(); // verificar se é and ou or entre aux1 e aux2
     if(type.compare("AND") == 0){
-      cout << a << " = " << "krao" << "(" << aux << ", " << aux2 << ")\n";
+      ss << a << " = " << "krao" << "(" << aux << ", " << aux2 << ")\n";
     }else{
-      cout << a << " = " << "kraoOR" << "(" << aux << ", " << aux2 << ")\n";
+      ss << a << " = " << "kraoOR" << "(" << aux << ", " << aux2 << ")\n";
     }
   }
   if(dimensoes.size()>0){
@@ -930,7 +930,7 @@ void joinFilters(string start, string type){
 void joinGroupbyAux(string gb, string start){
   string alpha = a;
   next();
-  cout << a << " = krao(" << gb << "," << alpha << ")\n";
+  ss << a << " = krao(" << gb << "," << alpha << ")\n";
   map<string,string> work;
   work[a]="dimension";
   g.tables[start]=work;
@@ -954,7 +954,7 @@ void removeTable(string start){
       if((it->at(2)).compare(start) == 0){
         if(g.tables[start].size() > 0){
           next();
-          cout << a << " = " << "dot(" << alpha << ", " << it->at(0)<< ")\n";
+          ss << a << " = " << "dot(" << alpha << ", " << it->at(0)<< ")\n";
           map<string,string> aux = g.tables[it->at(1)];
           aux[a] = "dimension";
           g.tables[it->at(1)] = aux;
@@ -973,7 +973,7 @@ string giveMeStart(string root){
   if(g.join.size() > 0){
     for(vector<vector<string> >::iterator it = g.join.begin(); it != g.join.end(); ++it) {
       if((it->at(1)).compare(root) == 0){
-        //cout << it->at(1) << "\n";
+        //ss << it->at(1) << "\n";
         return giveMeStart(it->at(2));
       }
     }
@@ -993,14 +993,14 @@ string giveMeFinish(string root, vector<string> v){
 }
 
 void print_tables3(){
-  cout << "======================" << "\n";
+  ss << "======================" << "\n";
   for(map<string,map<string,string> >::iterator it = g.tables.begin(); it != g.tables.end(); ++it) {
-    cout << it->first << ":\n";
+    ss << it->first << ":\n";
     for(map<string,string>::iterator it2 = g.tables[it->first].begin(); it2 != g.tables[it->first].end(); ++it2) {
-      cout << it2->first <<"\n";
+      ss << it2->first <<"\n";
     }
   }
-  cout << "--------------------" << "\n";
+  ss << "--------------------" << "\n";
 }
 int full_num_attributes(){
   int res = 0;
@@ -1072,7 +1072,7 @@ if (current_expression2.empty()){
 
 
 void print_tables2(){
-  cout << "======================" << "\n";
+  ss << "======================" << "\n";
   for(map<string,map<string,string> >::iterator it = mainGraph.tables.begin(); it != mainGraph.tables.end(); ++it) {
     cout << it->first << ":\n";
     for(map<string,string>::iterator it2 = mainGraph.tables[it->first].begin(); it2 != mainGraph.tables[it->first].end(); ++it2) {
@@ -1138,7 +1138,7 @@ void dot_all(){
     map<string,string> aux = mainGraph.tables[table];
     for(map<string,string>::iterator it = mainGraph.tables[table2].begin(); it != mainGraph.tables[table2].end(); ++it) {
       next();
-      cout << a << " = " << "dot(" << it->first << ", " << key << ")\n";
+      ss << a << " = " << "dot(" << it->first << ", " << key << ")\n";
       aux[a] = "dimension";
     }
     mainGraph.tables[table] = aux;
@@ -1173,13 +1173,13 @@ void dot_all_aux(string start){
           for(map<string,string>::iterator it2 = mainGraph.tables[start].begin(); it2 != mainGraph.tables[start].end(); ++it2){
             if(!mainGraph.search_map_filter(it2->first)){
               next();
-              cout << a << " = " << "dot(" << it2->first << ", " << it->at(0) << ")\n";
+              ss << a << " = " << "dot(" << it2->first << ", " << it->at(0) << ")\n";
               aux[a] = "dimension";
               l.ltree[l.indice(it2->first)] = a;
             }else{
               for(vector<string>::iterator it3 = mainGraph.filter[it2->first].begin(); it3 != mainGraph.filter[it2->first].end(); ++it3){
                 next();
-                cout << a << " = " << "dot(" << *it3 << ", " << it->at(0) << ")\n";
+                ss << a << " = " << "dot(" << *it3 << ", " << it->at(0) << ")\n";
                 aux[a] = "dimension";
                 l.ltree[l.indice(*it3)] = a;
               }
@@ -1288,30 +1288,30 @@ void returnf(){
           aux.push_back(s);
         }else{
           next();
-          cout << a << " = " << s <<"\n";
+          ss << a << " = " << s <<"\n";
           aux.push_back(a);
         }
       }else{
         s.erase (0,found);
         s.pop_back();
         next();
-        cout << a << " = map" << s << ")\n";
+        ss << a << " = map" << s << ")\n";
         string alpha2 = a;
         next();
-        cout << a << " = krao(" << alpha2 << "," << alpha <<")\n";
+        ss << a << " = krao(" << alpha2 << "," << alpha <<")\n";
         s = it->first;
         s.erase (found,s.size()-found);
-        cout << it->second << " = " << s << "(" << a << ")\n";
+        ss << it->second << " = " << s << "(" << a << ")\n";
         aux.push_back(it->second);
       }
     }
-    cout << "return(" << aux[0];
+    ss << "return(" << aux[0];
     for(vector<string>::iterator it = aux.begin()+1; it != aux.end(); ++it) {
-      cout << ", " << *it;
+      ss << ", " << *it;
     }
-    cout << ")\n";
+    ss << ")\n";
   }else{
-    cout << "return(" << a << ")\n";
+    ss << "return(" << a << ")\n";
   }
 }
 void change_trees(Ltree t2, int ind){
@@ -1345,7 +1345,7 @@ string giveMeRoot(string root){
     if(mainGraph.join.size() > 0){
         for(vector<vector<string> >::iterator it = mainGraph.join.begin(); it != mainGraph.join.end(); ++it) {
             if((it->at(2)).compare(root) == 0){
-              //cout << it->at(1) << "\n";
+              //ss << it->at(1) << "\n";
               return giveMeRoot(it->at(1));
             }
           }

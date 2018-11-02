@@ -13,6 +13,7 @@ vector<Ltree> trees;
 int itr = 0;
 vector<par> types;
 int itr2 = 0;
+stringstream ss;
 
 
 %}
@@ -23,11 +24,12 @@ int itr2 = 0;
 }
 
 %token SELECT WHERE GROUPBY ORDERBY HAVING AS
-%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP BEFORE IS END INTERVAL
+%token AND OR EXISTS BETWEEN JOIN INNER LEFT RIGHT FULL ON IN ANDOP BEFORE IS INTERVAL
 %token LIKE REGEX VIRGULA PVIRGULA PA PF
 /*%token REGEX*/
 
 
+%token END 0 "end of file"
 %token <str> NAME
 %token <str> ATTRIBUTE
 %token <str> BBOP
@@ -104,7 +106,8 @@ SelectBlock    : SELECT     selectList
                  WHERE_
                  GROUPBY_
                  ORDERBY_
-                 PVIRGULA                                         {mainfun(); }
+                 PVIRGULA
+                 "end of file"                                        {mainfun(); }
 
 WHERE_         : WHERE       whereList                       { ; }
                |                                              {;}
@@ -382,18 +385,12 @@ Inlist         : Literal                                     {$$ = $1;}
  }
 
 
+
 int main(int argc, char **argv){
 
-    FILE *  out = fopen("name.vm", "w");
-    if (out == NULL){
-        printf("Error opening file!\n");
-        exit(1);
-    }
-//    char codigo[1023*1024];
-    fprintf(out, "start\n");
     yyparse();
-    fprintf(out, "stop\n");
+    string s = ss.str();
+    cout << s;
 
-    fclose(out);
     return 0;
 }
